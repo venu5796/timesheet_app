@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resource Variance Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root { --primary: #2563eb; --bg: #f8fafc; --text: #1e293b; --border: #e2e8f0; --success: #10b981; --danger: #ef4444; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: auto; }
+        
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .btn { background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid var(--border); }
+        .card h3 { margin: 0; font-size: 0.75rem; color: #64748b; text-transform: uppercase; }
+        .card p { margin: 10px 0 0; font-size: 1.6rem; font-weight: 800; }
+
+        /* Accordion Styles */
+        .week-accordion { background: white; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 12px; overflow: hidden; }
+        .week-trigger { width: 100%; padding: 18px 24px; border: none; background: white; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .week-trigger:hover { background: #f8fafc; }
+        .week-title { font-weight: 700; color: var(--primary); font-size: 1.1rem; }
+        
+        .week-content { display: none; padding: 0 24px 20px 24px; border-top: 1px solid #f1f5f9; }
+        .week-content.active { display: block; }
+
+        /* Detail Table Grid */
+        .detail-row { display: grid; grid-template-columns: 2fr 1.2fr 1fr 1fr 1fr 1fr; padding: 12px 0; border-bottom: 1px solid #f8fafc; font-size: 0.85rem; align-items: center; }
+        .detail-header { font-weight: 700; color: #94a3b8; font-size: 0.7rem; text-transform: uppercase; border-bottom: 2px solid #f1f5f9; }
+        
+        /* Status Badges */
+        .badge { padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 0.7rem; text-transform: uppercase; }
+        .billable { background: #dcfce7; color: #166534; }
+        .non-billable { background: #f1f5f9; color: #475569; }
+        .var-box { font-weight: 700; }
+        .over { color: var(--danger); }
+        .under { color: var(--success); }
+
+        .chart-box { background: white; padding: 20px; border-radius: 12px; border: 1px solid var(--border); height: 350px; margin-bottom: 30px; }
+        #loader { text-align: center; padding: 40px; font-weight: 700; color: var(--primary); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Budget & Resource Variance</h1>
+        <button class="btn" onclick="fetchData()">Refresh Data</button>
+    </header>
+
+    <div id="loader">Syncing...</div>
+
+    <div id="dashboard" style="display:none;">
+        <div class="summary-grid">
+            <div class="card"><h3>Total Spend</h3><p id="stat-spend">€0</p></div>
+            <div class="card"><h3>Actual Hours</h3><p id="stat-hours">0</p></div>
+            <div class="card"><h3>Planned Hours</h3><p id="stat-plan">0</p></div>
+            <div class="card"><h3>Variance</h3><p id="stat-var">0</p></div>
+        </div>
+
+        <div class="chart-box"><canvas id="mainChart"></canvas></div>
+
+        <div id="accordion-container"></div>
+    </div>
+</div>
+
+<script>
+    // PASTE YOUR GOOGLE APPS SCRIPT URL HERE
+    const API_URL = "https://script.google.com/macros/s/AKfycbxTevCrHpPc-0mMlnSd5UmZ7mg3rUch6hE6VrrbeGQ_gbUtlQXzezZptzSOFp0rA2NB/exec"; 
+    let chartInstance = null;
+
+    async function fetchData() {
+        document.getElementById('loader').style.display = 'block';
+        try {
+            const res = await fetch(API_URL);
+            const data = await res.json();
+            process(data);
+        } catch (e) { alert("Check Connection Settings"); }
+        document.getElementById('loader').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'block';
+    }
+
+    function getMon(d) {
+        let date = new Date(d);
+        let day = date.getDay(), diff = date.getDate() - day + (day == 0 ? -6 : 1);
+        return new Date(date.setDate(diff)).toISOString().split('T')[0];
+    }
+
+    function process(data) {
+        const weeks = {};
+        let totals = { act:0, plan:0, spend:0 };
+
+        // 1. Process Actuals with Status Separation
+        data.actuals.forEach(r => {
+            const w = getMon(r.Date);
+            if (!weeks[w]) weeks[w] = { act:0, plan:0, spend:0, items:{} };
+            
+            const h = parseFloat(r['Time in Hours']) || 0;
+            const s = parseFloat(r.Subtotal) || 0;
+            const status = (parseFloat(r.Rate) || 0) > 0 ? 'Billable' : 'Non-billable';
+            
+            // Key is Role + Person + Status to show duplicates/splits
+            const key = `${r.Role}|${r.Person}|${status}`;
+            
+            if (!weeks[w].items[key]) {
+                weeks[w].items[key] = { act:0, plan:0, s:0, role:r.Role, name:r.Person, status: status };
+            }
+            weeks[w].items[key].act += h;
+            weeks[w].items[key].s += s;
+            weeks[w].act += h;
+            weeks[w].spend += s;
+            totals.act += h;
+            totals.spend += s;
+        });
+
+        // 2. Process Plan 
+        // Logic: Plan is person-based. We apply planned hours to the 'Billable' row 
+        // of that person if it exists, otherwise the 'Non-billable' row.
+        data.plan.forEach(r => {
+            const w = getMon(r.Date);
+            if (!weeks[w]) return; 
+            const h = parseFloat(r.PlannedHours) || 0;
+            
+            // Try to find the billable row for this person first
+            const bKey = `${r.Role}|${r.Person}|Billable`;
+            const nbKey = `${r.Role}|${r.Person}|Non-billable`;
+            
+            if (weeks[w].items[bKey]) {
+                weeks[w].items[bKey].plan += h;
+            } else if (weeks[w].items[nbKey]) {
+                weeks[w].items[nbKey].plan += h;
+            } else {
+                // If person has NO actuals yet, create a 'Planned' placeholder row
+                const key = `${r.Role}|${r.Person}|Planned`;
+                weeks[w].items[key] = { act:0, plan:h, s:0, role:r.Role, name:r.Person, status: 'Planned' };
+            }
+            
+            weeks[w].plan += h;
+            totals.plan += h;
+        });
+
+        renderUI(weeks, totals);
+    }
+
+    function renderUI(weeks, totals) {
+        document.getElementById('stat-spend').innerText = `€${totals.spend.toLocaleString()}`;
+        document.getElementById('stat-hours').innerText = totals.act.toFixed(1);
+        document.getElementById('stat-plan').innerText = totals.plan.toFixed(1);
+        document.getElementById('stat-var').innerText = (totals.plan - totals.act).toFixed(1);
+
+        const container = document.getElementById('accordion-container');
+        container.innerHTML = '';
+        
+        // Show ONLY weeks with Spend
+        const activeWeeks = Object.keys(weeks).filter(w => weeks[w].spend > 0).sort().reverse();
+
+        activeWeeks.forEach(w => {
+            const wd = weeks[w];
+            const weekHtml = `
+                <div class="week-accordion">
+                    <button class="week-trigger" onclick="this.nextElementSibling.classList.toggle('active')">
+                        <div class="week-title">Week of ${w}</div>
+                        <div style="font-size: 0.9rem; color: #64748b;">
+                            <b>€${wd.spend.toLocaleString()}</b> • ${wd.act.toFixed(1)} / ${wd.plan.toFixed(1)} hrs
+                        </div>
+                    </button>
+                    <div class="week-content">
+                        <div class="detail-row detail-header">
+                            <div>Resource</div><div>Status</div><div>Plan</div><div>Actual</div><div>Var.</div><div>Spend</div>
+                        </div>
+                        ${Object.values(wd.items).map(p => {
+                            const v = p.plan - p.act;
+                            const statusClass = p.status.toLowerCase() === 'billable' ? 'billable' : 'non-billable';
+                            return `
+                            <div class="detail-row">
+                                <div><b>${p.name}</b><br><small style="color:#64748b">${p.role}</small></div>
+                                <div><span class="badge ${statusClass}">${p.status}</span></div>
+                                <div>${p.plan.toFixed(1)}h</div>
+                                <div>${p.act.toFixed(1)}h</div>
+                                <div class="var-box ${v < 0 ? 'over' : 'under'}">${v.toFixed(1)}h</div>
+                                <div style="font-weight:700">€${p.s.toLocaleString()}</div>
+                            </div>`;
+                        }).join('')}
+                    </div>
+                </div>`;
+            container.innerHTML += weekHtml;
+        });
+
+        renderChart(activeWeeks.reverse(), weeks);
+    }
+
+    function renderChart(labels, weeks) {
+        const ctx = document.getElementById('mainChart').getContext('2d');
+        if (chartInstance) chartInstance.destroy();
+        chartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    { label: 'Planned Hours', data: labels.map(l => weeks[l].plan), backgroundColor: '#cbd5e1' },
+                    { label: 'Actual Hours', data: labels.map(l => weeks[l].act), backgroundColor: '#2563eb' }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    }
+
+    fetchData();
+</script>
+</body>
+</html>
