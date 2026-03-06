@@ -183,7 +183,8 @@
             border: 1px solid var(--border);
             border-radius: 14px;
             padding: 18px 20px;
-            height: 190px;
+            max-height: 280px;
+            min-height: 100px;
             overflow-y: auto;
             animation: fadeUp 0.5s ease both;
         }
@@ -332,6 +333,10 @@
         #rolloff-list { overflow-y: auto; max-height: 270px; }
         #rolloff-list::-webkit-scrollbar { width: 5px; }
         #rolloff-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        .rolloff-urgent { color: var(--danger) !important; font-weight: 700; }
+        .rolloff-soon   { color: var(--warning) !important; font-weight: 600; }
+        .rolloff-badge-urgent { background: #fee2e2; color: #991b1b; padding: 1px 7px; border-radius: 20px; font-size: 10px; font-weight: 700; margin-left: 6px; }
+        .rolloff-badge-soon   { background: #fffbeb; color: #92400e; padding: 1px 7px; border-radius: 20px; font-size: 10px; font-weight: 700; margin-left: 6px; }
 
         /* ── Animations ────────────────────────────────────── */
         @keyframes fadeUp {
@@ -371,18 +376,22 @@
         <div>
             <h1>Acquia Program Control Tower</h1>
             <div class="budget-box">
-                <span>REMAINING BUDGET CAP: €</span>
+                <label for="budgetLimit">REMAINING BUDGET CAP: €</label>
                 <input
                     type="number"
                     id="budgetLimit"
                     value="45000"
                     aria-label="Budget cap in euros"
-                    onchange="processData()"
+                    onblur="processData()"
+                    oninput="debouncedProcess()"
                 >
             </div>
         </div>
         <div class="header-controls no-print">
-            <button class="btn btn-primary" onclick="exportPDF()" aria-label="Export PDF report">
+            <span id="last-synced" style="font-size:11px; color:rgba(255,255,255,0.7); align-self:center; display:none;">
+                Last synced: <span id="sync-time">—</span>
+            </span>
+            <button id="btn-export" class="btn btn-primary" onclick="exportPDF()" aria-label="Export PDF report">
                 📄 Export PDF
             </button>
             <button class="btn" onclick="fetchData()" aria-label="Sync all data">
@@ -407,22 +416,23 @@
         <div class="kpi-row" role="region" aria-label="Key Performance Indicators">
             <div class="kpi-card">
                 <h4>Burned</h4>
-                <p id="kpi-burn">€0</p>
+                <p id="kpi-burn" aria-label="Total budget burned">€0</p>
                 <div id="kpi-burn-trend"></div>
             </div>
             <div class="kpi-card">
                 <h4>Remaining Budget</h4>
-                <p id="kpi-remain">€0</p>
+                <p id="kpi-remain" aria-label="Remaining budget">€0</p>
                 <div id="kpi-remain-trend"></div>
             </div>
             <div class="kpi-card">
                 <h4>Forecast (EAC)</h4>
-                <p id="kpi-eac">€0</p>
+                <p id="kpi-eac" aria-label="Estimate at completion">€0</p>
                 <div id="kpi-eac-trend"></div>
             </div>
             <div class="kpi-card">
                 <h4>Velocity</h4>
-                <p id="kpi-velo">0h/wk</p>
+                <p id="kpi-velo" aria-label="Team velocity">0h/wk</p>
+                <div id="kpi-velo-trend"></div>
             </div>
             <div class="kpi-card">
                 <h4>Bench %</h4>
@@ -530,6 +540,20 @@
     let globalData = { actuals: [], plan: [], rawPhases: [] };
     let chartRefs  = {};
 
+    /* ── Debounce helper ────────────────────────────────────── */
+    let _debounceTimer = null;
+    function debouncedProcess() {
+        clearTimeout(_debounceTimer);
+        _debounceTimer = setTimeout(processData, 350);
+    }
+
+    /* ── XSS-safe text helper ───────────────────────────────── */
+    function esc(str) {
+        const d = document.createElement('div');
+        d.textContent = String(str ?? '');
+        return d.innerHTML;
+    }
+
     /* ── Date Helpers ───────────────────────────────────────── */
     /**
      * Parses a date string (ISO or "Mon-DD") and returns the ISO date
@@ -577,6 +601,11 @@
                 plan:      Array.isArray(data.plan)       ? data.plan      : [],
                 rawPhases: Array.isArray(data.rawPhases)  ? data.rawPhases : [],
             };
+            // Update last-synced timestamp
+            const now = new Date();
+            document.getElementById('sync-time').textContent =
+                now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('last-synced').style.display = 'inline-flex';
             processData();
         } catch (e) {
             loader.style.display = 'none';
@@ -655,12 +684,12 @@
         const effPct     = totals.hours > 0 ? (totals.bill / totals.hours) * 100 : 0;
 
         // KPI values
-        document.getElementById('kpi-burn').innerText   = `€${fmt(totals.burn)}`;
-        document.getElementById('kpi-remain').innerText = `€${fmt(remain)}`;
-        document.getElementById('kpi-eac').innerText    = `€${fmt(eac)}`;
-        document.getElementById('kpi-velo').innerText   = `${(totals.hours / weekCount).toFixed(1)}h/wk`;
-        document.getElementById('kpi-bench').innerText  = `${benchPct.toFixed(0)}%`;
-        document.getElementById('kpi-eff').innerText    = `${effPct.toFixed(0)}%`;
+        document.getElementById('kpi-burn').textContent   = `€${fmt(totals.burn)}`;
+        document.getElementById('kpi-remain').textContent = `€${fmt(remain)}`;
+        document.getElementById('kpi-eac').textContent    = `€${fmt(eac)}`;
+        document.getElementById('kpi-velo').textContent   = `${(totals.hours / weekCount).toFixed(1)}h/wk`;
+        document.getElementById('kpi-bench').textContent  = `${benchPct.toFixed(0)}%`;
+        document.getElementById('kpi-eff').textContent    = `${effPct.toFixed(0)}%`;
 
         // KPI trend badges
         const burnRatio = budget > 0 ? totals.burn / budget : 0;
@@ -669,6 +698,12 @@
         setTrend('kpi-remain-trend', remain >= 0 ? 'ok' : 'bad', remain >= 0 ? '✓ Positive' : '✕ Overrun');
         setTrend('kpi-eac-trend',    eac <= budget ? 'ok' : eac <= budget * 1.1 ? 'warn' : 'bad',
                                      eac <= budget ? '✓ Within Budget' : '▴ Over Budget');
+        // Velocity trend: compare most recent week to average
+        const weekVals = Object.values(weeks).map(w => w.act);
+        const avgVelo  = weekVals.length > 1 ? weekVals.slice(0, -1).reduce((a, b) => a + b, 0) / (weekVals.length - 1) : 0;
+        const latestV  = weekVals[weekVals.length - 1] || 0;
+        const veloTrend = avgVelo === 0 ? 'ok' : latestV >= avgVelo * 1.05 ? 'ok' : latestV >= avgVelo * 0.85 ? 'warn' : 'bad';
+        setTrend('kpi-velo-trend', veloTrend, veloTrend === 'ok' ? '▴ Up' : veloTrend === 'warn' ? '▾ Steady' : '▾ Down');
         setTrend('kpi-bench-trend',  benchPct < 15 ? 'ok' : benchPct < 25 ? 'warn' : 'bad',
                                      benchPct < 15 ? '✓ Low' : benchPct < 25 ? '▴ Moderate' : '▴ High');
         setTrend('kpi-eff-trend',    effPct >= 75 ? 'ok' : effPct >= 60 ? 'warn' : 'bad',
@@ -698,26 +733,26 @@
     /* ── Heatmap ────────────────────────────────────────────── */
     function renderHeatmap(people, allWeeks) {
         const table = document.getElementById('heatmap-body');
-        let html = `<thead><tr>
+        const rows  = [];
+        rows.push(`<thead><tr>
             <th scope="col">Resource</th>
-            ${allWeeks.map(w => `<th scope="col">${w.substring(5)}</th>`).join('')}
-        </tr></thead><tbody>`;
+            ${allWeeks.map(w => `<th scope="col">${esc(w.substring(5))}</th>`).join('')}
+        </tr></thead><tbody>`);
 
         Object.keys(people).sort().forEach(p => {
-            html += `<tr><td>${p}</td>`;
-            allWeeks.forEach(w => {
+            const cells = allWeeks.map(w => {
                 const h   = people[p].weeks[w] || 0;
                 const cls = h > THRESH_OVER  ? 'h-over'
                            : h >= THRESH_GOOD ? 'h-good'
                            : h > 0            ? 'h-bench'
                            : '';
-                const title = h > 0 ? `${p}: ${h.toFixed(1)}h in week of ${w}` : `${p}: no entry`;
-                html += `<td class="${cls}" title="${title}">${h > 0 ? h.toFixed(1) : '–'}</td>`;
+                const titleTxt = h > 0 ? `${p}: ${h.toFixed(1)}h in week of ${w}` : `${p}: no entry`;
+                return `<td class="${cls}" title="${esc(titleTxt)}">${h > 0 ? h.toFixed(1) : '–'}</td>`;
             });
-            html += `</tr>`;
+            rows.push(`<tr><td>${esc(p)}</td>${cells.join('')}</tr>`);
         });
-        html += `</tbody>`;
-        table.innerHTML = html;
+        rows.push(`</tbody>`);
+        table.innerHTML = rows.join('');
     }
 
     /* ── Exceptions ─────────────────────────────────────────── */
@@ -734,14 +769,14 @@
             if (act === 0) {
                 missing.innerHTML += `
                     <div class="alert-item">
-                        ⚠️ <strong>${p.person}</strong>
+                        ⚠️ <strong>${esc(p.person)}</strong>
                         <span class="badge badge-warning">Missed Entry</span>
                     </div>`;
                 missCount++;
             } else if (act > p.planH * VARIANCE_FACTOR) {
                 flags.innerHTML += `
                     <div class="alert-item">
-                        🔴 <strong>${p.person}</strong>: ${act}h / ${p.planH}h
+                        🔴 <strong>${esc(p.person)}</strong>: ${act}h / ${p.planH}h
                         <span class="badge badge-danger">OVER</span>
                     </div>`;
                 flagCount++;
@@ -754,16 +789,29 @@
 
     /* ── Roll-off ────────────────────────────────────────────── */
     function renderRolloff(people) {
+        const today = new Date();
         const sorted = Object.keys(people).sort((a,b) =>
             new Date(people[a].last) - new Date(people[b].last)
         );
-        document.getElementById('rolloff-list').innerHTML = sorted.map(p => `
-            <div class="alert-item">
-                <strong>${p}</strong>
-                <span style="color:var(--muted); font-family:'DM Mono',monospace; font-size:11px;">
-                    Last: ${people[p].last}
+        document.getElementById('rolloff-list').innerHTML = sorted.map(p => {
+            const lastDate = new Date(people[p].last);
+            const daysAgo  = Math.round((today - lastDate) / 86400000);
+            let urgencyBadge = '';
+            let dateClass    = '';
+            if (daysAgo <= 14) {
+                urgencyBadge = `<span class="rolloff-badge-urgent">Rolling off</span>`;
+                dateClass    = 'rolloff-urgent';
+            } else if (daysAgo <= 30) {
+                urgencyBadge = `<span class="rolloff-badge-soon">Soon</span>`;
+                dateClass    = 'rolloff-soon';
+            }
+            return `<div class="alert-item">
+                <strong>${esc(p)}</strong>${urgencyBadge}
+                <span class="${dateClass}" style="font-family:'DM Mono',monospace; font-size:11px;">
+                    Last: ${esc(people[p].last)}
                 </span>
-            </div>`).join('');
+            </div>`;
+        }).join('');
     }
 
     /* ── Weekly Spotlight ───────────────────────────────────── */
@@ -793,8 +841,8 @@
             const varClass = variance < 0 ? 'variance-neg' : 'variance-pos';
             const varStr   = `${variance >= 0 ? '+' : ''}${variance.toFixed(1)}`;
             return `<tr>
-                <td><strong>${i.n}</strong></td>
-                <td>${i.r}</td>
+                <td><strong>${esc(i.n)}</strong></td>
+                <td>${esc(i.r)}</td>
                 <td><span class="${i.b ? 'status-bill' : 'status-nb'}">${i.b ? 'Billable' : 'Non-Bill'}</span></td>
                 <td class="mono">${i.p.toFixed(1)}</td>
                 <td class="mono">${i.a.toFixed(1)}</td>
@@ -905,7 +953,7 @@
 
     /* ── PDF Export ─────────────────────────────────────────── */
     function exportPDF() {
-        const btn = document.querySelector('button[onclick="exportPDF()"]');
+        const btn = document.getElementById('btn-export');
         if (btn) { btn.textContent = '⏳ Generating…'; btn.disabled = true; }
         const el = document.getElementById('master-report');
         html2pdf()
