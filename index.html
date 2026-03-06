@@ -201,6 +201,9 @@
         .pdf-export-mode .alert-panel,
         .pdf-export-mode .table-responsive,
         .pdf-export-mode #rolloff-container { overflow: visible !important; max-height: none !important; height: auto !important; }
+        /* Un-clip fixed-height chart wrapper divs — without this, end-point labels
+           that poke above/right of the canvas get cut off during PDF capture */
+        .pdf-export-mode .card > div { overflow: visible !important; }
         /* Disable sticky so heatmap first-col renders in canvas */
         .pdf-export-mode .heatmap-table td:first-child { position: static !important; }
         /* Clean visual chrome */
@@ -708,8 +711,8 @@
     /* ── CHARTS ────────────────────────────────────────────── */
     function renderCharts(weeks, phases, budget, sortedLabels) {
         const uiLabels=sortedLabels.map(l=>formatDateForUI(l));
-        const fontFam={family:'DM Sans',size:11};
-        const monoFont={family:'DM Mono',weight:'bold',size:10};
+        const fontFam={family:'DM Sans',size:12};
+        const monoFont={family:'DM Mono',weight:'bold',size:13};
         const n=sortedLabels.length;
 
         // 1. Burn vs Budget — end-point labels only (keeps chart readable)
@@ -727,7 +730,7 @@
                     tension:0.35,pointRadius:3,pointHoverRadius:6,
                     datalabels:{
                         display:ctx=>ctx.dataIndex===n-1,
-                        align:'top',anchor:'end',
+                        align:'top',anchor:'end',clamp:true,
                         color:'#ef4444',font:monoFont,
                         formatter:v=>'€'+v.toLocaleString()
                     }
@@ -739,7 +742,7 @@
                     pointRadius:0,fill:false,
                     datalabels:{
                         display:ctx=>ctx.dataIndex===n-1,
-                        align:'bottom',anchor:'end',
+                        align:'bottom',anchor:'end',clamp:true,
                         color:'#64748b',font:monoFont,
                         formatter:v=>'€'+v.toLocaleString()
                     }
@@ -747,7 +750,7 @@
             ]},
             options:{
                 responsive:true,maintainAspectRatio:false,
-                layout:{padding:{right:10}},
+                layout:{padding:{top:28,right:90,bottom:8,left:8}},
                 plugins:{
                     legend:{labels:{font:fontFam}},
                     tooltip:{callbacks:{label:ctx=>` €${ctx.parsed.y.toLocaleString()}`,}},
@@ -819,9 +822,9 @@
                     fill:false,tension:0.3,pointRadius:2,
                     datalabels:{
                         display:ctx=>ctx.dataIndex===n-1,
-                        align:'top',anchor:'end',
+                        align:'top',anchor:'end',clamp:true,
                         color:'#64748b',font:monoFont,
-                        formatter:v=>v.toFixed(0)+'h'
+                        formatter:v=>v.toFixed(0)+'h planned'
                     }
                 },
                 {
@@ -832,15 +835,16 @@
                     tension:0.35,pointRadius:3,
                     datalabels:{
                         display:ctx=>ctx.dataIndex===n-1,
-                        align:'bottom',anchor:'end',
+                        align:'bottom',anchor:'end',clamp:true,
                         color:'#3b82f6',font:monoFont,
-                        formatter:v=>v.toFixed(0)+'h'
+                        formatter:v=>v.toFixed(0)+'h actual'
                     }
                 }
             ]},
             options:{
                 responsive:true,maintainAspectRatio:false,
-                layout:{padding:{right:10}},
+                // Generous padding: top/bottom for label text, right for end-point labels
+                layout:{padding:{top:28,right:90,bottom:28,left:8}},
                 plugins:{
                     legend:{labels:{font:fontFam}},
                     tooltip:{callbacks:{label:ctx=>` ${ctx.parsed.y.toFixed(1)}h`}},
