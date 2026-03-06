@@ -708,44 +708,148 @@
     /* ── CHARTS ────────────────────────────────────────────── */
     function renderCharts(weeks, phases, budget, sortedLabels) {
         const uiLabels=sortedLabels.map(l=>formatDateForUI(l));
-        const fontFam={family:'DM Sans',size:12};
+        const fontFam={family:'DM Sans',size:11};
+        const monoFont={family:'DM Mono',weight:'bold',size:10};
+        const n=sortedLabels.length;
 
-        // 1. Burn vs Budget
+        // 1. Burn vs Budget — end-point labels only (keeps chart readable)
         let cum=0;
-        const burnData=sortedLabels.map(l=>{cum+=weeks[l].burn;return cum;});
+        const burnData=sortedLabels.map(l=>{cum+=weeks[l].burn;return Math.round(cum);});
         if(chartRefs.burn) chartRefs.burn.destroy();
         chartRefs.burn=new Chart(document.getElementById('chart-burn'),{
             type:'line',
             data:{labels:uiLabels,datasets:[
-                {label:'Cumulative Spend',data:burnData,borderColor:'#ef4444',borderWidth:2.5,fill:true,backgroundColor:'rgba(239,68,68,0.07)',tension:0.35,pointRadius:3},
-                {label:'Budget Cap',data:Array(sortedLabels.length).fill(budget),borderColor:'#94a3b8',borderDash:[6,4],borderWidth:1.5,pointRadius:0,fill:false}
+                {
+                    label:'Cumulative Spend',
+                    data:burnData,
+                    borderColor:'#ef4444',borderWidth:2.5,
+                    fill:true,backgroundColor:'rgba(239,68,68,0.07)',
+                    tension:0.35,pointRadius:3,pointHoverRadius:6,
+                    datalabels:{
+                        display:ctx=>ctx.dataIndex===n-1,
+                        align:'top',anchor:'end',
+                        color:'#ef4444',font:monoFont,
+                        formatter:v=>'€'+v.toLocaleString()
+                    }
+                },
+                {
+                    label:'Budget Cap',
+                    data:Array(n).fill(Math.round(budget)),
+                    borderColor:'#94a3b8',borderDash:[6,4],borderWidth:1.5,
+                    pointRadius:0,fill:false,
+                    datalabels:{
+                        display:ctx=>ctx.dataIndex===n-1,
+                        align:'bottom',anchor:'end',
+                        color:'#64748b',font:monoFont,
+                        formatter:v=>'€'+v.toLocaleString()
+                    }
+                }
             ]},
-            options:{responsive:true,maintainAspectRatio:false,plugins:{datalabels:{display:false},legend:{labels:{font:fontFam}}},scales:{y:{title:{display:true,text:'Cumulative Spend (€)',font:fontFam}}}}
+            options:{
+                responsive:true,maintainAspectRatio:false,
+                layout:{padding:{right:10}},
+                plugins:{
+                    legend:{labels:{font:fontFam}},
+                    tooltip:{callbacks:{label:ctx=>` €${ctx.parsed.y.toLocaleString()}`,}},
+                    datalabels:{}
+                },
+                scales:{
+                    y:{
+                        title:{display:true,text:'Cumulative Spend (€)',font:fontFam},
+                        ticks:{callback:v=>'€'+(v>=1000?(v/1000).toFixed(0)+'k':v)}
+                    }
+                }
+            }
         });
 
-        // 2. Billable vs Non-Billable
+        // 2. Billable vs Non-Billable — value inside each bar segment
         if(chartRefs.bench) chartRefs.bench.destroy();
         chartRefs.bench=new Chart(document.getElementById('chart-bench'),{
             type:'bar',
             data:{labels:uiLabels,datasets:[
-                {label:'Billable Hours',    data:sortedLabels.map(l=>weeks[l].bill),backgroundColor:'#10b981'},
-                {label:'Non-Billable Hours',data:sortedLabels.map(l=>weeks[l].nb),  backgroundColor:'#f59e0b'}
+                {
+                    label:'Billable Hours',
+                    data:sortedLabels.map(l=>+weeks[l].bill.toFixed(1)),
+                    backgroundColor:'#10b981',
+                    datalabels:{
+                        display:ctx=>ctx.dataset.data[ctx.dataIndex]>0,
+                        color:'#fff',font:monoFont,
+                        anchor:'center',align:'center',
+                        formatter:v=>v>0?v.toFixed(0)+'h':''
+                    }
+                },
+                {
+                    label:'Non-Billable Hours',
+                    data:sortedLabels.map(l=>+weeks[l].nb.toFixed(1)),
+                    backgroundColor:'#f59e0b',
+                    datalabels:{
+                        display:ctx=>ctx.dataset.data[ctx.dataIndex]>0,
+                        color:'#fff',font:monoFont,
+                        anchor:'center',align:'center',
+                        formatter:v=>v>0?v.toFixed(0)+'h':''
+                    }
+                }
             ]},
-            options:{responsive:true,maintainAspectRatio:false,plugins:{datalabels:{display:false},legend:{labels:{font:fontFam}}},scales:{x:{stacked:true},y:{stacked:true,title:{display:true,text:'Hours',font:fontFam}}}}
+            options:{
+                responsive:true,maintainAspectRatio:false,
+                plugins:{
+                    legend:{labels:{font:fontFam}},
+                    tooltip:{callbacks:{label:ctx=>` ${ctx.parsed.y.toFixed(1)}h`}},
+                    datalabels:{}
+                },
+                scales:{
+                    x:{stacked:true},
+                    y:{stacked:true,title:{display:true,text:'Hours',font:fontFam},ticks:{callback:v=>v+'h'}}
+                }
+            }
         });
 
-        // 3. S-Curve: cumulative planned vs actual hours
+        // 3. S-Curve — end-point label on each line showing final cumulative value
         let cp=0,ca=0;
-        const sCurvePlan=sortedLabels.map(l=>{cp+=weeks[l].plan||0;return cp;});
-        const sCurveAct =sortedLabels.map(l=>{ca+=weeks[l].act ||0;return ca;});
+        const sCurvePlan=sortedLabels.map(l=>{cp+=weeks[l].plan||0;return +cp.toFixed(1);});
+        const sCurveAct =sortedLabels.map(l=>{ca+=weeks[l].act ||0;return +ca.toFixed(1);});
         if(chartRefs.scurve) chartRefs.scurve.destroy();
         chartRefs.scurve=new Chart(document.getElementById('chart-scurve'),{
             type:'line',
             data:{labels:uiLabels,datasets:[
-                {label:'Planned Hours',data:sCurvePlan,borderColor:'#94a3b8',borderDash:[6,4],borderWidth:2,fill:false,tension:0.3,pointRadius:2},
-                {label:'Actual Hours', data:sCurveAct, borderColor:'#3b82f6',borderWidth:2.5,fill:true,backgroundColor:'rgba(59,130,246,0.07)',tension:0.35,pointRadius:3}
+                {
+                    label:'Planned Hours',
+                    data:sCurvePlan,
+                    borderColor:'#94a3b8',borderDash:[6,4],borderWidth:2,
+                    fill:false,tension:0.3,pointRadius:2,
+                    datalabels:{
+                        display:ctx=>ctx.dataIndex===n-1,
+                        align:'top',anchor:'end',
+                        color:'#64748b',font:monoFont,
+                        formatter:v=>v.toFixed(0)+'h'
+                    }
+                },
+                {
+                    label:'Actual Hours',
+                    data:sCurveAct,
+                    borderColor:'#3b82f6',borderWidth:2.5,
+                    fill:true,backgroundColor:'rgba(59,130,246,0.07)',
+                    tension:0.35,pointRadius:3,
+                    datalabels:{
+                        display:ctx=>ctx.dataIndex===n-1,
+                        align:'bottom',anchor:'end',
+                        color:'#3b82f6',font:monoFont,
+                        formatter:v=>v.toFixed(0)+'h'
+                    }
+                }
             ]},
-            options:{responsive:true,maintainAspectRatio:false,plugins:{datalabels:{display:false},legend:{labels:{font:fontFam}}},scales:{y:{title:{display:true,text:'Cumulative Hours',font:fontFam}}}}
+            options:{
+                responsive:true,maintainAspectRatio:false,
+                layout:{padding:{right:10}},
+                plugins:{
+                    legend:{labels:{font:fontFam}},
+                    tooltip:{callbacks:{label:ctx=>` ${ctx.parsed.y.toFixed(1)}h`}},
+                    datalabels:{}
+                },
+                scales:{
+                    y:{title:{display:true,text:'Cumulative Hours',font:fontFam},ticks:{callback:v=>v+'h'}}
+                }
+            }
         });
 
         // 4. Phase doughnut — labels outside with clamp
@@ -842,22 +946,34 @@
         const today=new Date();
         const statusMap={
             'complete':   {cls:'ms-complete',icon:'✓',label:'Complete'},
+            'completed':  {cls:'ms-complete',icon:'✓',label:'Complete'},
+            'done':       {cls:'ms-complete',icon:'✓',label:'Complete'},
             'on track':   {cls:'ms-on-track',icon:'●',label:'On Track'},
             'on-track':   {cls:'ms-on-track',icon:'●',label:'On Track'},
+            'on_track':   {cls:'ms-on-track',icon:'●',label:'On Track'},
+            'green':      {cls:'ms-on-track',icon:'●',label:'On Track'},
             'at risk':    {cls:'ms-at-risk', icon:'▲',label:'At Risk'},
             'at-risk':    {cls:'ms-at-risk', icon:'▲',label:'At Risk'},
+            'at_risk':    {cls:'ms-at-risk', icon:'▲',label:'At Risk'},
+            'amber':      {cls:'ms-at-risk', icon:'▲',label:'At Risk'},
             'delayed':    {cls:'ms-delayed', icon:'✕',label:'Delayed'},
             'not started':{cls:'ms-on-track',icon:'○',label:'Not Started'},
+            'not_started':{cls:'ms-on-track',icon:'○',label:'Not Started'},
+            'planned':    {cls:'ms-on-track',icon:'○',label:'Planned'},
         };
         function derive(ms){
+            // ① Honour explicit status from API — NEVER override with date logic
             const raw=(ms.status||ms.Status||'').toString().toLowerCase().trim();
-            if(statusMap[raw]) return statusMap[raw];
-            const ps=parseDateSafe(ms.due||ms.Due||''); if(!ps) return statusMap['on-track'];
-            const due=new Date(ps); if(isNaN(due)) return statusMap['on-track'];
+            if(raw && statusMap[raw]) return statusMap[raw];
+            // ② Unknown non-empty string → on-track rather than misclassify
+            if(raw) return statusMap['on track'];
+            // ③ No status field at all → fall back to due-date inference
+            const ps=parseDateSafe(ms.due||ms.Due||''); if(!ps) return statusMap['on track'];
+            const due=new Date(ps); if(isNaN(due)) return statusMap['on track'];
             const d=Math.round((due-today)/86400000);
-            if(d<0) return statusMap['complete'];
+            if(d<0)   return statusMap['complete'];
             if(d<=14) return statusMap['at-risk'];
-            return statusMap['on-track'];
+            return statusMap['on track'];
         }
         const counts={complete:0,'on-track':0,'at-risk':0,delayed:0};
         body.innerHTML=data.map(ms=>{
