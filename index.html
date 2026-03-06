@@ -34,14 +34,8 @@
 
         /* ── Reset & Base ──────────────────────────────────── */
         *, *::before, *::after { box-sizing: border-box; }
-        body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; font-size: 13px; line-height: 1.5; }
+        body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 24px 20px; font-size: 13px; line-height: 1.5; }
         .container { max-width: 1580px; margin: 0 auto; }
-
-        /* ── Page Break Rules for Clean PDF Export ─────────── */
-        .kpi-row, .card, .header, .alert-panel {
-            page-break-inside: avoid;
-            break-inside: avoid;
-        }
 
         /* ── Header ────────────────────────────────────────── */
         .header { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); color: white; padding: 22px 30px; border-radius: 16px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; box-shadow: 0 4px 20px rgba(0,61,130,0.25); }
@@ -49,7 +43,7 @@
         .budget-box { background: rgba(255,255,255,0.15); backdrop-filter: blur(4px); padding: 8px 16px; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.4px; }
         .budget-box input { border: none; padding: 5px 8px; border-radius: 5px; width: 110px; font-family: 'DM Mono', monospace; font-weight: 700; font-size: 13px; text-align: center; color: var(--primary); background: white; transition: box-shadow 0.2s; }
         .budget-box input:focus { outline: none; box-shadow: 0 0 0 3px rgba(255,255,255,0.4); }
-        .header-controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+        .header-controls { display: flex; gap: 10px; flex-wrap: wrap; }
 
         /* ── Buttons ───────────────────────────────────────── */
         .btn { padding: 9px 16px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.15); color: white; transition: background 0.2s, transform 0.1s; display: inline-flex; align-items: center; gap: 6px; }
@@ -60,39 +54,33 @@
         .btn-select { padding: 8px 14px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
 
         /* ── KPI Row ───────────────────────────────────────── */
-        .kpi-row  { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin-bottom: 24px; }
-        .kpi-card { background: var(--surface); padding: 18px 16px 14px; border-radius: 14px; border: 1px solid var(--border); text-align: center; animation: fadeUp 0.4s ease both; }
+        .kpi-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin-bottom: 24px; }
+        .kpi-card { background: var(--surface); padding: 18px 16px 16px; border-radius: 14px; border: 1px solid var(--border); text-align: center; animation: fadeUp 0.4s ease both; }
         .kpi-card h4 { margin: 0; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.7px; font-weight: 600; }
-        .kpi-card p  { margin: 8px 0 0; font-size: 1.45rem; font-weight: 800; color: var(--primary); font-family: 'DM Mono', monospace; letter-spacing: -1px; }
-        .kpi-trend   { font-size: 11px; margin-top: 4px; font-weight: 600; display: inline-flex; align-items: center; gap: 3px; padding: 2px 7px; border-radius: 20px; }
-        .trend-ok    { background: #dcfce7; color: #15803d; }
-        .trend-warn  { background: #fef9c3; color: #854d0e; }
-        .trend-bad   { background: #fee2e2; color: #991b1b; }
+        .kpi-card p { margin: 8px 0 0; font-size: 1.5rem; font-weight: 800; color: var(--primary); font-family: 'DM Mono', monospace; letter-spacing: -1px; }
+        .kpi-trend { font-size: 11px; margin-top: 4px; font-weight: 600; display: inline-flex; align-items: center; gap: 3px; padding: 2px 7px; border-radius: 20px; }
+        .trend-ok  { background: #dcfce7; color: #15803d; }
+        .trend-warn{ background: #fef9c3; color: #854d0e; }
+        .trend-bad { background: #fee2e2; color: #991b1b; }
 
         /* ── Alert Grid ────────────────────────────────────── */
-        .alert-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
+        .alert-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
         .alert-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; max-height: 280px; min-height: 100px; overflow-y: auto; animation: fadeUp 0.5s ease both; }
-        .alert-item  { padding: 7px 6px; border-bottom: 1px solid #f1f5f9; font-size: 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;}
+        .alert-item { padding: 7px 6px; border-bottom: 1px solid #f1f5f9; font-size: 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;}
         .alert-item:last-child { border-bottom: none; }
         .alert-empty { color: var(--muted); font-size: 12px; text-align: center; padding: 20px 0; }
-
-        .badge         { padding: 3px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;}
+        
+        .badge { padding: 3px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;}
         .badge-danger  { background: #fee2e2; color: #991b1b; }
         .badge-warning { background: #fffbeb; color: #92400e; }
         .badge-success { background: #dcfce7; color: #166534; }
         .badge-purple  { background: #f3e8ff; color: #6b21a8; }
         .badge-neutral { background: #f1f5f9; color: #475569; }
 
-        /* ── Milestone badges ──────────────────────────────── */
-        .ms-complete { background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap;}
-        .ms-on-track { background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap;}
-        .ms-at-risk  { background: #fffbeb; color: #92400e; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap;}
-
         /* ── Main Grid & Cards ─────────────────────────────── */
-        .main-grid  { display: grid; grid-template-columns: 2fr 1fr; gap: 18px; margin-bottom: 24px; }
-        .equal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
-        .card { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); padding: 20px 22px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); animation: fadeUp 0.5s ease both; overflow: hidden;}
-        .card-title { font-size: 14px; font-weight: 700; color: var(--primary); margin: 0 0 14px; padding-bottom: 10px; border-bottom: 1px solid #f0f4f8; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;}
+        .main-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 18px; margin-bottom: 24px; }
+        .card { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); padding: 20px 22px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); animation: fadeUp 0.5s ease both; overflow: hidden; }
+        .card-title { font-size: 14px; font-weight: 700; color: var(--primary); margin: 0 0 14px; padding-bottom: 10px; border-bottom: 1px solid #f0f4f8; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
         /* ── Heatmap ───────────────────────────────────────── */
@@ -103,11 +91,12 @@
         .h-over  { background-color: #fee2e2 !important; color: #991b1b !important; font-weight: 700; }
         .h-good  { background-color: #dcfce7 !important; color: #166534 !important; }
         .h-bench { background-color: #fffbeb !important; color: #92400e !important; }
+        
         .heatmap-legend { display: flex; gap: 16px; margin-top: 12px; flex-wrap: wrap; }
         .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
         .legend-dot  { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
 
-        /* ── Spotlight Table ───────────────────────────────── */
+        /* ── Spotlight & Roll-off Tables ───────────────────── */
         .spot-table { width: 100%; border-collapse: collapse; margin-top: 6px; }
         .spot-table th { text-align: left; padding: 10px 14px; background: #f8fafc; font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase; white-space: nowrap;}
         .spot-table td { padding: 11px 14px; border-bottom: 1px solid #f1f5f9; font-size: 12px; white-space: nowrap;}
@@ -118,7 +107,6 @@
         .status-bill { background: #eff6ff; color: #1d4ed8; padding: 2px 7px; border-radius: 10px; font-size: 10px; font-weight: 700; }
         .status-nb   { background: #fffbeb; color: #92400e;  padding: 2px 7px; border-radius: 10px; font-size: 10px; font-weight: 700; }
 
-        /* ── Roll-off Table ────────────────────────────────── */
         .rolloff-table { width: 100%; border-collapse: collapse; font-size: 12px; }
         .rolloff-table th { text-align: left; padding: 8px 4px; font-size: 10px; color: var(--muted); text-transform: uppercase; border-bottom: 1px solid #f1f5f9; }
         .rolloff-table td { padding: 10px 4px; border-bottom: 1px solid #f8fafc; vertical-align: middle; }
@@ -129,6 +117,11 @@
         #rolloff-container { max-height: 250px; overflow-y: auto; padding-right: 5px; }
         #rolloff-container::-webkit-scrollbar { width: 4px; }
         #rolloff-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+        /* ── Milestone badges ──────────────────────────────── */
+        .ms-complete { background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap;}
+        .ms-on-track { background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap;}
+        .ms-at-risk  { background: #fffbeb; color: #92400e; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap;}
 
         /* ── Loader & Errors ───────────────────────────────── */
         #loader { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 120px 20px; gap: 16px; color: var(--primary); font-weight: 700; }
@@ -146,29 +139,46 @@
             .header { flex-direction: column; align-items: flex-start; }
             .header-controls { width: 100%; justify-content: space-between; margin-top: 10px; }
         }
-        
         @media (max-width: 768px) {
             .alert-grid { grid-template-columns: 1fr; }
             .kpi-row { grid-template-columns: repeat(2, 1fr); }
         }
-
         @media (max-width: 480px) {
             .kpi-row { grid-template-columns: 1fr; }
             .budget-box { width: 100%; justify-content: space-between; }
-            .budget-box input { width: 80px; }
             .btn { width: 100%; justify-content: center; margin-bottom: 8px;}
         }
 
-        /* ── Print / PDF Specific CSS ──────────────────────── */
-        @media print {
-            .no-print { display: none !important; }
-            body { background: white; padding: 0; font-size: 11px; }
-            .card, .alert-panel, .kpi-card { box-shadow: none; border-color: #ddd; page-break-inside: avoid; break-inside: avoid; }
-            .header { border-radius: 0; box-shadow: none; page-break-inside: avoid; break-inside: avoid; }
-            .kpi-row { grid-template-columns: repeat(6, 1fr) !important; page-break-inside: avoid; break-inside: avoid; }
-            .alert-grid, .main-grid, .equal-grid { grid-template-columns: 1fr 1fr !important; page-break-inside: avoid; break-inside: avoid;}
-            .table-responsive { overflow: visible !important; }
-            #rolloff-container { max-height: none !important; overflow: visible !important; }
+        /* ── PDF EXPORT SPECIFIC CSS ───────────────────────── */
+        /* These rules activate temporarily when generating the PDF */
+        body.pdf-export-mode { width: 1600px !important; background: white; }
+        .pdf-export-mode .container { max-width: 1560px !important; width: 1560px !important; margin: 0 auto; padding: 20px; }
+        .pdf-export-mode .no-print { display: none !important; }
+        
+        /* Explode scrollable areas so all data prints */
+        .pdf-export-mode .table-responsive { overflow: visible !important; }
+        .pdf-export-mode #rolloff-container { max-height: none !important; overflow: visible !important; }
+        .pdf-export-mode .alert-panel { max-height: none !important; overflow: visible !important; }
+        
+        /* Prevent slicing elements in half */
+        .pdf-export-mode .kpi-row, 
+        .pdf-export-mode .alert-grid, 
+        .pdf-export-mode .main-grid { 
+            page-break-inside: avoid !important; 
+            break-inside: avoid !important; 
+        }
+        .pdf-export-mode tr { 
+            page-break-inside: avoid !important; 
+            break-inside: avoid !important; 
+        }
+        
+        /* Remove shadows for clean PDF render */
+        .pdf-export-mode .card, 
+        .pdf-export-mode .alert-panel, 
+        .pdf-export-mode .kpi-card { 
+            box-shadow: none !important; 
+            border-color: #e2e8f0 !important; 
+            break-inside: auto !important; /* Allow long cards to bridge pages cleanly */
         }
     </style>
 </head>
@@ -348,7 +358,7 @@
     // Register the DataLabels plugin for Chart.js
     Chart.register(ChartDataLabels);
 
-    /* ── UPDATED API URL ───────────────────────────────────────── */
+    /* ── CONNECTED API URL ───────────────────────────────────────── */
     const API_URL = "https://script.google.com/macros/s/AKfycbyoU4NiluGpZqzoSqxEWWmb5IKj0ttIHq2bStmPP3Ijd557ZaPlz3BQf2wWVLUZG3vM/exec";
     
     const RATE_FALLBACK     = 100;   
@@ -406,6 +416,7 @@
 
         try {
             const res  = await fetch(API_URL);
+            if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
             const data = await res.json();
             if (data.error) throw new Error(data.error);
 
@@ -422,7 +433,7 @@
         } catch (e) {
             loader.style.display = 'none';
             debug.style.display  = 'block';
-            debug.innerHTML = `<div class="error-box"><h3>⚠️ Connection Error</h3><p>${e.message}</p><button class="btn btn-primary" onclick="fetchData()">🔄 Retry</button></div>`;
+            debug.innerHTML = `<div class="error-box"><h3>⚠️ Connection Error</h3><p>${esc(e.message)}</p><button class="btn btn-primary" onclick="fetchData()" style="margin-top:10px;">🔄 Retry</button></div>`;
         }
     }
 
@@ -630,7 +641,6 @@
         if (missCount === 0) missing.innerHTML = `<p class="alert-empty">✅ All active timesheets submitted for the week of ${esc(latest)}</p>`;
     }
 
-    // ── Milestone Auto-Tracker ──────────────────────────────
     function renderMilestones() {
         const body  = document.getElementById('milestone-body');
         const sumEl = document.getElementById('ms-summary');
@@ -639,7 +649,7 @@
         if (!body) return;
 
         if (!data || data.length === 0) {
-            body.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px;">No milestone data found. Check script output.</td></tr>';
+            body.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px;">No milestone data found.</td></tr>';
             if (sumEl) sumEl.textContent = '';
             return;
         }
@@ -778,7 +788,6 @@
             options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: false }, legend: { labels: { font: { family: 'DM Sans', size: 12 } } } }, scales: { x: { stacked: true }, y: { stacked: true } } }
         });
 
-        // ── Phase Chart with Outside Data Labels ──
         if (chartRefs.phase) chartRefs.phase.destroy();
         chartRefs.phase = new Chart(document.getElementById('chart-phase'), {
             type: 'doughnut',
@@ -813,26 +822,40 @@
         });
     }
 
-    // ── Fixed PDF Export logic ──
+    // ── FIXED PDF EXPORT FUNCTION ──
     function exportPDF() {
         const btn = document.getElementById('btn-export');
         if (btn) { btn.textContent = '⏳ Generating…'; btn.disabled = true; }
         
+        // Add class to trigger PDF-specific CSS (forces 1600px width and removes scrollbars)
+        document.body.classList.add('pdf-export-mode');
+
         const el = document.getElementById('master-report');
         
-        // Configuring html2pdf to respect CSS page-break rules
         const opt = {
-            margin:       [10, 10, 10, 10], // top, left, bottom, right in mm
+            margin:       [10, 10, 10, 10], 
             filename:     'Program_Status_Report.pdf',
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true },
+            image:        { type: 'jpeg', quality: 1 },
+            html2canvas:  { 
+                scale: 2, 
+                useCORS: true,
+                windowWidth: 1600 // Crucial: tricks html2canvas into capturing desktop view
+            },
             jsPDF:        { unit: 'mm', format: 'a3', orientation: 'landscape' },
-            pagebreak:    { mode: ['css', 'legacy'] } // This tells it to read break-inside: avoid
+            pagebreak:    { mode: ['css', 'legacy'] }
         };
 
-        html2pdf().set(opt).from(el).save().then(() => {
-            if (btn) { btn.textContent = '📄 Export PDF'; btn.disabled = false; }
-        });
+        // Small timeout allows the browser to re-render the un-scrolled layout before taking the picture
+        setTimeout(() => {
+            html2pdf().set(opt).from(el).save().then(() => {
+                if (btn) { btn.textContent = '📄 Export PDF'; btn.disabled = false; }
+                document.body.classList.remove('pdf-export-mode'); // Restore normal view
+            }).catch(err => {
+                console.error("PDF Export Error: ", err);
+                if (btn) { btn.textContent = '📄 Export PDF'; btn.disabled = false; }
+                document.body.classList.remove('pdf-export-mode');
+            });
+        }, 500); 
     }
 
     fetchData();
