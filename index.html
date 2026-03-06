@@ -23,12 +23,25 @@
             --border:        #dde3ed;
             --text:          #1a2535;
             --muted:         #64748b;
+
+            /* Thresholds */
+            --thresh-over: 40;   
+            --thresh-good: 30;   
+            --rate-fallback: 100; 
+            --variance-pct: 1.2;  
+            --variance-under: 0.8; 
         }
 
         /* ── Reset & Base ──────────────────────────────────── */
         *, *::before, *::after { box-sizing: border-box; }
-        body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 24px 20px; font-size: 13px; line-height: 1.5; }
+        body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; font-size: 13px; line-height: 1.5; }
         .container { max-width: 1580px; margin: 0 auto; }
+
+        /* ── Page Break Rules for Clean PDF Export ─────────── */
+        .kpi-row, .card, .header, .alert-panel {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
 
         /* ── Header ────────────────────────────────────────── */
         .header { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); color: white; padding: 22px 30px; border-radius: 16px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; box-shadow: 0 4px 20px rgba(0,61,130,0.25); }
@@ -36,7 +49,7 @@
         .budget-box { background: rgba(255,255,255,0.15); backdrop-filter: blur(4px); padding: 8px 16px; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.4px; }
         .budget-box input { border: none; padding: 5px 8px; border-radius: 5px; width: 110px; font-family: 'DM Mono', monospace; font-weight: 700; font-size: 13px; text-align: center; color: var(--primary); background: white; transition: box-shadow 0.2s; }
         .budget-box input:focus { outline: none; box-shadow: 0 0 0 3px rgba(255,255,255,0.4); }
-        .header-controls { display: flex; gap: 10px; flex-wrap: wrap; }
+        .header-controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 
         /* ── Buttons ───────────────────────────────────────── */
         .btn { padding: 9px 16px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.15); color: white; transition: background 0.2s, transform 0.1s; display: inline-flex; align-items: center; gap: 6px; }
@@ -46,22 +59,8 @@
         .btn-primary:hover { background: #f0f7ff; }
         .btn-select { padding: 8px 14px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
 
-        /* ── RAG Health Banner ─────────────────────────────── */
-        .rag-banner { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px 22px; margin-bottom: 24px; display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
-        .rag-banner-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); white-space: nowrap; margin-right: 4px; }
-        .rag-pills { display: flex; gap: 10px; flex-wrap: wrap; flex: 1; }
-        .rag-pill  { display: flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; }
-        .rag-green { background: #dcfce7; color: #166534; }
-        .rag-amber { background: #fffbeb; color: #92400e; }
-        .rag-red   { background: #fee2e2; color: #991b1b; }
-        .rag-dot   { width: 8px; height: 8px; border-radius: 50%; }
-        .rag-stats { display: flex; gap: 20px; flex-wrap: wrap; border-left: 1px solid var(--border); padding-left: 16px; }
-        .rag-stat     { text-align: center; }
-        .rag-stat-val { font-size: 15px; font-weight: 800; color: var(--primary); font-family: 'DM Mono', monospace; }
-        .rag-stat-lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
-
         /* ── KPI Row ───────────────────────────────────────── */
-        .kpi-row  { display: grid; grid-template-columns: repeat(7, 1fr); gap: 14px; margin-bottom: 24px; }
+        .kpi-row  { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin-bottom: 24px; }
         .kpi-card { background: var(--surface); padding: 18px 16px 14px; border-radius: 14px; border: 1px solid var(--border); text-align: center; animation: fadeUp 0.4s ease both; }
         .kpi-card h4 { margin: 0; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.7px; font-weight: 600; }
         .kpi-card p  { margin: 8px 0 0; font-size: 1.45rem; font-weight: 800; color: var(--primary); font-family: 'DM Mono', monospace; letter-spacing: -1px; }
@@ -69,16 +68,15 @@
         .trend-ok    { background: #dcfce7; color: #15803d; }
         .trend-warn  { background: #fef9c3; color: #854d0e; }
         .trend-bad   { background: #fee2e2; color: #991b1b; }
-        .kpi-spark   { margin-top: 8px; height: 26px; }
 
         /* ── Alert Grid ────────────────────────────────────── */
         .alert-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
         .alert-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; max-height: 280px; min-height: 100px; overflow-y: auto; animation: fadeUp 0.5s ease both; }
-        .alert-item  { padding: 7px 6px; border-bottom: 1px solid #f1f5f9; font-size: 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+        .alert-item  { padding: 7px 6px; border-bottom: 1px solid #f1f5f9; font-size: 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;}
         .alert-item:last-child { border-bottom: none; }
         .alert-empty { color: var(--muted); font-size: 12px; text-align: center; padding: 20px 0; }
 
-        .badge         { padding: 3px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .badge         { padding: 3px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;}
         .badge-danger  { background: #fee2e2; color: #991b1b; }
         .badge-warning { background: #fffbeb; color: #92400e; }
         .badge-success { background: #dcfce7; color: #166534; }
@@ -86,22 +84,22 @@
         .badge-neutral { background: #f1f5f9; color: #475569; }
 
         /* ── Milestone badges ──────────────────────────────── */
-        .ms-complete { background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; }
-        .ms-on-track { background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; }
-        .ms-at-risk  { background: #fffbeb; color: #92400e; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; }
-        .ms-delayed  { background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+        .ms-complete { background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap;}
+        .ms-on-track { background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap;}
+        .ms-at-risk  { background: #fffbeb; color: #92400e; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap;}
 
-        /* ── Grid Layouts ──────────────────────────────────── */
+        /* ── Main Grid & Cards ─────────────────────────────── */
         .main-grid  { display: grid; grid-template-columns: 2fr 1fr; gap: 18px; margin-bottom: 24px; }
-        .equal-grid { display: grid; grid-template-columns: 1fr 1fr;  gap: 18px; margin-bottom: 24px; }
-        .card { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); padding: 20px 22px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); animation: fadeUp 0.5s ease both; }
-        .card-title { font-size: 14px; font-weight: 700; color: var(--primary); margin: 0 0 14px; padding-bottom: 10px; border-bottom: 1px solid #f0f4f8; display: flex; justify-content: space-between; align-items: center; }
+        .equal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
+        .card { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); padding: 20px 22px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); animation: fadeUp 0.5s ease both; overflow: hidden;}
+        .card-title { font-size: 14px; font-weight: 700; color: var(--primary); margin: 0 0 14px; padding-bottom: 10px; border-bottom: 1px solid #f0f4f8; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;}
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
         /* ── Heatmap ───────────────────────────────────────── */
         .heatmap-table { width: 100%; border-collapse: collapse; font-size: 11px; font-family: 'DM Mono', monospace; }
-        .heatmap-table th { border: 1px solid var(--border); padding: 8px 10px; text-align: center; background: #f8fafc; font-size: 10px; font-family: 'DM Sans', sans-serif; color: var(--muted); font-weight: 600; letter-spacing: 0.4px; }
+        .heatmap-table th { border: 1px solid var(--border); padding: 8px 10px; text-align: center; background: #f8fafc; font-size: 10px; font-family: 'DM Sans', sans-serif; color: var(--muted); font-weight: 600; letter-spacing: 0.4px; min-width: 45px;}
         .heatmap-table td { border: 1px solid var(--border); padding: 8px 10px; text-align: center; }
-        .heatmap-table td:first-child { text-align: left; font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 12px; color: var(--text); min-width: 130px; }
+        .heatmap-table td:first-child { text-align: left; font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 12px; color: var(--text); min-width: 140px; position: sticky; left: 0; background: #fff; z-index: 1;}
         .h-over  { background-color: #fee2e2 !important; color: #991b1b !important; font-weight: 700; }
         .h-good  { background-color: #dcfce7 !important; color: #166534 !important; }
         .h-bench { background-color: #fffbeb !important; color: #92400e !important; }
@@ -111,8 +109,8 @@
 
         /* ── Spotlight Table ───────────────────────────────── */
         .spot-table { width: 100%; border-collapse: collapse; margin-top: 6px; }
-        .spot-table th { text-align: left; padding: 10px 14px; background: #f8fafc; font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase; }
-        .spot-table td { padding: 11px 14px; border-bottom: 1px solid #f1f5f9; font-size: 12px; }
+        .spot-table th { text-align: left; padding: 10px 14px; background: #f8fafc; font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase; white-space: nowrap;}
+        .spot-table td { padding: 11px 14px; border-bottom: 1px solid #f1f5f9; font-size: 12px; white-space: nowrap;}
         .spot-table tr:hover td { background: #f8fafc; }
         .variance-pos { color: var(--success); font-weight: 700; font-family: 'DM Mono', monospace; }
         .variance-neg { color: var(--danger);  font-weight: 700; font-family: 'DM Mono', monospace; }
@@ -132,24 +130,6 @@
         #rolloff-container::-webkit-scrollbar { width: 4px; }
         #rolloff-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
-        /* ── Phase Breakdown Table ─────────────────────────── */
-        .phase-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 6px; }
-        .phase-table th { text-align: left; padding: 8px 10px; background: #f8fafc; font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; }
-        .phase-table td { padding: 9px 10px; border-bottom: 1px solid #f1f5f9; }
-        .phase-table tr:last-child td { border-bottom: none; font-weight: 700; }
-        .phase-bar-wrap { background: #f1f5f9; border-radius: 3px; height: 4px; margin-top: 4px; }
-        .phase-bar-fill { height: 4px; border-radius: 3px; }
-
-        /* ── Top Spenders ──────────────────────────────────── */
-        .spender-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #f1f5f9; }
-        .spender-row:last-child { border-bottom: none; }
-        .spender-rank { font-size: 11px; font-weight: 700; color: var(--muted); width: 16px; flex-shrink: 0; }
-        .spender-info { flex: 1; min-width: 0; }
-        .spender-name { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .spender-meta { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
-        .spender-bar-wrap { flex: 1; background: #f1f5f9; border-radius: 3px; height: 6px; max-width: 80px; }
-        .spender-bar-fill { height: 6px; border-radius: 3px; background: linear-gradient(90deg, #3b82f6, var(--primary)); }
-
         /* ── Loader & Errors ───────────────────────────────── */
         #loader { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 120px 20px; gap: 16px; color: var(--primary); font-weight: 700; }
         .spinner { width: 38px; height: 38px; border: 4px solid #dde3ed; border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
@@ -159,26 +139,36 @@
 
         @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* ── Responsive ────────────────────────────────────── */
+        /* ── RESPONSIVE DESIGN (Mobile & Tablet) ───────────── */
         @media (max-width: 1200px) {
-            .kpi-row   { grid-template-columns: repeat(4, 1fr); }
+            .kpi-row { grid-template-columns: repeat(3, 1fr); }
             .main-grid, .equal-grid { grid-template-columns: 1fr; }
-            .rag-banner { flex-direction: column; align-items: flex-start; }
-            .rag-stats  { border-left: none; padding-left: 0; border-top: 1px solid var(--border); padding-top: 12px; width: 100%; }
+            .header { flex-direction: column; align-items: flex-start; }
+            .header-controls { width: 100%; justify-content: space-between; margin-top: 10px; }
         }
-        @media (max-width: 640px) {
-            .kpi-row    { grid-template-columns: repeat(2, 1fr); }
+        
+        @media (max-width: 768px) {
             .alert-grid { grid-template-columns: 1fr; }
-            .header     { flex-direction: column; align-items: flex-start; }
+            .kpi-row { grid-template-columns: repeat(2, 1fr); }
         }
 
+        @media (max-width: 480px) {
+            .kpi-row { grid-template-columns: 1fr; }
+            .budget-box { width: 100%; justify-content: space-between; }
+            .budget-box input { width: 80px; }
+            .btn { width: 100%; justify-content: center; margin-bottom: 8px;}
+        }
+
+        /* ── Print / PDF Specific CSS ──────────────────────── */
         @media print {
             .no-print { display: none !important; }
-            body { background: white; padding: 0; }
-            .card, .alert-panel, .kpi-card { box-shadow: none; border-color: #ddd; }
-            .header { border-radius: 0; }
-            .kpi-row   { grid-template-columns: repeat(7, 1fr) !important; }
-            .alert-grid, .main-grid, .equal-grid { grid-template-columns: 1fr 1fr !important; }
+            body { background: white; padding: 0; font-size: 11px; }
+            .card, .alert-panel, .kpi-card { box-shadow: none; border-color: #ddd; page-break-inside: avoid; break-inside: avoid; }
+            .header { border-radius: 0; box-shadow: none; page-break-inside: avoid; break-inside: avoid; }
+            .kpi-row { grid-template-columns: repeat(6, 1fr) !important; page-break-inside: avoid; break-inside: avoid; }
+            .alert-grid, .main-grid, .equal-grid { grid-template-columns: 1fr 1fr !important; page-break-inside: avoid; break-inside: avoid;}
+            .table-responsive { overflow: visible !important; }
+            #rolloff-container { max-height: none !important; overflow: visible !important; }
         }
     </style>
 </head>
@@ -195,7 +185,7 @@
             </div>
         </div>
         <div class="header-controls no-print">
-            <span id="last-synced" style="font-size:11px; color:rgba(255,255,255,0.7); align-self:center; display:none;">
+            <span id="last-synced" style="font-size:11px; color:rgba(255,255,255,0.7); display:none;">
                 Last synced: <span id="sync-time">—</span>
             </span>
             <button id="btn-export" class="btn btn-primary" onclick="exportPDF()">📄 Export PDF</button>
@@ -212,67 +202,51 @@
 
     <div id="dashboard" style="display:none;">
 
-        <div class="rag-banner" role="region" aria-label="Project health">
-            <span class="rag-banner-title">Project Health</span>
-            <div class="rag-pills" id="rag-pills">
-                <span class="rag-pill rag-green"><span class="rag-dot" style="background:#16a34a;"></span>Loading…</span>
-            </div>
-            <div class="rag-stats" id="rag-stats"></div>
-        </div>
-
         <div class="kpi-row" role="region" aria-label="Key Performance Indicators">
-            <div class="kpi-card" aria-label="Total burned">
+            <div class="kpi-card">
                 <h4>Burned</h4>
                 <p id="kpi-burn">€0</p>
                 <div id="kpi-burn-trend"></div>
             </div>
-            <div class="kpi-card" aria-label="Remaining budget">
+            <div class="kpi-card">
                 <h4>Remaining Budget</h4>
                 <p id="kpi-remain">€0</p>
                 <div id="kpi-remain-trend"></div>
             </div>
-            <div class="kpi-card" aria-label="Forecast EAC">
+            <div class="kpi-card">
                 <h4>Forecast (EAC)</h4>
                 <p id="kpi-eac">€0</p>
                 <div id="kpi-eac-trend"></div>
             </div>
-            <div class="kpi-card" aria-label="Velocity">
+            <div class="kpi-card">
                 <h4>Velocity</h4>
                 <p id="kpi-velo">0h/wk</p>
                 <div id="kpi-velo-trend"></div>
-                <div class="kpi-spark"><canvas id="spark-velo" height="26"></canvas></div>
             </div>
-            <div class="kpi-card" aria-label="Non-billable percentage">
+            <div class="kpi-card">
                 <h4>Non-Billable %</h4>
                 <p id="kpi-bench">0%</p>
                 <div id="kpi-bench-trend"></div>
-                <div class="kpi-spark"><canvas id="spark-bench" height="26"></canvas></div>
             </div>
-            <div class="kpi-card" aria-label="Billable efficiency">
+            <div class="kpi-card">
                 <h4>Billable Eff.</h4>
                 <p id="kpi-eff">0%</p>
                 <div id="kpi-eff-trend"></div>
-                <div class="kpi-spark"><canvas id="spark-eff" height="26"></canvas></div>
-            </div>
-            <div class="kpi-card" aria-label="EAC Confidence">
-                <h4>EAC Confidence</h4>
-                <p id="kpi-conf" style="font-size:1.1rem;">—</p>
-                <div id="kpi-conf-trend"></div>
             </div>
         </div>
 
         <div class="alert-grid">
-            <div class="alert-panel" role="region" aria-label="Variance flags">
+            <div class="alert-panel">
                 <div class="card-title">
                     <span style="margin:0;">🚨 Variance Flags</span>
                     <small style="font-size:11px;color:var(--muted);font-weight:500;">&gt;20% Over/Under Plan</small>
                 </div>
                 <div id="red-flags"></div>
             </div>
-            <div class="alert-panel" role="region" aria-label="Missing timesheets">
+            <div class="alert-panel">
                 <div class="card-title">
-                    <span style="margin:0;">📋 Delinquency &amp; Missing</span>
-                    <small style="font-size:11px;color:var(--muted);font-weight:500;">Scheduled but 0h logged</small>
+                    <span style="margin:0;">📋 Delinquency & Missing</span>
+                    <small style="font-size:11px;color:var(--muted);font-weight:500;">Scheduled but 0h</small>
                 </div>
                 <div id="missing-timesheets"></div>
             </div>
@@ -281,8 +255,22 @@
         <div class="main-grid">
             <div class="card">
                 <h3 class="card-title">📈 Cumulative Burn vs. Budget Cap</h3>
-                <div style="height:310px;"><canvas id="chart-burn"></canvas></div>
+                <div style="height: 310px; width:100%;"><canvas id="chart-burn"></canvas></div>
             </div>
+            <div class="card">
+                <h3 class="card-title">⚖️ Non-Billable vs. Billable Time</h3>
+                <div style="height: 310px; width:100%;"><canvas id="chart-bench"></canvas></div>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <div class="card">
+                <h3 class="card-title">🗂️ Spend by Phase (Billable €)</h3>
+                <div style="height: 310px; width:100%; position: relative;">
+                    <canvas id="chart-phase" style="padding: 20px;"></canvas>
+                </div>
+            </div>
+            
             <div class="card">
                 <div class="card-title">
                     <span style="margin:0;">📅 Predictive Roll-off Schedule</span>
@@ -302,71 +290,29 @@
             </div>
         </div>
 
-        <div class="equal-grid">
-            <div class="card">
-                <h3 class="card-title">⚖️ Non-Billable vs. Billable Time</h3>
-                <div style="height:290px;"><canvas id="chart-bench"></canvas></div>
+        <div class="card" style="margin-bottom: 24px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+                <h3 class="card-title" style="margin:0; border:none; padding:0;">🏁 Milestone Tracker</h3>
+                <span id="ms-summary" style="font-size:11px; color:var(--muted); font-weight:500;"></span>
             </div>
-            <div class="card">
-                <h3 class="card-title">📐 Planned vs. Actual Hours (S-Curve)</h3>
-                <div style="height:290px;"><canvas id="chart-scurve"></canvas></div>
-            </div>
-        </div>
-
-        <div class="equal-grid">
-            <div class="card">
-                <h3 class="card-title">🗂️ Spend by Phase (Billable €)</h3>
-                <div style="height:310px; position:relative;">
-                    <canvas id="chart-phase"></canvas>
-                </div>
-            </div>
-            <div class="card">
-                <h3 class="card-title">📋 Phase Cost Breakdown</h3>
-                <table class="phase-table">
+            <div class="table-responsive" style="max-height:260px;">
+                <table class="spot-table">
                     <thead>
                         <tr>
-                            <th>Phase</th>
-                            <th style="text-align:right;">Spend (€)</th>
-                            <th style="text-align:right;">% of Total</th>
+                            <th scope="col">Milestone / Phase</th>
+                            <th scope="col">Due Date</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Notes</th>
                         </tr>
                     </thead>
-                    <tbody id="phase-breakdown-body"></tbody>
+                    <tbody id="milestone-body"></tbody>
                 </table>
-            </div>
-        </div>
-
-        <div class="equal-grid">
-            <div class="card">
-                <div class="card-title">
-                    <span style="margin:0;">💸 Top 5 Spenders This Week</span>
-                    <small id="spender-week-label" style="font-size:11px;color:var(--muted);font-weight:500;"></small>
-                </div>
-                <div id="top-spenders"></div>
-            </div>
-            <div class="card">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-                    <h3 class="card-title" style="margin:0; border:none; padding:0;">🏁 Milestone Tracker</h3>
-                    <span id="ms-summary" style="font-size:11px; color:var(--muted); font-weight:500;"></span>
-                </div>
-                <div style="overflow-x:auto; max-height:260px; overflow-y:auto;">
-                    <table class="spot-table">
-                        <thead>
-                            <tr>
-                                <th scope="col">Milestone</th>
-                                <th scope="col">Due Date</th>
-                                <th scope="col">Status</th>
-                                <th scope="col">Notes</th>
-                            </tr>
-                        </thead>
-                        <tbody id="milestone-body"></tbody>
-                    </table>
-                </div>
             </div>
         </div>
 
         <div class="card" style="margin-bottom: 24px;">
             <h3 class="card-title">🌡️ Resource Utilization Heatmap</h3>
-            <div style="overflow-x: auto;">
+            <div class="table-responsive">
                 <table class="heatmap-table" id="heatmap-body"></table>
             </div>
             <div class="heatmap-legend">
@@ -378,21 +324,16 @@
         </div>
 
         <div class="card">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap: wrap; gap: 10px;">
                 <h3 class="card-title" style="margin:0; border:none; padding:0;">📊 Weekly Performance Metrics</h3>
                 <select id="weekSelect" class="btn-select no-print" onchange="updateWeeklySpotlight(this.value)"></select>
             </div>
-            <div style="overflow-x:auto;">
+            <div class="table-responsive">
                 <table class="spot-table">
                     <thead>
                         <tr>
-                            <th scope="col">Resource</th>
-                            <th scope="col">Role</th>
-                            <th scope="col">Status</th>
-                            <th scope="col">Planned (h)</th>
-                            <th scope="col">Actual (h)</th>
-                            <th scope="col">Variance (h)</th>
-                            <th scope="col">Spend</th>
+                            <th scope="col">Resource</th><th scope="col">Role</th><th scope="col">Status</th>
+                            <th scope="col">Planned (h)</th><th scope="col">Actual (h)</th><th scope="col">Variance (h)</th><th scope="col">Spend</th>
                         </tr>
                     </thead>
                     <tbody id="spotlight-body"></tbody>
@@ -400,25 +341,26 @@
             </div>
         </div>
 
-    </div></div><script>
-    // ── Register Chart.js DataLabels plugin ─────────────────
+    </div>
+</div>
+
+<script>
+    // Register the DataLabels plugin for Chart.js
     Chart.register(ChartDataLabels);
 
-    // ── Configuration constants ──────────────────────────────
-    const API_URL         = "https://script.google.com/macros/s/AKfycbyoU4NiluGpZqzoSqxEWWmb5IKj0ttIHq2bStmPP3Ijd557ZaPlz3BQf2wWVLUZG3vM/exec";
-    const RATE_FALLBACK   = 100;    
-    const THRESH_OVER     = 40;     
-    const THRESH_GOOD     = 30;     
-    const VARIANCE_FACTOR = 1.2;    
-    const VARIANCE_UNDER  = 0.8;    
-    const ACTIVE_DAYS     = 14;     
-    const CHART_COLORS    = ['#004a99','#3b82f6','#10b981','#f59e0b','#8b5cf6','#ec4899','#14b8a6'];
+    /* ── UPDATED API URL ───────────────────────────────────────── */
+    const API_URL = "https://script.google.com/macros/s/AKfycbyoU4NiluGpZqzoSqxEWWmb5IKj0ttIHq2bStmPP3Ijd557ZaPlz3BQf2wWVLUZG3vM/exec";
+    
+    const RATE_FALLBACK     = 100;   
+    const THRESH_OVER       = 40;    
+    const THRESH_GOOD       = 30;    
+    const VARIANCE_FACTOR   = 1.2;   
+    const VARIANCE_UNDER    = 0.8;
+    const CHART_COLORS      = ['#004a99','#3b82f6','#10b981','#f59e0b','#8b5cf6','#ec4899'];
 
-    let globalData     = { actuals: [], plan: [], rawPhases: [], milestones: [] };
-    let chartRefs      = {};
-    let sparkRefs      = {};
+    let globalData = { actuals: [], plan: [], rawPhases: [], milestones: [] };
+    let chartRefs  = {};
     let _debounceTimer = null;
-    let _escEl         = null; 
 
     function debouncedProcess() {
         clearTimeout(_debounceTimer);
@@ -426,19 +368,15 @@
     }
 
     function esc(str) {
-        if (!_escEl) _escEl = document.createElement('div');
-        _escEl.textContent = String(str ?? '');
-        return _escEl.innerHTML;
+        const d = document.createElement('div');
+        d.textContent = String(str ?? '');
+        return d.innerHTML;
     }
 
     function formatDateForUI(isoString) {
-        if (!isoString) return '—';
-        const parts = String(isoString).split('T')[0].split('-');
-        if (parts.length === 3) {
-            const d = new Date(+parts[0], +parts[1] - 1, +parts[2]);
-            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        }
-        return new Date(isoString).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        if(!isoString) return "-";
+        const d = new Date(isoString);
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     }
 
     function parseDateSafe(str) {
@@ -452,8 +390,8 @@
             }
         }
         if (isNaN(d.getTime())) return null;
-        const day    = d.getDay();
-        const diff   = d.getDate() - day + (day === 0 ? -6 : 1);
+        const day  = d.getDay();
+        const diff = d.getDate() - day + (day === 0 ? -6 : 1);
         const monday = new Date(d);
         monday.setDate(diff);
         return monday.toISOString().split('T')[0];
@@ -462,23 +400,21 @@
     async function fetchData() {
         const debug  = document.getElementById('debug-info');
         const loader = document.getElementById('loader');
-        debug.style.display  = 'none';
+        debug.style.display = 'none';
         loader.style.display = 'flex';
         document.getElementById('dashboard').style.display = 'none';
 
         try {
-            const res = await fetch(API_URL);
-            if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+            const res  = await fetch(API_URL);
             const data = await res.json();
             if (data.error) throw new Error(data.error);
 
             globalData = {
-                actuals:    Array.isArray(data.actuals)    ? data.actuals    : [],
-                plan:       Array.isArray(data.plan)        ? data.plan       : [],
-                rawPhases:  Array.isArray(data.rawPhases)   ? data.rawPhases  : [],
-                milestones: Array.isArray(data.milestones)  ? data.milestones : [],
+                actuals:   Array.isArray(data.actuals)   ? data.actuals   : [],
+                plan:      Array.isArray(data.plan)       ? data.plan      : [],
+                rawPhases: Array.isArray(data.rawPhases)  ? data.rawPhases : [],
+                milestones: Array.isArray(data.milestones) ? data.milestones : [],
             };
-
             const now = new Date();
             document.getElementById('sync-time').textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             document.getElementById('last-synced').style.display = 'inline-flex';
@@ -486,7 +422,7 @@
         } catch (e) {
             loader.style.display = 'none';
             debug.style.display  = 'block';
-            debug.innerHTML = `<div class="error-box"><h3>⚠️ Connection Error</h3><p>${esc(e.message)}</p><button class="btn btn-primary" onclick="fetchData()">🔄 Retry</button></div>`;
+            debug.innerHTML = `<div class="error-box"><h3>⚠️ Connection Error</h3><p>${e.message}</p><button class="btn btn-primary" onclick="fetchData()">🔄 Retry</button></div>`;
         }
     }
 
@@ -501,38 +437,43 @@
             const w = parseDateSafe(r.Date);
             if (!w) return;
 
-            const h      = parseFloat(r['Time in Hours']) || 0;
-            const s      = parseFloat(r.Subtotal)         || 0;
-            const isBill = parseFloat(r.Rate)              > 0;
-            const task   = String(r['Task/Deliverable']   || '').toLowerCase();
+            const h       = parseFloat(r['Time in Hours']) || 0;
+            const s       = parseFloat(r.Subtotal)         || 0;
+            const isBill  = parseFloat(r.Rate)             > 0;
+            const taskTxt = String(r['Task/Deliverable']   || '').toLowerCase();
 
             if (!weeks[w]) weeks[w] = { burn:0, act:0, plan:0, bill:0, nb:0 };
-            weeks[w].burn += s;
-            weeks[w].act  += h;
+            weeks[w].burn += s; weeks[w].act  += h;
             if (isBill) weeks[w].bill += h; else weeks[w].nb += h;
 
             let match = 'Other/General';
-            for (const ph of sortedPhases) {
-                if (task.includes(ph.toLowerCase())) { match = ph; break; }
+            for (let p of sortedPhases) {
+                if (taskTxt.includes(p.toLowerCase())) {
+                    match = p;
+                    break; 
+                }
             }
-            if (s > 0) phases[match] = (phases[match] || 0) + s;
+            if (s > 0) { 
+                phases[match] = (phases[match] || 0) + s;
+            }
 
             const pKey = r.Person;
-            if (!people[pKey]) people[pKey] = { weeks:{}, actualLast:null, plannedFirst:null, plannedLast:null, rate: parseFloat(r.Rate) || 0 };
+            if (!people[pKey]) people[pKey] = { weeks: {}, actualLast: null, plannedFirst: null, plannedLast: null, rate: parseFloat(r.Rate) || 0 };
             people[pKey].weeks[w] = (people[pKey].weeks[w] || 0) + h;
-
+            
             if (!people[pKey].actualLast || new Date(r.Date) > new Date(people[pKey].actualLast)) {
                 people[pKey].actualLast = r.Date;
             }
 
-            totals.burn  += s;
-            totals.hours += h;
+            totals.burn  += s; totals.hours += h;
             if (isBill) totals.bill += h; else totals.nb += h;
         });
 
         let eacRem = 0;
         globalData.plan.forEach(p => {
-            if (!people[p.person]) people[p.person] = { weeks:{}, actualLast:null, plannedFirst:null, plannedLast:null, rate: p.plannedRate || RATE_FALLBACK };
+            const w = parseDateSafe(p.dateStr);
+            
+            if (!people[p.person]) people[p.person] = { weeks: {}, actualLast: null, plannedFirst: null, plannedLast: null, rate: p.plannedRate || RATE_FALLBACK };
 
             if (p.planH > 0) {
                 if (!people[p.person].plannedFirst || new Date(p.dateStr) < new Date(people[p.person].plannedFirst)) {
@@ -543,9 +484,8 @@
                 }
             }
 
-            const w = parseDateSafe(p.dateStr);
             if (w && weeks[w]) weeks[w].plan += p.planH;
-
+            
             if (new Date(p.dateStr) > new Date()) {
                 eacRem += p.planH * (people[p.person].rate || p.plannedRate || RATE_FALLBACK);
             }
@@ -558,11 +498,11 @@
         document.getElementById('loader').style.display    = 'none';
         document.getElementById('dashboard').style.display = 'block';
 
-        const weekCount = Math.max(Object.keys(weeks).length, 1);
-        const remain    = budget - totals.burn;
-        const eac       = totals.burn + eacRem;
-        const benchPct  = totals.hours > 0 ? (totals.nb   / totals.hours) * 100 : 0;
-        const effPct    = totals.hours > 0 ? (totals.bill / totals.hours) * 100 : 0;
+        const weekCount  = Math.max(Object.keys(weeks).length, 1); 
+        const remain     = budget - totals.burn;
+        const eac        = totals.burn + eacRem;
+        const benchPct   = totals.hours > 0 ? (totals.nb   / totals.hours) * 100 : 0;
+        const effPct     = totals.hours > 0 ? (totals.bill / totals.hours) * 100 : 0;
 
         document.getElementById('kpi-burn').textContent   = `€${fmt(totals.burn)}`;
         document.getElementById('kpi-remain').textContent = `€${fmt(remain)}`;
@@ -575,39 +515,23 @@
         setTrend('kpi-burn-trend',   burnRatio < 0.7 ? 'ok' : burnRatio < 0.9 ? 'warn' : 'bad', burnRatio < 0.7 ? '▾ On Track' : burnRatio < 0.9 ? '▴ Watch' : '▴ High');
         setTrend('kpi-remain-trend', remain >= 0 ? 'ok' : 'bad', remain >= 0 ? '✓ Positive' : '✕ Overrun');
         setTrend('kpi-eac-trend',    eac <= budget ? 'ok' : eac <= budget * 1.1 ? 'warn' : 'bad', eac <= budget ? '✓ Within Budget' : '▴ Over Budget');
+        
+        const weekVals = Object.values(weeks).map(w => w.act);
+        const avgVelo  = weekVals.length > 1 ? weekVals.slice(0, -1).reduce((a, b) => a + b, 0) / (weekVals.length - 1) : 0;
+        const latestV  = weekVals[weekVals.length - 1] || 0;
+        const veloTrend = avgVelo === 0 ? 'ok' : latestV >= avgVelo * 1.05 ? 'ok' : latestV >= avgVelo * 0.85 ? 'warn' : 'bad';
+        setTrend('kpi-velo-trend', veloTrend, veloTrend === 'ok' ? '▴ Up' : veloTrend === 'warn' ? '▾ Steady' : '▾ Down');
+        setTrend('kpi-bench-trend',  benchPct < 15 ? 'ok' : benchPct < 25 ? 'warn' : 'bad', benchPct < 15 ? '✓ Low' : benchPct < 25 ? '▴ Moderate' : '▴ High');
+        setTrend('kpi-eff-trend',    effPct >= 75 ? 'ok' : effPct >= 60 ? 'warn' : 'bad', effPct >= 75 ? '✓ Healthy' : effPct >= 60 ? '▾ Low' : '▾ Critical');
 
-        const sortedLabels = Object.keys(weeks).sort();
-        const weekVals     = sortedLabels.map(l => weeks[l].act);
-        const avgVelo      = weekVals.length > 1 ? weekVals.slice(0, -1).reduce((a, b) => a + b, 0) / (weekVals.length - 1) : 0;
-        const latestV      = weekVals[weekVals.length - 1] || 0;
-        const veloTrend    = avgVelo === 0 ? 'ok' : latestV >= avgVelo * 1.05 ? 'ok' : latestV >= avgVelo * 0.85 ? 'warn' : 'bad';
-        setTrend('kpi-velo-trend',  veloTrend, veloTrend === 'ok' ? '▴ Up' : veloTrend === 'warn' ? '▾ Steady' : '▾ Down');
-        setTrend('kpi-bench-trend', benchPct < 15 ? 'ok' : benchPct < 25 ? 'warn' : 'bad', benchPct < 15 ? '✓ Low' : benchPct < 25 ? '▴ Moderate' : '▴ High');
-        setTrend('kpi-eff-trend',   effPct >= 75 ? 'ok' : effPct >= 60 ? 'warn' : 'bad', effPct >= 75 ? '✓ Healthy' : effPct >= 60 ? '▾ Low' : '▾ Critical');
-
-        const futureWeeks = [...new Set(globalData.plan.filter(p => new Date(p.dateStr) > new Date()).map(p => parseDateSafe(p.dateStr)).filter(Boolean))].length;
-        const confLabel = futureWeeks === 0 ? 'No Data' : futureWeeks < 4 ? 'Low' : futureWeeks < 8 ? 'Medium' : 'High';
-        const confType  = futureWeeks === 0 ? 'bad' : futureWeeks < 4 ? 'warn' : futureWeeks < 8 ? 'warn' : 'ok';
-        document.getElementById('kpi-conf').textContent = confLabel;
-        setTrend('kpi-conf-trend', confType, `${futureWeeks} wks planned`);
-
-        renderRAGBanner(weeks, people, totals, budget, eac, sortedLabels);
-
-        const last6 = sortedLabels.slice(-6);
-        renderSparkline('spark-velo',  last6.map(l => weeks[l]?.act  || 0), '#3b82f6');
-        renderSparkline('spark-bench', last6.map(l => weeks[l]?.act > 0 ? (weeks[l].nb   / weeks[l].act) * 100 : 0), '#f59e0b');
-        renderSparkline('spark-eff',   last6.map(l => weeks[l]?.act > 0 ? (weeks[l].bill  / weeks[l].act) * 100 : 0), '#10b981');
-
-        const sortedW = [...sortedLabels].reverse();
+        const sortedW = Object.keys(weeks).sort().reverse();
         document.getElementById('weekSelect').innerHTML = sortedW.map(w => `<option value="${w}">${w}</option>`).join('');
 
-        renderHeatmap(people, sortedLabels);
+        renderHeatmap(people, Object.keys(weeks).sort());
         renderExceptions(weeks, people, sortedW[0]);
-        renderCharts(weeks, phases, budget, sortedLabels);
-        renderPredictiveRolloff(people);
-        renderPhaseBreakdown(phases);
-        renderTopSpenders(sortedW[0]);
+        renderCharts(weeks, phases, budget);
         renderMilestones();
+        renderPredictiveRolloffClean(people);
         updateWeeklySpotlight(sortedW[0]);
     }
 
@@ -618,58 +542,6 @@
         el.innerHTML = `<span class="kpi-trend ${map[type]}">${label}</span>`;
     }
     function fmt(n) { return Math.round(n).toLocaleString(); }
-
-    function renderRAGBanner(weeks, people, totals, budget, eac, sortedLabels) {
-        const today = new Date();
-        const burnRatio = budget > 0 ? totals.burn / budget : 0;
-        const budgetRAG = burnRatio < 0.7 ? 'green' : burnRatio < 0.9 ? 'amber' : 'red';
-
-        const futureWks = [...new Set(globalData.plan.filter(p => new Date(p.dateStr) > today).map(p => parseDateSafe(p.dateStr)).filter(Boolean))].length;
-        const schedRAG = futureWks > 4 ? 'green' : futureWks > 0 ? 'amber' : 'red';
-
-        const latestW   = sortedLabels[sortedLabels.length - 1];
-        const planRows  = globalData.plan.filter(p => parseDateSafe(p.dateStr) === latestW && p.planH > 0);
-        const missing   = planRows.filter(p => (people[p.person]?.weeks[latestW] || 0) === 0).length;
-        const missFrac  = planRows.length > 0 ? missing / planRows.length : 0;
-        const resRAG    = missFrac < 0.1 ? 'green' : missFrac < 0.3 ? 'amber' : 'red';
-
-        const delivRAG  = eac <= budget ? 'green' : eac <= budget * 1.1 ? 'amber' : 'red';
-
-        const pills = [{ label: 'Budget', rag: budgetRAG }, { label: 'Schedule', rag: schedRAG }, { label: 'Resources', rag: resRAG }, { label: 'Delivery', rag: delivRAG }];
-        const dotColors = { green: '#16a34a', amber: '#d97706', red: '#dc2626' };
-
-        document.getElementById('rag-pills').innerHTML = pills.map(p =>
-            `<span class="rag-pill rag-${p.rag}"><span class="rag-dot" style="background:${dotColors[p.rag]};"></span>${p.label}</span>`
-        ).join('');
-
-        const recentBurn = sortedLabels.slice(-4).map(l => weeks[l].burn);
-        const runRate    = recentBurn.length > 0 ? recentBurn.reduce((a, b) => a + b, 0) / recentBurn.length : 0;
-        const runway     = runRate > 0 ? ((budget - totals.burn) / runRate).toFixed(1) : '∞';
-        const cutoff     = new Date(today.getTime() - ACTIVE_DAYS * 86400000);
-        const activeRes  = Object.values(people).filter(p => p.actualLast && new Date(p.actualLast) >= cutoff).length;
-        const totalRes   = Object.keys(people).length;
-
-        document.getElementById('rag-stats').innerHTML = `
-            <div class="rag-stat"><div class="rag-stat-val">${runway}</div><div class="rag-stat-lbl">Budget Runway (wks)</div></div>
-            <div class="rag-stat"><div class="rag-stat-val">€${fmt(runRate)}</div><div class="rag-stat-lbl">Weekly Run Rate</div></div>
-            <div class="rag-stat"><div class="rag-stat-val">${activeRes}</div><div class="rag-stat-lbl">Active (${ACTIVE_DAYS}d)</div></div>
-            <div class="rag-stat"><div class="rag-stat-val">${totalRes}</div><div class="rag-stat-lbl">Total Headcount</div></div>
-        `;
-    }
-
-    function renderSparkline(id, data, color) {
-        const canvas = document.getElementById(id);
-        if (!canvas) return;
-        if (sparkRefs[id]) sparkRefs[id].destroy();
-        sparkRefs[id] = new Chart(canvas, {
-            type: 'line',
-            data: {
-                labels: data.map((_, i) => i),
-                datasets: [{ data, borderColor: color, borderWidth: 1.5, fill: true, backgroundColor: color + '22', tension: 0.4, pointRadius: 0 }]
-            },
-            options: { responsive: false, animation: false, plugins: { legend: { display: false }, datalabels: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false } } }
-        });
-    }
 
     function renderHeatmap(people, allWeeks) {
         const table = document.getElementById('heatmap-body');
@@ -687,7 +559,6 @@
         table.innerHTML = rows.join('');
     }
 
-    // ── FIXED DELINQUENCY LOGIC WITH DATES ────────────────────────
     function renderExceptions(weeks, people, latest) {
         const flags   = document.getElementById('red-flags');
         const missing = document.getElementById('missing-timesheets');
@@ -698,11 +569,12 @@
 
         globalData.plan.forEach(p => {
             if (parseDateSafe(p.dateStr) !== latest) return;
+            
             const act = people[p.person]?.weeks[latest] || 0;
-
+            
             if (act === 0 && p.planH > 0) {
-                const plannedFirst  = people[p.person]?.plannedFirst ? new Date(people[p.person].plannedFirst) : null;
-
+                const plannedFirst = people[p.person].plannedFirst ? new Date(people[p.person].plannedFirst) : null;
+                
                 if (plannedFirst && plannedFirst > today) {
                     missing.innerHTML += `
                         <div class="alert-item">
@@ -710,40 +582,44 @@
                             <span class="badge badge-neutral">Not Onboarded Yet</span>
                         </div>`;
                 } else {
-                    const actualLast    = people[p.person]?.actualLast ? new Date(people[p.person].actualLast) : null;
-                    const referenceDate = actualLast || plannedFirst;
-                    const daysSince     = referenceDate ? Math.round((today - referenceDate) / 86400000) : 999;
+                    const actualLast = people[p.person].actualLast ? new Date(people[p.person].actualLast) : null;
+                    const referenceDate = actualLast || plannedFirst; 
+                    
+                    const daysSince = referenceDate ? Math.round((today - referenceDate) / 86400000) : 0;
 
-                    if (daysSince > 7) {
+                    if(daysSince > 7) {
                         missing.innerHTML += `
-                            <div class="alert-item">
-                                <span>⚠️ <strong>${esc(p.person)}</strong>
-                                    <span style="color:var(--muted)">(Since ${referenceDate ? formatDateForUI(referenceDate.toISOString()) : 'unknown'})</span>
-                                </span>
-                                <span class="badge badge-purple">Delinquent (${daysSince}d)</span>
+                            <div class="alert-item" style="flex-direction:column; align-items:flex-start; gap:4px;">
+                                <div>⚠️ <strong>${esc(p.person)}</strong></div>
+                                <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+                                    <span style="color:var(--muted); font-size:11px;">(Since ${formatDateForUI(referenceDate.toISOString())})</span>
+                                    <span class="badge badge-purple">Delinquent (${daysSince}d)</span>
+                                </div>
                             </div>`;
                     } else {
                         missing.innerHTML += `
                             <div class="alert-item">
-                                <span>⚠️ <strong>${esc(p.person)}</strong> <span style="color:var(--muted)">(Week of ${esc(latest)})</span></span>
+                                <span>⚠️ <strong>${esc(p.person)}</strong> <span style="color:var(--muted)">(${esc(latest)})</span></span>
                                 <span class="badge badge-warning">Missed Entry</span>
                             </div>`;
                     }
                 }
                 missCount++;
-            } else if (act > p.planH * VARIANCE_FACTOR) {
+            } 
+            else if (act > p.planH * VARIANCE_FACTOR) {
                 const overPct = Math.round(((act - p.planH) / p.planH) * 100);
                 flags.innerHTML += `
                     <div class="alert-item">
-                        <span>🔴 <strong>${esc(p.person)}</strong>: <span class="mono">${act}h</span> vs <span class="mono">${p.planH}h</span> (+${overPct}%)</span>
+                        <span>🔴 <strong>${esc(p.person)}</strong>: <span style="font-family:'DM Mono',monospace">${act}h</span> vs <span style="font-family:'DM Mono',monospace">${p.planH}h</span> (+${overPct}%)</span>
                         <span class="badge badge-danger">RED FLAG</span>
                     </div>`;
                 flagCount++;
-            } else if (act > 0 && act < p.planH * VARIANCE_UNDER) {
+            }
+            else if (act > 0 && act < p.planH * VARIANCE_UNDER) {
                 const underPct = Math.round(((p.planH - act) / p.planH) * 100);
                 flags.innerHTML += `
                     <div class="alert-item">
-                        <span>🟢 <strong>${esc(p.person)}</strong>: <span class="mono">${act}h</span> vs <span class="mono">${p.planH}h</span> (-${underPct}%)</span>
+                        <span>🟢 <strong>${esc(p.person)}</strong>: <span style="font-family:'DM Mono',monospace">${act}h</span> vs <span style="font-family:'DM Mono',monospace">${p.planH}h</span> (-${underPct}%)</span>
                         <span class="badge badge-success">GREEN FLAG</span>
                     </div>`;
                 flagCount++;
@@ -751,194 +627,19 @@
         });
 
         if (flagCount === 0) flags.innerHTML   = '<p class="alert-empty">✅ No significant variances this week</p>';
-        if (missCount === 0) missing.innerHTML = `<p class="alert-empty">✅ All active timesheets submitted for ${esc(latest)}</p>`;
+        if (missCount === 0) missing.innerHTML = `<p class="alert-empty">✅ All active timesheets submitted for the week of ${esc(latest)}</p>`;
     }
 
-    function renderPredictiveRolloff(people) {
-        const today  = new Date();
-        const valid  = Object.keys(people).filter(p => people[p].plannedLast);
-        const sorted = valid.sort((a, b) => new Date(people[a].plannedLast) - new Date(people[b].plannedLast));
-
-        document.getElementById('rolloff-list').innerHTML = sorted.map(p => {
-            const finalDate = new Date(people[p].plannedLast);
-            const daysUntil = Math.round((finalDate - today) / 86400000);
-            let statusHTML;
-            if      (daysUntil < 0)   statusHTML = `<span class="dot-indicator dot-grey"></span><span style="color:var(--muted)">Completed</span>`;
-            else if (daysUntil <= 14) statusHTML = `<span class="dot-indicator dot-red"></span><span style="color:var(--danger);font-weight:600;">Rolling Off</span>`;
-            else if (daysUntil <= 30) statusHTML = `<span class="dot-indicator dot-yellow"></span><span style="color:var(--warning);font-weight:600;">Final Month</span>`;
-            else                      statusHTML = `<span style="color:var(--muted)">Active</span>`;
-            return `<tr>
-                <td><strong>${esc(p)}</strong></td>
-                <td>${statusHTML}</td>
-                <td class="mono" style="text-align:right;">${formatDateForUI(people[p].plannedLast)}</td>
-            </tr>`;
-        }).join('') || '<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:20px;">No plan data available</td></tr>';
-    }
-
-    function renderCharts(weeks, phases, budget, sortedLabels) {
-        const uiLabels = sortedLabels.map(l => formatDateForUI(l));
-        const fontFam  = { family: 'DM Sans', size: 12 };
-
-        let cum = 0;
-        const burnData = sortedLabels.map(l => { cum += weeks[l].burn; return cum; });
-        if (chartRefs.burn) chartRefs.burn.destroy();
-        chartRefs.burn = new Chart(document.getElementById('chart-burn'), {
-            type: 'line',
-            data: {
-                labels: uiLabels,
-                datasets: [
-                    { label: 'Cumulative Spend', data: burnData, borderColor: '#ef4444', borderWidth: 2.5, fill: true, backgroundColor: 'rgba(239,68,68,0.07)', tension: 0.35, pointRadius: 3 },
-                    { label: 'Budget Cap', data: Array(sortedLabels.length).fill(budget), borderColor: '#94a3b8', borderDash: [6,4], borderWidth: 1.5, pointRadius: 0, fill: false }
-                ]
-            },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: false }, legend: { labels: { font: fontFam } } }, scales: { y: { title: { display: true, text: 'Cumulative Spend (€)', font: fontFam } } } }
-        });
-
-        if (chartRefs.bench) chartRefs.bench.destroy();
-        chartRefs.bench = new Chart(document.getElementById('chart-bench'), {
-            type: 'bar',
-            data: {
-                labels: uiLabels,
-                datasets: [
-                    { label: 'Billable Hours',     data: sortedLabels.map(l => weeks[l].bill), backgroundColor: '#10b981' },
-                    { label: 'Non-Billable Hours', data: sortedLabels.map(l => weeks[l].nb),   backgroundColor: '#f59e0b' }
-                ]
-            },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: false }, legend: { labels: { font: fontFam } } }, scales: { x: { stacked: true }, y: { stacked: true, title: { display: true, text: 'Hours', font: fontFam } } } }
-        });
-
-        let cumPlan = 0, cumAct = 0;
-        const sCurvePlan = sortedLabels.map(l => { cumPlan += weeks[l].plan || 0; return cumPlan; });
-        const sCurveAct  = sortedLabels.map(l => { cumAct  += weeks[l].act  || 0; return cumAct;  });
-        if (chartRefs.scurve) chartRefs.scurve.destroy();
-        chartRefs.scurve = new Chart(document.getElementById('chart-scurve'), {
-            type: 'line',
-            data: {
-                labels: uiLabels,
-                datasets: [
-                    { label: 'Planned Hours', data: sCurvePlan, borderColor: '#94a3b8', borderDash: [6,4], borderWidth: 2, fill: false, tension: 0.3, pointRadius: 2 },
-                    { label: 'Actual Hours',  data: sCurveAct,  borderColor: '#3b82f6', borderWidth: 2.5, fill: true, backgroundColor: 'rgba(59,130,246,0.07)', tension: 0.35, pointRadius: 3 }
-                ]
-            },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: false }, legend: { labels: { font: fontFam } } }, scales: { y: { title: { display: true, text: 'Cumulative Hours', font: fontFam } } } }
-        });
-
-        // ── UPDATED: Spend by Phase Doughnut with external € labels ──
-        const phaseKeys  = Object.keys(phases);
-        const phaseVals  = Object.values(phases);
-        const phaseTotal = phaseVals.reduce((a, b) => a + b, 0);
-        if (chartRefs.phase) chartRefs.phase.destroy();
-        chartRefs.phase = new Chart(document.getElementById('chart-phase'), {
-            type: 'doughnut',
-            data: {
-                labels: phaseKeys,
-                datasets: [{ data: phaseVals, backgroundColor: CHART_COLORS, borderWidth: 2, borderColor: '#ffffff', hoverOffset: 6 }]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                cutout: '45%',
-                layout: { padding: 30 },
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: ctx => ` €${ctx.parsed.toLocaleString()} (${((ctx.parsed / phaseTotal) * 100).toFixed(1)}%)`
-                        }
-                    },
-                    datalabels: {
-                        display: ctx => (ctx.dataset.data[ctx.dataIndex] / phaseTotal) >= 0.03,
-                        color: '#1e293b',
-                        align: 'end',
-                        anchor: 'end',
-                        clamp: true,   
-                        offset: 6,
-                        font: { family: 'DM Sans', weight: '700', size: 11 },
-                        formatter: (value, ctx) => {
-                            const pct   = ((value / phaseTotal) * 100).toFixed(1);
-                            const label = ctx.chart.data.labels[ctx.dataIndex];
-                            const short = label.length > 14 ? label.substring(0, 13) + '…' : label;
-                            return [`${short}`, `€${value.toLocaleString()} (${pct}%)`];
-                        },
-                        textAlign: 'center',
-                    }
-                }
-            }
-        });
-    }
-
-    function renderPhaseBreakdown(phases) {
-        const body  = document.getElementById('phase-breakdown-body');
-        if (!body) return;
-        const total  = Object.values(phases).reduce((a, b) => a + b, 0);
-        const sorted = Object.entries(phases).sort((a, b) => b[1] - a[1]);
-
-        body.innerHTML = sorted.map(([name, val], i) => {
-            const pct   = total > 0 ? (val / total * 100).toFixed(1) : '0.0';
-            const color = CHART_COLORS[i % CHART_COLORS.length];
-            return `<tr>
-                <td>
-                    <div style="display:flex;align-items:center;gap:6px;">
-                        <span style="width:10px;height:10px;border-radius:2px;background:${color};flex-shrink:0;display:inline-block;"></span>
-                        ${esc(name)}
-                    </div>
-                    <div class="phase-bar-wrap"><div class="phase-bar-fill" style="width:${pct}%;background:${color};"></div></div>
-                </td>
-                <td class="mono" style="text-align:right;">€${val.toLocaleString()}</td>
-                <td class="mono" style="text-align:right;">${pct}%</td>
-            </tr>`;
-        }).join('');
-
-        body.innerHTML += `<tr style="border-top:2px solid var(--border);">
-            <td><strong>Total</strong></td>
-            <td class="mono" style="text-align:right;"><strong>€${total.toLocaleString()}</strong></td>
-            <td class="mono" style="text-align:right;"><strong>100%</strong></td>
-        </tr>`;
-    }
-
-    function renderTopSpenders(latestWeek) {
-        const container = document.getElementById('top-spenders');
-        const label     = document.getElementById('spender-week-label');
-        if (!container) return;
-        if (label) label.textContent = `Week of ${latestWeek}`;
-
-        const agg = {};
-        globalData.actuals
-            .filter(r => parseDateSafe(r.Date) === latestWeek)
-            .forEach(r => {
-                const name = r.Person;
-                if (!agg[name]) agg[name] = { spend: 0, hours: 0 };
-                agg[name].spend += parseFloat(r.Subtotal)         || 0;
-                agg[name].hours += parseFloat(r['Time in Hours']) || 0;
-            });
-
-        const sorted   = Object.entries(agg).sort((a, b) => b[1].spend - a[1].spend).slice(0, 5);
-        const maxSpend = sorted[0]?.[1].spend || 1;
-
-        container.innerHTML = sorted.length === 0
-            ? '<p class="alert-empty">No actuals for this week</p>'
-            : sorted.map(([name, d], i) => `
-                <div class="spender-row">
-                    <span class="spender-rank">${i + 1}</span>
-                    <div class="spender-info">
-                        <div class="spender-name">${esc(name)}</div>
-                        <div class="spender-meta">€${d.spend.toLocaleString()} · ${d.hours.toFixed(1)}h</div>
-                    </div>
-                    <div class="spender-bar-wrap">
-                        <div class="spender-bar-fill" style="width:${(d.spend / maxSpend * 100).toFixed(0)}%;"></div>
-                    </div>
-                </div>
-            `).join('');
-    }
-
-    // ── NEW AUTOMATED MILESTONE LOGIC ─────────────────────────────
+    // ── Milestone Auto-Tracker ──────────────────────────────
     function renderMilestones() {
         const body  = document.getElementById('milestone-body');
         const sumEl = document.getElementById('ms-summary');
         const data  = globalData.milestones;
+        
         if (!body) return;
 
         if (!data || data.length === 0) {
-            body.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px;">No milestone data found. (Ensure backend script is updated)</td></tr>';
+            body.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px;">No milestone data found. Check script output.</td></tr>';
             if (sumEl) sumEl.textContent = '';
             return;
         }
@@ -946,45 +647,69 @@
         const today = new Date();
         const statusMap = {
             'complete':    { cls: 'ms-complete', icon: '✓', label: 'Complete'    },
-            'on track':    { cls: 'ms-on-track', icon: '●', label: 'On Track'    },
-            'at risk':     { cls: 'ms-at-risk',  icon: '▲', label: 'Due Soon'    }
+            'on-track':    { cls: 'ms-on-track', icon: '●', label: 'On Track'    },
+            'at-risk':     { cls: 'ms-at-risk',  icon: '▲', label: 'Due Soon'    }
         };
 
         function deriveStatus(ms) {
             const parsedStr = parseDateSafe(ms.due);
-            if (!parsedStr) return statusMap['on track'];
-            
+            if(!parsedStr) return statusMap['on-track'];
+
             const due = new Date(parsedStr);
-            if (isNaN(due)) return statusMap['on track'];
+            if (isNaN(due)) return statusMap['on-track'];
             
             const daysUntil = Math.round((due - today) / 86400000);
             
             if (daysUntil < 0)   return statusMap['complete'];
-            if (daysUntil <= 14) return statusMap['at risk'];
-            return statusMap['on track'];
+            if (daysUntil <= 14) return statusMap['at-risk'];
+            return statusMap['on-track'];
         }
 
-        const counts = { complete: 0, 'on track': 0, 'at risk': 0 };
+        const counts = { complete: 0, 'on-track': 0, 'at-risk': 0 };
         
         body.innerHTML = data.map(ms => {
             const name  = ms.name || '—';
-            const parsedStr = parseDateSafe(ms.due);
+            const due   = parseDateSafe(ms.due);
+            const notes = ms.notes || '';
             const s     = deriveStatus(ms);
             
-            const sKey  = s.label.toLowerCase();
+            const sKey  = s.label.toLowerCase().replace(' ', '-');
             if (counts[sKey] !== undefined) counts[sKey]++;
             
             return `<tr>
                 <td><strong>${esc(name)}</strong></td>
-                <td class="mono" style="white-space:nowrap;">${parsedStr ? formatDateForUI(parsedStr) : '—'}</td>
+                <td class="mono" style="white-space:nowrap;">${due ? formatDateForUI(due) : '—'}</td>
                 <td><span class="${s.cls}">${s.icon} ${s.label}</span></td>
-                <td style="color:var(--muted);font-size:11px;">${esc(ms.notes || 'Auto-generated')}</td>
+                <td style="color:var(--muted);font-size:11px;">${esc(notes)}</td>
             </tr>`;
         }).join('');
 
         if (sumEl) {
-            sumEl.innerHTML = `<b>${counts.complete}</b> done &nbsp;·&nbsp; <b>${counts['on track']}</b> on track &nbsp;·&nbsp; <b>${counts['at risk']}</b> due soon`;
+            sumEl.innerHTML = `<b>${counts.complete}</b> done &nbsp;·&nbsp; <b>${counts['on-track']}</b> on track &nbsp;·&nbsp; <b>${counts['at-risk']}</b> due soon`;
         }
+    }
+
+    function renderPredictiveRolloffClean(people) {
+        const today = new Date();
+        const validPeople = Object.keys(people).filter(p => people[p].plannedLast);
+        const sorted = validPeople.sort((a,b) => new Date(people[a].plannedLast) - new Date(people[b].plannedLast));
+        
+        document.getElementById('rolloff-list').innerHTML = sorted.map(p => {
+            const finalDate = new Date(people[p].plannedLast);
+            const daysUntil = Math.round((finalDate - today) / 86400000);
+            
+            let statusHTML = '';
+            if (daysUntil < 0) statusHTML = `<span class="dot-indicator dot-grey"></span><span style="color:var(--muted)">Completed</span>`;
+            else if (daysUntil <= 14) statusHTML = `<span class="dot-indicator dot-red"></span><span style="color:var(--danger); font-weight:600;">Rolling Off</span>`;
+            else if (daysUntil <= 30) statusHTML = `<span class="dot-indicator dot-yellow"></span><span style="color:var(--warning); font-weight:600;">Final Month</span>`;
+            else statusHTML = `<span style="color:var(--muted)">Active</span>`;
+
+            return `<tr>
+                <td><strong>${esc(p)}</strong></td>
+                <td>${statusHTML}</td>
+                <td class="mono" style="text-align:right;">${formatDateForUI(people[p].plannedLast)}</td>
+            </tr>`;
+        }).join('');
     }
 
     function updateWeeklySpotlight(week) {
@@ -995,7 +720,7 @@
             const key = `${r.Person}|${r.Role}`;
             if (!agg[key]) agg[key] = { n: r.Person, r: r.Role, a: 0, s: 0, p: 0, b: parseFloat(r.Rate) > 0 };
             agg[key].a += parseFloat(r['Time in Hours']) || 0;
-            agg[key].s += parseFloat(r.Subtotal)         || 0;
+            agg[key].s += parseFloat(r.Subtotal) || 0;
         });
 
         globalData.plan.filter(p => parseDateSafe(p.dateStr) === week).forEach(p => {
@@ -1005,17 +730,16 @@
         });
 
         body.innerHTML = Object.values(agg).map(i => {
-            const variance   = i.p - i.a;
-            const varClass   = variance < 0 ? 'variance-neg' : 'variance-pos';
+            const variance = i.p - i.a;
+            const varClass = variance < 0 ? 'variance-neg' : 'variance-pos';
             const badgeClass = i.b ? 'status-bill' : 'status-nb';
-            const badgeText  = i.b ? 'Billable' : 'Non-Bill';
-            const statusDisp = (i.a === 0 && i.p > 0 && !i.b)
-                ? `<span class="status-nb">Planned</span>`
-                : `<span class="${badgeClass}">${badgeText}</span>`;
+            const badgeText = i.b ? 'Billable' : 'Non-Bill';
+            const statusDisplay = (i.a === 0 && i.p > 0 && !i.b) ? `<span class="status-nb">Planned</span>` : `<span class="${badgeClass}">${badgeText}</span>`;
+
             return `<tr>
                 <td><strong>${esc(i.n)}</strong></td>
                 <td>${esc(i.r)}</td>
-                <td>${statusDisp}</td>
+                <td>${statusDisplay}</td>
                 <td class="mono">${i.p.toFixed(1)}</td>
                 <td class="mono">${i.a.toFixed(1)}</td>
                 <td class="${varClass}">${variance >= 0 ? '+' : ''}${variance.toFixed(1)}</td>
@@ -1024,15 +748,89 @@
         }).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px;">No data for this week</td></tr>';
     }
 
+    function renderCharts(weeks, phases, budget) {
+        const labels = Object.keys(weeks).sort();
+
+        let cum = 0; const burnData = labels.map(l => { cum += weeks[l].burn; return cum; });
+        if (chartRefs.burn) chartRefs.burn.destroy();
+        chartRefs.burn = new Chart(document.getElementById('chart-burn'), {
+            type: 'line',
+            data: {
+                labels: labels.map(l => formatDateForUI(l)),
+                datasets: [
+                    { label: 'Cumulative Spend', data: burnData, borderColor: '#ef4444', borderWidth: 2.5, fill: true, backgroundColor: 'rgba(239,68,68,0.07)', tension: 0.35, pointRadius: 3 },
+                    { label: 'Budget Cap', data: Array(labels.length).fill(budget), borderColor: '#94a3b8', borderDash: [6, 4], borderWidth: 1.5, pointRadius: 0, fill: false }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: false }, legend: { labels: { font: { family: 'DM Sans', size: 12 } } } } }
+        });
+
+        if (chartRefs.bench) chartRefs.bench.destroy();
+        chartRefs.bench = new Chart(document.getElementById('chart-bench'), {
+            type: 'bar',
+            data: {
+                labels: labels.map(l => formatDateForUI(l)),
+                datasets: [
+                    { label: 'Billable Hours', data: labels.map(l => weeks[l].bill), backgroundColor: '#10b981' },
+                    { label: 'Non-Billable Hours', data: labels.map(l => weeks[l].nb), backgroundColor: '#f59e0b' }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: false }, legend: { labels: { font: { family: 'DM Sans', size: 12 } } } }, scales: { x: { stacked: true }, y: { stacked: true } } }
+        });
+
+        // ── Phase Chart with Outside Data Labels ──
+        if (chartRefs.phase) chartRefs.phase.destroy();
+        chartRefs.phase = new Chart(document.getElementById('chart-phase'), {
+            type: 'doughnut',
+            data: { 
+                labels: Object.keys(phases), 
+                datasets: [{ 
+                    data: Object.values(phases), 
+                    backgroundColor: CHART_COLORS, 
+                    borderWidth: 2, 
+                    borderColor: '#ffffff' 
+                }] 
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                cutout: '50%',
+                layout: { padding: { left: 40, right: 40, top: 20, bottom: 20 } },
+                plugins: { 
+                    legend: { display: true, position: 'right' },
+                    datalabels: {
+                        display: true,
+                        color: '#1e293b',
+                        align: 'end',
+                        anchor: 'end',
+                        font: { family: 'DM Mono', weight: 'bold', size: 11 },
+                        formatter: function(value) {
+                            return '€' + value.toLocaleString();
+                        }
+                    }
+                } 
+            }
+        });
+    }
+
+    // ── Fixed PDF Export logic ──
     function exportPDF() {
         const btn = document.getElementById('btn-export');
         if (btn) { btn.textContent = '⏳ Generating…'; btn.disabled = true; }
-        html2pdf().from(document.getElementById('master-report')).set({
-            margin: 10,
-            filename: 'Program_Status_Report.pdf',
-            html2canvas: { scale: 2, useCORS: true },
-            jsPDF: { orientation: 'landscape', unit: 'mm', format: 'a3' }
-        }).save().then(() => {
+        
+        const el = document.getElementById('master-report');
+        
+        // Configuring html2pdf to respect CSS page-break rules
+        const opt = {
+            margin:       [10, 10, 10, 10], // top, left, bottom, right in mm
+            filename:     'Program_Status_Report.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true },
+            jsPDF:        { unit: 'mm', format: 'a3', orientation: 'landscape' },
+            pagebreak:    { mode: ['css', 'legacy'] } // This tells it to read break-inside: avoid
+        };
+
+        html2pdf().set(opt).from(el).save().then(() => {
             if (btn) { btn.textContent = '📄 Export PDF'; btn.disabled = false; }
         });
     }
