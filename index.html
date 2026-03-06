@@ -53,15 +53,30 @@
         .btn-primary:hover { background: #f0f7ff; }
         .btn-select { padding: 8px 14px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
 
+        /* ── RAG Health Banner ─────────────────────────────── */
+        .rag-banner { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 14px 22px; margin-bottom: 24px; display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+        .rag-banner-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); white-space: nowrap; margin-right: 4px; }
+        .rag-pills { display: flex; gap: 10px; flex-wrap: wrap; flex: 1; }
+        .rag-pill  { display: flex; align-items: center; gap: 6px; padding: 5px 13px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+        .rag-green { background: #dcfce7; color: #166534; }
+        .rag-amber { background: #fffbeb; color: #92400e; }
+        .rag-red   { background: #fee2e2; color: #991b1b; }
+        .rag-dot   { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .rag-stats { display: flex; gap: 20px; flex-wrap: wrap; border-left: 1px solid var(--border); padding-left: 16px; }
+        .rag-stat     { text-align: center; }
+        .rag-stat-val { font-size: 15px; font-weight: 800; color: var(--primary); font-family: 'DM Mono', monospace; }
+        .rag-stat-lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
         /* ── KPI Row ───────────────────────────────────────── */
-        .kpi-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin-bottom: 24px; }
-        .kpi-card { background: var(--surface); padding: 18px 16px 16px; border-radius: 14px; border: 1px solid var(--border); text-align: center; animation: fadeUp 0.4s ease both; }
+        .kpi-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 14px; margin-bottom: 24px; }
+        .kpi-card { background: var(--surface); padding: 18px 16px 14px; border-radius: 14px; border: 1px solid var(--border); text-align: center; animation: fadeUp 0.4s ease both; }
         .kpi-card h4 { margin: 0; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.7px; font-weight: 600; }
-        .kpi-card p { margin: 8px 0 0; font-size: 1.5rem; font-weight: 800; color: var(--primary); font-family: 'DM Mono', monospace; letter-spacing: -1px; }
+        .kpi-card p { margin: 8px 0 0; font-size: 1.45rem; font-weight: 800; color: var(--primary); font-family: 'DM Mono', monospace; letter-spacing: -1px; }
         .kpi-trend { font-size: 11px; margin-top: 4px; font-weight: 600; display: inline-flex; align-items: center; gap: 3px; padding: 2px 7px; border-radius: 20px; }
         .trend-ok  { background: #dcfce7; color: #15803d; }
         .trend-warn{ background: #fef9c3; color: #854d0e; }
         .trend-bad { background: #fee2e2; color: #991b1b; }
+        .kpi-spark { margin-top: 8px; height: 26px; }
 
         /* ── Alert Grid ────────────────────────────────────── */
         .alert-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
@@ -78,10 +93,29 @@
         .badge-neutral { background: #f1f5f9; color: #475569; }
 
         /* ── Main Grid & Cards ─────────────────────────────── */
-        .main-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 18px; margin-bottom: 24px; }
+        .main-grid  { display: grid; grid-template-columns: 2fr 1fr; gap: 18px; margin-bottom: 24px; }
+        .equal-grid { display: grid; grid-template-columns: 1fr 1fr;  gap: 18px; margin-bottom: 24px; }
         .card { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); padding: 20px 22px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); animation: fadeUp 0.5s ease both; overflow: hidden; }
         .card-title { font-size: 14px; font-weight: 700; color: var(--primary); margin: 0 0 14px; padding-bottom: 10px; border-bottom: 1px solid #f0f4f8; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+        /* ── Phase Breakdown Table ─────────────────────────── */
+        .phase-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 6px; }
+        .phase-table th { text-align: left; padding: 8px 10px; background: #f8fafc; font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+        .phase-table td { padding: 9px 10px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+        .phase-table tr:last-child td { border-bottom: none; }
+        .phase-bar-wrap { background: #f1f5f9; border-radius: 3px; height: 4px; margin-top: 4px; }
+        .phase-bar-fill { height: 4px; border-radius: 3px; }
+
+        /* ── Top Spenders ──────────────────────────────────── */
+        .spender-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid #f1f5f9; }
+        .spender-row:last-child { border-bottom: none; }
+        .spender-rank { font-size: 11px; font-weight: 700; color: var(--muted); width: 16px; flex-shrink: 0; }
+        .spender-info { flex: 1; min-width: 0; }
+        .spender-name { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .spender-meta { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
+        .spender-bar-wrap { flex: 1; background: #f1f5f9; border-radius: 3px; height: 6px; max-width: 80px; }
+        .spender-bar-fill { height: 6px; border-radius: 3px; background: linear-gradient(90deg, #3b82f6, var(--primary)); }
 
         /* ── Heatmap ───────────────────────────────────────── */
         .heatmap-table { width: 100%; border-collapse: collapse; font-size: 11px; font-family: 'DM Mono', monospace; }
@@ -122,6 +156,7 @@
         .ms-complete { background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap;}
         .ms-on-track { background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap;}
         .ms-at-risk  { background: #fffbeb; color: #92400e; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap;}
+        .ms-delayed  { background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap;}
 
         /* ── Loader & Errors ───────────────────────────────── */
         #loader { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 120px 20px; gap: 16px; color: var(--primary); font-weight: 700; }
@@ -134,10 +169,11 @@
 
         /* ── RESPONSIVE DESIGN (Mobile & Tablet) ───────────── */
         @media (max-width: 1200px) {
-            .kpi-row { grid-template-columns: repeat(3, 1fr); }
+            .kpi-row { grid-template-columns: repeat(4, 1fr); }
             .main-grid, .equal-grid { grid-template-columns: 1fr; }
             .header { flex-direction: column; align-items: flex-start; }
             .header-controls { width: 100%; justify-content: space-between; margin-top: 10px; }
+            .rag-stats { border-left: none; padding-left: 0; border-top: 1px solid var(--border); padding-top: 12px; width: 100%; }
         }
         @media (max-width: 768px) {
             .alert-grid { grid-template-columns: 1fr; }
@@ -212,36 +248,53 @@
 
     <div id="dashboard" style="display:none;">
 
+        <!-- ── RAG Health Banner ── -->
+        <div class="rag-banner" role="region" aria-label="Project health">
+            <span class="rag-banner-title">Project Health</span>
+            <div class="rag-pills" id="rag-pills">
+                <span class="rag-pill rag-green"><span class="rag-dot" style="background:#16a34a;"></span>Loading…</span>
+            </div>
+            <div class="rag-stats" id="rag-stats"></div>
+        </div>
+
         <div class="kpi-row" role="region" aria-label="Key Performance Indicators">
-            <div class="kpi-card">
+            <div class="kpi-card" aria-label="Total burned">
                 <h4>Burned</h4>
                 <p id="kpi-burn">€0</p>
                 <div id="kpi-burn-trend"></div>
             </div>
-            <div class="kpi-card">
+            <div class="kpi-card" aria-label="Remaining budget">
                 <h4>Remaining Budget</h4>
                 <p id="kpi-remain">€0</p>
                 <div id="kpi-remain-trend"></div>
             </div>
-            <div class="kpi-card">
+            <div class="kpi-card" aria-label="Forecast EAC">
                 <h4>Forecast (EAC)</h4>
                 <p id="kpi-eac">€0</p>
                 <div id="kpi-eac-trend"></div>
             </div>
-            <div class="kpi-card">
+            <div class="kpi-card" aria-label="Velocity">
                 <h4>Velocity</h4>
                 <p id="kpi-velo">0h/wk</p>
                 <div id="kpi-velo-trend"></div>
+                <div class="kpi-spark"><canvas id="spark-velo" height="26"></canvas></div>
             </div>
-            <div class="kpi-card">
+            <div class="kpi-card" aria-label="Non-billable percentage">
                 <h4>Non-Billable %</h4>
                 <p id="kpi-bench">0%</p>
                 <div id="kpi-bench-trend"></div>
+                <div class="kpi-spark"><canvas id="spark-bench" height="26"></canvas></div>
             </div>
-            <div class="kpi-card">
+            <div class="kpi-card" aria-label="Billable efficiency">
                 <h4>Billable Eff.</h4>
                 <p id="kpi-eff">0%</p>
                 <div id="kpi-eff-trend"></div>
+                <div class="kpi-spark"><canvas id="spark-eff" height="26"></canvas></div>
+            </div>
+            <div class="kpi-card" aria-label="EAC Confidence">
+                <h4>EAC Confidence</h4>
+                <p id="kpi-conf" style="font-size:1.1rem;">—</p>
+                <div id="kpi-conf-trend"></div>
             </div>
         </div>
 
@@ -262,25 +315,12 @@
             </div>
         </div>
 
+        <!-- ── Burn vs Budget Cap (wide) + Roll-off ── -->
         <div class="main-grid">
             <div class="card">
                 <h3 class="card-title">📈 Cumulative Burn vs. Budget Cap</h3>
                 <div style="height: 310px; width:100%;"><canvas id="chart-burn"></canvas></div>
             </div>
-            <div class="card">
-                <h3 class="card-title">⚖️ Non-Billable vs. Billable Time</h3>
-                <div style="height: 310px; width:100%;"><canvas id="chart-bench"></canvas></div>
-            </div>
-        </div>
-
-        <div class="main-grid">
-            <div class="card">
-                <h3 class="card-title">🗂️ Spend by Phase (Billable €)</h3>
-                <div style="height: 310px; width:100%; position: relative;">
-                    <canvas id="chart-phase" style="padding: 20px;"></canvas>
-                </div>
-            </div>
-            
             <div class="card">
                 <div class="card-title">
                     <span style="margin:0;">📅 Predictive Roll-off Schedule</span>
@@ -300,23 +340,68 @@
             </div>
         </div>
 
-        <div class="card" style="margin-bottom: 24px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
-                <h3 class="card-title" style="margin:0; border:none; padding:0;">🏁 Milestone Tracker</h3>
-                <span id="ms-summary" style="font-size:11px; color:var(--muted); font-weight:500;"></span>
+        <!-- ── Billable vs Non-Billable + S-Curve ── -->
+        <div class="equal-grid">
+            <div class="card">
+                <h3 class="card-title">⚖️ Non-Billable vs. Billable Time</h3>
+                <div style="height: 290px; width:100%;"><canvas id="chart-bench"></canvas></div>
             </div>
-            <div class="table-responsive" style="max-height:260px;">
-                <table class="spot-table">
+            <div class="card">
+                <h3 class="card-title">📐 Planned vs. Actual Hours (S-Curve)</h3>
+                <div style="height: 290px; width:100%;"><canvas id="chart-scurve"></canvas></div>
+            </div>
+        </div>
+
+        <!-- ── Spend by Phase + Phase Breakdown Table ── -->
+        <div class="equal-grid">
+            <div class="card">
+                <h3 class="card-title">🗂️ Spend by Phase (Billable €)</h3>
+                <div style="height: 310px; width:100%; position: relative;">
+                    <canvas id="chart-phase"></canvas>
+                </div>
+            </div>
+            <div class="card">
+                <h3 class="card-title">📋 Phase Cost Breakdown</h3>
+                <table class="phase-table">
                     <thead>
                         <tr>
-                            <th scope="col">Milestone / Phase</th>
-                            <th scope="col">Due Date</th>
-                            <th scope="col">Status</th>
-                            <th scope="col">Notes</th>
+                            <th>Phase</th>
+                            <th style="text-align:right;">Spend (€)</th>
+                            <th style="text-align:right;">% of Total</th>
                         </tr>
                     </thead>
-                    <tbody id="milestone-body"></tbody>
+                    <tbody id="phase-breakdown-body"></tbody>
                 </table>
+            </div>
+        </div>
+
+        <!-- ── Top 5 Spenders + Milestone Tracker ── -->
+        <div class="equal-grid">
+            <div class="card">
+                <div class="card-title">
+                    <span style="margin:0;">💸 Top 5 Spenders This Week</span>
+                    <small id="spender-week-label" style="font-size:11px;color:var(--muted);font-weight:500;"></small>
+                </div>
+                <div id="top-spenders"></div>
+            </div>
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+                    <h3 class="card-title" style="margin:0; border:none; padding:0;">🏁 Milestone Tracker</h3>
+                    <span id="ms-summary" style="font-size:11px; color:var(--muted); font-weight:500;"></span>
+                </div>
+                <div class="table-responsive" style="max-height:260px; overflow-y:auto;">
+                    <table class="spot-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Milestone / Phase</th>
+                                <th scope="col">Due Date</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="milestone-body"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -366,10 +451,13 @@
     const THRESH_GOOD       = 30;    
     const VARIANCE_FACTOR   = 1.2;   
     const VARIANCE_UNDER    = 0.8;
-    const CHART_COLORS      = ['#004a99','#3b82f6','#10b981','#f59e0b','#8b5cf6','#ec4899'];
+    const ACTIVE_DAYS       = 14;
+    const CHART_COLORS      = ['#004a99','#3b82f6','#10b981','#f59e0b','#8b5cf6','#ec4899','#14b8a6'];
 
     let globalData = { actuals: [], plan: [], rawPhases: [], milestones: [] };
     let chartRefs  = {};
+    let sparkRefs  = {};
+    let _escEl     = null;
     let _debounceTimer = null;
 
     function debouncedProcess() {
@@ -378,15 +466,20 @@
     }
 
     function esc(str) {
-        const d = document.createElement('div');
-        d.textContent = String(str ?? '');
-        return d.innerHTML;
+        if (!_escEl) _escEl = document.createElement('div');
+        _escEl.textContent = String(str ?? '');
+        return _escEl.innerHTML;
     }
 
     function formatDateForUI(isoString) {
-        if(!isoString) return "-";
-        const d = new Date(isoString);
-        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        if (!isoString) return '—';
+        // Parse as local date to avoid UTC off-by-one in western timezones
+        const parts = String(isoString).split('T')[0].split('-');
+        if (parts.length === 3) {
+            const d = new Date(+parts[0], +parts[1] - 1, +parts[2]);
+            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+        return new Date(isoString).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     }
 
     function parseDateSafe(str) {
@@ -527,22 +620,44 @@
         setTrend('kpi-remain-trend', remain >= 0 ? 'ok' : 'bad', remain >= 0 ? '✓ Positive' : '✕ Overrun');
         setTrend('kpi-eac-trend',    eac <= budget ? 'ok' : eac <= budget * 1.1 ? 'warn' : 'bad', eac <= budget ? '✓ Within Budget' : '▴ Over Budget');
         
-        const weekVals = Object.values(weeks).map(w => w.act);
+        const sortedLabels = Object.keys(weeks).sort();
+        const weekVals = sortedLabels.map(l => weeks[l].act);
         const avgVelo  = weekVals.length > 1 ? weekVals.slice(0, -1).reduce((a, b) => a + b, 0) / (weekVals.length - 1) : 0;
         const latestV  = weekVals[weekVals.length - 1] || 0;
         const veloTrend = avgVelo === 0 ? 'ok' : latestV >= avgVelo * 1.05 ? 'ok' : latestV >= avgVelo * 0.85 ? 'warn' : 'bad';
-        setTrend('kpi-velo-trend', veloTrend, veloTrend === 'ok' ? '▴ Up' : veloTrend === 'warn' ? '▾ Steady' : '▾ Down');
-        setTrend('kpi-bench-trend',  benchPct < 15 ? 'ok' : benchPct < 25 ? 'warn' : 'bad', benchPct < 15 ? '✓ Low' : benchPct < 25 ? '▴ Moderate' : '▴ High');
-        setTrend('kpi-eff-trend',    effPct >= 75 ? 'ok' : effPct >= 60 ? 'warn' : 'bad', effPct >= 75 ? '✓ Healthy' : effPct >= 60 ? '▾ Low' : '▾ Critical');
+        setTrend('kpi-velo-trend',  veloTrend, veloTrend === 'ok' ? '▴ Up' : veloTrend === 'warn' ? '▾ Steady' : '▾ Down');
+        setTrend('kpi-bench-trend', benchPct < 15 ? 'ok' : benchPct < 25 ? 'warn' : 'bad', benchPct < 15 ? '✓ Low' : benchPct < 25 ? '▴ Moderate' : '▴ High');
+        setTrend('kpi-eff-trend',   effPct >= 75 ? 'ok' : effPct >= 60 ? 'warn' : 'bad', effPct >= 75 ? '✓ Healthy' : effPct >= 60 ? '▾ Low' : '▾ Critical');
 
-        const sortedW = Object.keys(weeks).sort().reverse();
+        // EAC Confidence card
+        const futureWeeks = [...new Set(
+            globalData.plan.filter(p => new Date(p.dateStr) > new Date())
+                .map(p => parseDateSafe(p.dateStr)).filter(Boolean)
+        )].length;
+        const confLabel = futureWeeks === 0 ? 'No Data' : futureWeeks < 4 ? 'Low' : futureWeeks < 8 ? 'Medium' : 'High';
+        const confType  = futureWeeks === 0 ? 'bad' : futureWeeks < 4 ? 'warn' : futureWeeks < 8 ? 'warn' : 'ok';
+        document.getElementById('kpi-conf').textContent = confLabel;
+        setTrend('kpi-conf-trend', confType, `${futureWeeks} wks planned`);
+
+        // RAG Banner
+        renderRAGBanner(weeks, people, totals, budget, eac, sortedLabels);
+
+        // Sparklines (last 6 weeks)
+        const last6 = sortedLabels.slice(-6);
+        renderSparkline('spark-velo',  last6.map(l => weeks[l]?.act  || 0), '#3b82f6');
+        renderSparkline('spark-bench', last6.map(l => weeks[l]?.act > 0 ? (weeks[l].nb   / weeks[l].act) * 100 : 0), '#f59e0b');
+        renderSparkline('spark-eff',   last6.map(l => weeks[l]?.act > 0 ? (weeks[l].bill  / weeks[l].act) * 100 : 0), '#10b981');
+
+        const sortedW = [...sortedLabels].reverse();
         document.getElementById('weekSelect').innerHTML = sortedW.map(w => `<option value="${w}">${w}</option>`).join('');
 
-        renderHeatmap(people, Object.keys(weeks).sort());
+        renderHeatmap(people, sortedLabels);
         renderExceptions(weeks, people, sortedW[0]);
-        renderCharts(weeks, phases, budget);
+        renderCharts(weeks, phases, budget, sortedLabels);
         renderMilestones();
         renderPredictiveRolloffClean(people);
+        renderPhaseBreakdown(phases);
+        renderTopSpenders(sortedW[0]);
         updateWeeklySpotlight(sortedW[0]);
     }
 
@@ -649,7 +764,7 @@
         if (!body) return;
 
         if (!data || data.length === 0) {
-            body.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px;">No milestone data found.</td></tr>';
+            body.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px;">No milestone data — expose ResourcePlan D2:V2 in your Apps Script.</td></tr>';
             if (sumEl) sumEl.textContent = '';
             return;
         }
@@ -657,33 +772,38 @@
         const today = new Date();
         const statusMap = {
             'complete':    { cls: 'ms-complete', icon: '✓', label: 'Complete'    },
+            'on track':    { cls: 'ms-on-track', icon: '●', label: 'On Track'    },
             'on-track':    { cls: 'ms-on-track', icon: '●', label: 'On Track'    },
-            'at-risk':     { cls: 'ms-at-risk',  icon: '▲', label: 'Due Soon'    }
+            'at risk':     { cls: 'ms-at-risk',  icon: '▲', label: 'At Risk'     },
+            'at-risk':     { cls: 'ms-at-risk',  icon: '▲', label: 'At Risk'     },
+            'delayed':     { cls: 'ms-delayed',  icon: '✕', label: 'Delayed'     },
+            'not started': { cls: 'ms-on-track', icon: '○', label: 'Not Started' },
         };
 
         function deriveStatus(ms) {
-            const parsedStr = parseDateSafe(ms.due);
-            if(!parsedStr) return statusMap['on-track'];
-
+            // Honour explicit status from API first
+            const raw = (ms.status || ms.Status || '').toString().toLowerCase().trim();
+            if (statusMap[raw]) return statusMap[raw];
+            // Fallback: derive from due date
+            const parsedStr = parseDateSafe(ms.due || ms.Due || '');
+            if (!parsedStr) return statusMap['on-track'];
             const due = new Date(parsedStr);
             if (isNaN(due)) return statusMap['on-track'];
-            
             const daysUntil = Math.round((due - today) / 86400000);
-            
             if (daysUntil < 0)   return statusMap['complete'];
             if (daysUntil <= 14) return statusMap['at-risk'];
             return statusMap['on-track'];
         }
 
-        const counts = { complete: 0, 'on-track': 0, 'at-risk': 0 };
+        const counts = { complete: 0, 'on-track': 0, 'at-risk': 0, delayed: 0 };
         
         body.innerHTML = data.map(ms => {
-            const name  = ms.name || '—';
-            const due   = parseDateSafe(ms.due);
-            const notes = ms.notes || '';
+            const name  = ms.name  || ms.Name  || ms.milestone || ms.Milestone || '—';
+            const due   = ms.due   || ms.Due   || ms.date      || ms.Date      || '';
+            const notes = ms.notes || ms.Notes || ms.note      || ms.Note      || '';
             const s     = deriveStatus(ms);
             
-            const sKey  = s.label.toLowerCase().replace(' ', '-');
+            const sKey = s.label.toLowerCase().replace(' ', '-');
             if (counts[sKey] !== undefined) counts[sKey]++;
             
             return `<tr>
@@ -695,8 +815,134 @@
         }).join('');
 
         if (sumEl) {
-            sumEl.innerHTML = `<b>${counts.complete}</b> done &nbsp;·&nbsp; <b>${counts['on-track']}</b> on track &nbsp;·&nbsp; <b>${counts['at-risk']}</b> due soon`;
+            sumEl.innerHTML = `<b>${counts.complete}</b> done &nbsp;·&nbsp; <b>${counts['on-track']}</b> on track &nbsp;·&nbsp; <b>${counts['at-risk']}</b> at risk &nbsp;·&nbsp; <b>${counts.delayed}</b> delayed`;
         }
+    }
+
+    /* ── RAG Health Banner ─────────────────────────────────── */
+    function renderRAGBanner(weeks, people, totals, budget, eac, sortedLabels) {
+        const today = new Date();
+        const burnRatio = budget > 0 ? totals.burn / budget : 0;
+        const budgetRAG = burnRatio < 0.7 ? 'green' : burnRatio < 0.9 ? 'amber' : 'red';
+
+        const futureWks = [...new Set(
+            globalData.plan.filter(p => new Date(p.dateStr) > today)
+                .map(p => parseDateSafe(p.dateStr)).filter(Boolean)
+        )].length;
+        const schedRAG = futureWks > 4 ? 'green' : futureWks > 0 ? 'amber' : 'red';
+
+        const latestW  = sortedLabels[sortedLabels.length - 1];
+        const planRows = globalData.plan.filter(p => parseDateSafe(p.dateStr) === latestW && p.planH > 0);
+        const missing  = planRows.filter(p => (people[p.person]?.weeks[latestW] || 0) === 0).length;
+        const missFrac = planRows.length > 0 ? missing / planRows.length : 0;
+        const resRAG   = missFrac < 0.1 ? 'green' : missFrac < 0.3 ? 'amber' : 'red';
+
+        const delivRAG = eac <= budget ? 'green' : eac <= budget * 1.1 ? 'amber' : 'red';
+
+        const pills = [
+            { label: 'Budget',    rag: budgetRAG },
+            { label: 'Schedule',  rag: schedRAG  },
+            { label: 'Resources', rag: resRAG    },
+            { label: 'Delivery',  rag: delivRAG  },
+        ];
+        const dotColors = { green: '#16a34a', amber: '#d97706', red: '#dc2626' };
+        document.getElementById('rag-pills').innerHTML = pills.map(p =>
+            `<span class="rag-pill rag-${p.rag}"><span class="rag-dot" style="background:${dotColors[p.rag]};"></span>${p.label}</span>`
+        ).join('');
+
+        const recentBurn = sortedLabels.slice(-4).map(l => weeks[l].burn);
+        const runRate    = recentBurn.length > 0 ? recentBurn.reduce((a, b) => a + b, 0) / recentBurn.length : 0;
+        const runway     = runRate > 0 ? ((budget - totals.burn) / runRate).toFixed(1) : '∞';
+        const cutoff     = new Date(today.getTime() - ACTIVE_DAYS * 86400000);
+        const activeRes  = Object.values(people).filter(p => p.actualLast && new Date(p.actualLast) >= cutoff).length;
+        const totalRes   = Object.keys(people).length;
+
+        document.getElementById('rag-stats').innerHTML = `
+            <div class="rag-stat"><div class="rag-stat-val">${runway}</div><div class="rag-stat-lbl">Runway (wks)</div></div>
+            <div class="rag-stat"><div class="rag-stat-val">€${fmt(runRate)}</div><div class="rag-stat-lbl">Run Rate /wk</div></div>
+            <div class="rag-stat"><div class="rag-stat-val">${activeRes}</div><div class="rag-stat-lbl">Active (${ACTIVE_DAYS}d)</div></div>
+            <div class="rag-stat"><div class="rag-stat-val">${totalRes}</div><div class="rag-stat-lbl">Headcount</div></div>
+        `;
+    }
+
+    /* ── Sparklines ────────────────────────────────────────── */
+    function renderSparkline(id, data, color) {
+        const canvas = document.getElementById(id);
+        if (!canvas) return;
+        if (sparkRefs[id]) sparkRefs[id].destroy();
+        sparkRefs[id] = new Chart(canvas, {
+            type: 'line',
+            data: {
+                labels: data.map((_, i) => i),
+                datasets: [{ data, borderColor: color, borderWidth: 1.5, fill: true,
+                    backgroundColor: color + '22', tension: 0.4, pointRadius: 0 }]
+            },
+            options: {
+                responsive: false, animation: false,
+                plugins: { legend: { display: false }, datalabels: { display: false }, tooltip: { enabled: false } },
+                scales: { x: { display: false }, y: { display: false } }
+            }
+        });
+    }
+
+    /* ── Phase Breakdown Table ─────────────────────────────── */
+    function renderPhaseBreakdown(phases) {
+        const body  = document.getElementById('phase-breakdown-body');
+        if (!body) return;
+        const total  = Object.values(phases).reduce((a, b) => a + b, 0);
+        const sorted = Object.entries(phases).sort((a, b) => b[1] - a[1]);
+        body.innerHTML = sorted.map(([name, val], i) => {
+            const pct   = total > 0 ? (val / total * 100).toFixed(1) : '0.0';
+            const color = CHART_COLORS[i % CHART_COLORS.length];
+            return `<tr>
+                <td>
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <span style="width:10px;height:10px;border-radius:2px;background:${color};flex-shrink:0;display:inline-block;"></span>
+                        ${esc(name)}
+                    </div>
+                    <div class="phase-bar-wrap"><div class="phase-bar-fill" style="width:${pct}%;background:${color};"></div></div>
+                </td>
+                <td class="mono" style="text-align:right;">€${val.toLocaleString()}</td>
+                <td class="mono" style="text-align:right;">${pct}%</td>
+            </tr>`;
+        }).join('');
+        body.innerHTML += `<tr style="border-top:2px solid var(--border);">
+            <td><strong>Total</strong></td>
+            <td class="mono" style="text-align:right;"><strong>€${total.toLocaleString()}</strong></td>
+            <td class="mono" style="text-align:right;"><strong>100%</strong></td>
+        </tr>`;
+    }
+
+    /* ── Top 5 Spenders ────────────────────────────────────── */
+    function renderTopSpenders(latestWeek) {
+        const container = document.getElementById('top-spenders');
+        const label     = document.getElementById('spender-week-label');
+        if (!container) return;
+        if (label) label.textContent = `Week of ${latestWeek}`;
+        const agg = {};
+        globalData.actuals
+            .filter(r => parseDateSafe(r.Date) === latestWeek)
+            .forEach(r => {
+                const name = r.Person;
+                if (!agg[name]) agg[name] = { spend: 0, hours: 0 };
+                agg[name].spend += parseFloat(r.Subtotal)         || 0;
+                agg[name].hours += parseFloat(r['Time in Hours']) || 0;
+            });
+        const sorted   = Object.entries(agg).sort((a, b) => b[1].spend - a[1].spend).slice(0, 5);
+        const maxSpend = sorted[0]?.[1].spend || 1;
+        container.innerHTML = sorted.length === 0
+            ? '<p class="alert-empty">No actuals for this week</p>'
+            : sorted.map(([name, d], i) => `
+                <div class="spender-row">
+                    <span class="spender-rank">${i + 1}</span>
+                    <div class="spender-info">
+                        <div class="spender-name">${esc(name)}</div>
+                        <div class="spender-meta">€${d.spend.toLocaleString()} · ${d.hours.toFixed(1)}h</div>
+                    </div>
+                    <div class="spender-bar-wrap">
+                        <div class="spender-bar-fill" style="width:${(d.spend / maxSpend * 100).toFixed(0)}%;"></div>
+                    </div>
+                </div>`).join('');
     }
 
     function renderPredictiveRolloffClean(people) {
@@ -758,66 +1004,101 @@
         }).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px;">No data for this week</td></tr>';
     }
 
-    function renderCharts(weeks, phases, budget) {
-        const labels = Object.keys(weeks).sort();
+    function renderCharts(weeks, phases, budget, sortedLabels) {
+        const uiLabels = sortedLabels.map(l => formatDateForUI(l));
+        const fontFam  = { family: 'DM Sans', size: 12 };
 
-        let cum = 0; const burnData = labels.map(l => { cum += weeks[l].burn; return cum; });
+        // 1. Cumulative Burn vs Budget
+        let cum = 0;
+        const burnData = sortedLabels.map(l => { cum += weeks[l].burn; return cum; });
         if (chartRefs.burn) chartRefs.burn.destroy();
         chartRefs.burn = new Chart(document.getElementById('chart-burn'), {
             type: 'line',
             data: {
-                labels: labels.map(l => formatDateForUI(l)),
+                labels: uiLabels,
                 datasets: [
                     { label: 'Cumulative Spend', data: burnData, borderColor: '#ef4444', borderWidth: 2.5, fill: true, backgroundColor: 'rgba(239,68,68,0.07)', tension: 0.35, pointRadius: 3 },
-                    { label: 'Budget Cap', data: Array(labels.length).fill(budget), borderColor: '#94a3b8', borderDash: [6, 4], borderWidth: 1.5, pointRadius: 0, fill: false }
+                    { label: 'Budget Cap', data: Array(sortedLabels.length).fill(budget), borderColor: '#94a3b8', borderDash: [6, 4], borderWidth: 1.5, pointRadius: 0, fill: false }
                 ]
             },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: false }, legend: { labels: { font: { family: 'DM Sans', size: 12 } } } } }
+            options: { responsive: true, maintainAspectRatio: false,
+                plugins: { datalabels: { display: false }, legend: { labels: { font: fontFam } } },
+                scales: { y: { title: { display: true, text: 'Cumulative Spend (€)', font: fontFam } } }
+            }
         });
 
+        // 2. Billable vs Non-Billable
         if (chartRefs.bench) chartRefs.bench.destroy();
         chartRefs.bench = new Chart(document.getElementById('chart-bench'), {
             type: 'bar',
             data: {
-                labels: labels.map(l => formatDateForUI(l)),
+                labels: uiLabels,
                 datasets: [
-                    { label: 'Billable Hours', data: labels.map(l => weeks[l].bill), backgroundColor: '#10b981' },
-                    { label: 'Non-Billable Hours', data: labels.map(l => weeks[l].nb), backgroundColor: '#f59e0b' }
+                    { label: 'Billable Hours',     data: sortedLabels.map(l => weeks[l].bill), backgroundColor: '#10b981' },
+                    { label: 'Non-Billable Hours', data: sortedLabels.map(l => weeks[l].nb),   backgroundColor: '#f59e0b' }
                 ]
             },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: false }, legend: { labels: { font: { family: 'DM Sans', size: 12 } } } }, scales: { x: { stacked: true }, y: { stacked: true } } }
+            options: { responsive: true, maintainAspectRatio: false,
+                plugins: { datalabels: { display: false }, legend: { labels: { font: fontFam } } },
+                scales: { x: { stacked: true }, y: { stacked: true, title: { display: true, text: 'Hours', font: fontFam } } }
+            }
         });
 
+        // 3. S-Curve: Planned vs Actual cumulative hours
+        let cumPlan = 0, cumAct = 0;
+        const sCurvePlan = sortedLabels.map(l => { cumPlan += weeks[l].plan || 0; return cumPlan; });
+        const sCurveAct  = sortedLabels.map(l => { cumAct  += weeks[l].act  || 0; return cumAct;  });
+        if (chartRefs.scurve) chartRefs.scurve.destroy();
+        chartRefs.scurve = new Chart(document.getElementById('chart-scurve'), {
+            type: 'line',
+            data: {
+                labels: uiLabels,
+                datasets: [
+                    { label: 'Planned Hours', data: sCurvePlan, borderColor: '#94a3b8', borderDash: [6,4], borderWidth: 2, fill: false, tension: 0.3, pointRadius: 2 },
+                    { label: 'Actual Hours',  data: sCurveAct,  borderColor: '#3b82f6', borderWidth: 2.5, fill: true, backgroundColor: 'rgba(59,130,246,0.07)', tension: 0.35, pointRadius: 3 }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false,
+                plugins: { datalabels: { display: false }, legend: { labels: { font: fontFam } } },
+                scales: { y: { title: { display: true, text: 'Cumulative Hours', font: fontFam } } }
+            }
+        });
+
+        // 4. Spend by Phase — datalabels shown OUTSIDE segments
+        const phaseKeys  = Object.keys(phases);
+        const phaseVals  = Object.values(phases);
+        const phaseTotal = phaseVals.reduce((a, b) => a + b, 0);
         if (chartRefs.phase) chartRefs.phase.destroy();
         chartRefs.phase = new Chart(document.getElementById('chart-phase'), {
             type: 'doughnut',
-            data: { 
-                labels: Object.keys(phases), 
-                datasets: [{ 
-                    data: Object.values(phases), 
-                    backgroundColor: CHART_COLORS, 
-                    borderWidth: 2, 
-                    borderColor: '#ffffff' 
-                }] 
+            data: {
+                labels: phaseKeys,
+                datasets: [{ data: phaseVals, backgroundColor: CHART_COLORS, borderWidth: 2, borderColor: '#ffffff', hoverOffset: 6 }]
             },
-            options: { 
-                responsive: true, 
-                maintainAspectRatio: false, 
-                cutout: '50%',
-                layout: { padding: { left: 40, right: 40, top: 20, bottom: 20 } },
-                plugins: { 
-                    legend: { display: true, position: 'right' },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                cutout: '45%',
+                layout: { padding: 30 },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: ctx => ` €${ctx.parsed.toLocaleString()} (${((ctx.parsed / phaseTotal) * 100).toFixed(1)}%)` } },
                     datalabels: {
-                        display: true,
+                        display: ctx => (ctx.dataset.data[ctx.dataIndex] / phaseTotal) >= 0.03,
                         color: '#1e293b',
                         align: 'end',
                         anchor: 'end',
-                        font: { family: 'DM Mono', weight: 'bold', size: 11 },
-                        formatter: function(value) {
-                            return '€' + value.toLocaleString();
-                        }
+                        clamp: true,
+                        offset: 6,
+                        font: { family: 'DM Sans', weight: '700', size: 11 },
+                        formatter: (value, ctx) => {
+                            const pct   = ((value / phaseTotal) * 100).toFixed(1);
+                            const label = ctx.chart.data.labels[ctx.dataIndex];
+                            const short = label.length > 14 ? label.substring(0, 13) + '…' : label;
+                            return [`${short}`, `€${value.toLocaleString()} (${pct}%)`];
+                        },
+                        textAlign: 'center',
                     }
-                } 
+                }
             }
         });
     }
