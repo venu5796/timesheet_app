@@ -53,51 +53,35 @@
         .btn-primary:hover { background: #f0f7ff; }
         .btn-select { padding: 8px 14px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
 
-        /* ── RAG Health Banner ─────────────────────────────── */
-        .rag-banner { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 14px 22px; margin-bottom: 24px; display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
-        .rag-banner-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); white-space: nowrap; margin-right: 4px; }
-        .rag-pills { display: flex; gap: 10px; flex-wrap: wrap; flex: 1; }
-        .rag-pill  { display: flex; align-items: center; gap: 6px; padding: 5px 13px; border-radius: 20px; font-size: 12px; font-weight: 700; }
-        .rag-green { background: #dcfce7; color: #166534; }
-        .rag-amber { background: #fffbeb; color: #92400e; }
-        .rag-red   { background: #fee2e2; color: #991b1b; }
-        .rag-dot   { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-        .rag-stats { display: flex; gap: 20px; flex-wrap: wrap; border-left: 1px solid var(--border); padding-left: 16px; }
-        .rag-stat     { text-align: center; }
-        .rag-stat-val { font-size: 15px; font-weight: 800; color: var(--primary); font-family: 'DM Mono', monospace; }
-        .rag-stat-lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
-
         /* ── KPI Row ───────────────────────────────────────── */
         .kpi-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 14px; margin-bottom: 24px; }
-        .kpi-card { background: var(--surface); padding: 18px 16px 14px; border-radius: 14px; border: 1px solid var(--border); text-align: center; animation: fadeUp 0.4s ease both; }
+        .kpi-card { background: var(--surface); padding: 18px 16px 16px; border-radius: 14px; border: 1px solid var(--border); text-align: center; animation: fadeUp 0.4s ease both; }
         .kpi-card h4 { margin: 0; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.7px; font-weight: 600; }
-        .kpi-card p { margin: 8px 0 0; font-size: 1.45rem; font-weight: 800; color: var(--primary); font-family: 'DM Mono', monospace; letter-spacing: -1px; }
+        .kpi-card p { margin: 8px 0 0; font-size: 1.5rem; font-weight: 800; color: var(--primary); font-family: 'DM Mono', monospace; letter-spacing: -1px; }
         .kpi-trend { font-size: 11px; margin-top: 4px; font-weight: 600; display: inline-flex; align-items: center; gap: 3px; padding: 2px 7px; border-radius: 20px; }
         .trend-ok  { background: #dcfce7; color: #15803d; }
         .trend-warn{ background: #fef9c3; color: #854d0e; }
         .trend-bad { background: #fee2e2; color: #991b1b; }
-        .kpi-spark { margin-top: 8px; height: 26px; }
 
-        /* ── Alert Grid ────────────────────────────────────── */
-        .alert-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
-        .alert-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; max-height: 280px; min-height: 100px; overflow-y: auto; animation: fadeUp 0.5s ease both; }
-        .alert-item { padding: 7px 6px; border-bottom: 1px solid #f1f5f9; font-size: 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;}
-        .alert-item:last-child { border-bottom: none; }
-        .alert-empty { color: var(--muted); font-size: 12px; text-align: center; padding: 20px 0; }
-        
-        .badge { padding: 3px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;}
-        .badge-danger  { background: #fee2e2; color: #991b1b; }
-        .badge-warning { background: #fffbeb; color: #92400e; }
-        .badge-success { background: #dcfce7; color: #166534; }
-        .badge-purple  { background: #f3e8ff; color: #6b21a8; }
-        .badge-neutral { background: #f1f5f9; color: #475569; }
+        /* ── RAG Health Banner ─────────────────────────────── */
+        .rag-banner { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 14px 22px; margin-bottom: 24px; display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+        .rag-banner-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); white-space: nowrap; margin-right: 4px; }
+        .rag-pills { display: flex; gap: 10px; flex-wrap: wrap; flex: 1; }
+        .rag-pill  { display: inline-flex; align-items: center; gap: 6px; padding: 5px 13px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+        .rag-green { background: #dcfce7; color: #166534; }
+        .rag-amber { background: #fffbeb; color: #92400e; }
+        .rag-red   { background: #fee2e2; color: #991b1b; }
+        .rag-dot   { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; display: inline-block; }
+        .rag-stats { display: flex; gap: 20px; flex-wrap: wrap; border-left: 1px solid var(--border); padding-left: 16px; }
+        .rag-stat  { text-align: center; }
+        .rag-stat-val { font-size: 15px; font-weight: 800; color: var(--primary); font-family: 'DM Mono', monospace; }
+        .rag-stat-lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
 
-        /* ── Main Grid & Cards ─────────────────────────────── */
-        .main-grid  { display: grid; grid-template-columns: 2fr 1fr; gap: 18px; margin-bottom: 24px; }
-        .equal-grid { display: grid; grid-template-columns: 1fr 1fr;  gap: 18px; margin-bottom: 24px; }
-        .card { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); padding: 20px 22px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); animation: fadeUp 0.5s ease both; overflow: hidden; }
-        .card-title { font-size: 14px; font-weight: 700; color: var(--primary); margin: 0 0 14px; padding-bottom: 10px; border-bottom: 1px solid #f0f4f8; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        /* ── Equal 50/50 grid ──────────────────────────────── */
+        .equal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
+
+        /* ── Sparkline strip inside KPI cards ──────────────── */
+        .kpi-spark { margin-top: 8px; height: 28px; }
 
         /* ── Phase Breakdown Table ─────────────────────────── */
         .phase-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 6px; }
@@ -115,7 +99,30 @@
         .spender-name { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .spender-meta { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
         .spender-bar-wrap { flex: 1; background: #f1f5f9; border-radius: 3px; height: 6px; max-width: 80px; }
-        .spender-bar-fill { height: 6px; border-radius: 3px; background: linear-gradient(90deg, #3b82f6, var(--primary)); }
+        .spender-bar-fill { height: 6px; border-radius: 3px; background: linear-gradient(90deg, #3b82f6, #003d82); }
+
+        /* ── Extra milestone status ────────────────────────── */
+        .ms-delayed { background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+
+        /* ── Alert Grid ────────────────────────────────────── */
+        .alert-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
+        .alert-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; max-height: 280px; min-height: 100px; overflow-y: auto; animation: fadeUp 0.5s ease both; }
+        .alert-item { padding: 7px 6px; border-bottom: 1px solid #f1f5f9; font-size: 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;}
+        .alert-item:last-child { border-bottom: none; }
+        .alert-empty { color: var(--muted); font-size: 12px; text-align: center; padding: 20px 0; }
+        
+        .badge { padding: 3px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;}
+        .badge-danger  { background: #fee2e2; color: #991b1b; }
+        .badge-warning { background: #fffbeb; color: #92400e; }
+        .badge-success { background: #dcfce7; color: #166534; }
+        .badge-purple  { background: #f3e8ff; color: #6b21a8; }
+        .badge-neutral { background: #f1f5f9; color: #475569; }
+
+        /* ── Main Grid & Cards ─────────────────────────────── */
+        .main-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 18px; margin-bottom: 24px; }
+        .card { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); padding: 20px 22px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); animation: fadeUp 0.5s ease both; overflow: hidden; }
+        .card-title { font-size: 14px; font-weight: 700; color: var(--primary); margin: 0 0 14px; padding-bottom: 10px; border-bottom: 1px solid #f0f4f8; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
         /* ── Heatmap ───────────────────────────────────────── */
         .heatmap-table { width: 100%; border-collapse: collapse; font-size: 11px; font-family: 'DM Mono', monospace; }
@@ -156,7 +163,6 @@
         .ms-complete { background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap;}
         .ms-on-track { background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap;}
         .ms-at-risk  { background: #fffbeb; color: #92400e; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap;}
-        .ms-delayed  { background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap;}
 
         /* ── Loader & Errors ───────────────────────────────── */
         #loader { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 120px 20px; gap: 16px; color: var(--primary); font-weight: 700; }
@@ -170,7 +176,7 @@
         /* ── RESPONSIVE DESIGN (Mobile & Tablet) ───────────── */
         @media (max-width: 1200px) {
             .kpi-row { grid-template-columns: repeat(4, 1fr); }
-            .main-grid, .equal-grid { grid-template-columns: 1fr; }
+            .main-grid, .equal-grid, .alert-grid { grid-template-columns: 1fr; }
             .header { flex-direction: column; align-items: flex-start; }
             .header-controls { width: 100%; justify-content: space-between; margin-top: 10px; }
             .rag-stats { border-left: none; padding-left: 0; border-top: 1px solid var(--border); padding-top: 12px; width: 100%; }
@@ -185,37 +191,28 @@
             .btn { width: 100%; justify-content: center; margin-bottom: 8px;}
         }
 
-        /* ── PDF EXPORT SPECIFIC CSS ───────────────────────── */
-        /* These rules activate temporarily when generating the PDF */
-        body.pdf-export-mode { width: 1600px !important; background: white; }
-        .pdf-export-mode .container { max-width: 1560px !important; width: 1560px !important; margin: 0 auto; padding: 20px; }
-        .pdf-export-mode .no-print { display: none !important; }
-        
-        /* Explode scrollable areas so all data prints */
-        .pdf-export-mode .table-responsive { overflow: visible !important; }
-        .pdf-export-mode #rolloff-container { max-height: none !important; overflow: visible !important; }
-        .pdf-export-mode .alert-panel { max-height: none !important; overflow: visible !important; }
-        
-        /* Prevent slicing elements in half */
-        .pdf-export-mode .kpi-row, 
-        .pdf-export-mode .alert-grid, 
-        .pdf-export-mode .main-grid { 
-            page-break-inside: avoid !important; 
-            break-inside: avoid !important; 
-        }
-        .pdf-export-mode tr { 
-            page-break-inside: avoid !important; 
-            break-inside: avoid !important; 
-        }
-        
-        /* Remove shadows for clean PDF render */
-        .pdf-export-mode .card, 
-        .pdf-export-mode .alert-panel, 
-        .pdf-export-mode .kpi-card { 
-            box-shadow: none !important; 
-            border-color: #e2e8f0 !important; 
-            break-inside: auto !important; /* Allow long cards to bridge pages cleanly */
-        }
+        /* ── PDF EXPORT CSS (active only during export) ────── */
+        body.pdf-export-mode { background: white !important; padding: 0 !important; }
+        .pdf-export-mode .container { max-width: none !important; width: 100% !important; padding: 16px !important; }
+        .pdf-export-mode .no-print,
+        .pdf-export-mode #weekSelect { display: none !important; }
+        /* Un-clip every scrollable / overflow-hidden area */
+        .pdf-export-mode .card,
+        .pdf-export-mode .alert-panel,
+        .pdf-export-mode .table-responsive,
+        .pdf-export-mode #rolloff-container { overflow: visible !important; max-height: none !important; height: auto !important; }
+        /* Disable sticky so heatmap first-col renders in canvas */
+        .pdf-export-mode .heatmap-table td:first-child { position: static !important; }
+        /* Clean visual chrome */
+        .pdf-export-mode .card,
+        .pdf-export-mode .alert-panel,
+        .pdf-export-mode .kpi-card,
+        .pdf-export-mode .rag-banner { box-shadow: none !important; border-color: #e2e8f0 !important; animation: none !important; }
+        /* Grid layouts scaled for A3 landscape */
+        .pdf-export-mode .kpi-row    { grid-template-columns: repeat(4, 1fr) !important; }
+        .pdf-export-mode .main-grid,
+        .pdf-export-mode .equal-grid,
+        .pdf-export-mode .alert-grid { grid-template-columns: 1fr 1fr !important; }
     </style>
 </head>
 <body>
@@ -248,56 +245,56 @@
 
     <div id="dashboard" style="display:none;">
 
-        <!-- ── RAG Health Banner ── -->
-        <div class="rag-banner" role="region" aria-label="Project health">
+        <!-- RAG Health Banner -->
+        <div class="rag-banner" id="rag-banner" role="region" aria-label="Project health">
             <span class="rag-banner-title">Project Health</span>
-            <div class="rag-pills" id="rag-pills">
-                <span class="rag-pill rag-green"><span class="rag-dot" style="background:#16a34a;"></span>Loading…</span>
-            </div>
+            <div class="rag-pills" id="rag-pills"></div>
             <div class="rag-stats" id="rag-stats"></div>
         </div>
 
+        <!-- 7 KPI Cards -->
         <div class="kpi-row" role="region" aria-label="Key Performance Indicators">
-            <div class="kpi-card" aria-label="Total burned">
+            <div class="kpi-card">
                 <h4>Burned</h4>
                 <p id="kpi-burn">€0</p>
                 <div id="kpi-burn-trend"></div>
             </div>
-            <div class="kpi-card" aria-label="Remaining budget">
+            <div class="kpi-card">
                 <h4>Remaining Budget</h4>
                 <p id="kpi-remain">€0</p>
                 <div id="kpi-remain-trend"></div>
             </div>
-            <div class="kpi-card" aria-label="Forecast EAC">
+            <div class="kpi-card">
                 <h4>Forecast (EAC)</h4>
                 <p id="kpi-eac">€0</p>
                 <div id="kpi-eac-trend"></div>
             </div>
-            <div class="kpi-card" aria-label="Velocity">
+            <div class="kpi-card">
                 <h4>Velocity</h4>
                 <p id="kpi-velo">0h/wk</p>
                 <div id="kpi-velo-trend"></div>
-                <div class="kpi-spark"><canvas id="spark-velo" height="26"></canvas></div>
+                <div class="kpi-spark"><canvas id="spark-velo"></canvas></div>
             </div>
-            <div class="kpi-card" aria-label="Non-billable percentage">
+            <div class="kpi-card">
                 <h4>Non-Billable %</h4>
                 <p id="kpi-bench">0%</p>
                 <div id="kpi-bench-trend"></div>
-                <div class="kpi-spark"><canvas id="spark-bench" height="26"></canvas></div>
+                <div class="kpi-spark"><canvas id="spark-bench"></canvas></div>
             </div>
-            <div class="kpi-card" aria-label="Billable efficiency">
+            <div class="kpi-card">
                 <h4>Billable Eff.</h4>
                 <p id="kpi-eff">0%</p>
                 <div id="kpi-eff-trend"></div>
-                <div class="kpi-spark"><canvas id="spark-eff" height="26"></canvas></div>
+                <div class="kpi-spark"><canvas id="spark-eff"></canvas></div>
             </div>
-            <div class="kpi-card" aria-label="EAC Confidence">
+            <div class="kpi-card">
                 <h4>EAC Confidence</h4>
-                <p id="kpi-conf" style="font-size:1.1rem;">—</p>
+                <p id="kpi-conf" style="font-size:1.1rem; letter-spacing:0;">—</p>
                 <div id="kpi-conf-trend"></div>
             </div>
         </div>
 
+        <!-- Variance + Delinquency -->
         <div class="alert-grid">
             <div class="alert-panel">
                 <div class="card-title">
@@ -315,67 +312,61 @@
             </div>
         </div>
 
-        <!-- ── Burn vs Budget Cap (wide) + Roll-off ── -->
+        <!-- Burn chart (wide) + Roll-off -->
         <div class="main-grid">
             <div class="card">
                 <h3 class="card-title">📈 Cumulative Burn vs. Budget Cap</h3>
-                <div style="height: 310px; width:100%;"><canvas id="chart-burn"></canvas></div>
+                <div style="height:310px;width:100%;"><canvas id="chart-burn"></canvas></div>
             </div>
             <div class="card">
-                <div class="card-title">
-                    <span style="margin:0;">📅 Predictive Roll-off Schedule</span>
-                </div>
+                <div class="card-title"><span style="margin:0;">📅 Predictive Roll-off Schedule</span></div>
                 <div id="rolloff-container">
                     <table class="rolloff-table">
-                        <thead>
-                            <tr>
-                                <th>Resource</th>
-                                <th>Status</th>
-                                <th style="text-align:right;">End Date</th>
-                            </tr>
-                        </thead>
+                        <thead><tr>
+                            <th>Resource</th>
+                            <th>Status</th>
+                            <th style="text-align:right;">End Date</th>
+                        </tr></thead>
                         <tbody id="rolloff-list"></tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- ── Billable vs Non-Billable + S-Curve ── -->
+        <!-- Billable chart + S-Curve -->
         <div class="equal-grid">
             <div class="card">
                 <h3 class="card-title">⚖️ Non-Billable vs. Billable Time</h3>
-                <div style="height: 290px; width:100%;"><canvas id="chart-bench"></canvas></div>
+                <div style="height:290px;width:100%;"><canvas id="chart-bench"></canvas></div>
             </div>
             <div class="card">
                 <h3 class="card-title">📐 Planned vs. Actual Hours (S-Curve)</h3>
-                <div style="height: 290px; width:100%;"><canvas id="chart-scurve"></canvas></div>
+                <div style="height:290px;width:100%;"><canvas id="chart-scurve"></canvas></div>
             </div>
         </div>
 
-        <!-- ── Spend by Phase + Phase Breakdown Table ── -->
+        <!-- Phase doughnut + Phase breakdown table -->
         <div class="equal-grid">
             <div class="card">
                 <h3 class="card-title">🗂️ Spend by Phase (Billable €)</h3>
-                <div style="height: 310px; width:100%; position: relative;">
-                    <canvas id="chart-phase"></canvas>
-                </div>
+                <div style="height:310px;width:100%;position:relative;"><canvas id="chart-phase"></canvas></div>
             </div>
             <div class="card">
                 <h3 class="card-title">📋 Phase Cost Breakdown</h3>
-                <table class="phase-table">
-                    <thead>
-                        <tr>
+                <div class="table-responsive">
+                    <table class="phase-table">
+                        <thead><tr>
                             <th>Phase</th>
                             <th style="text-align:right;">Spend (€)</th>
                             <th style="text-align:right;">% of Total</th>
-                        </tr>
-                    </thead>
-                    <tbody id="phase-breakdown-body"></tbody>
-                </table>
+                        </tr></thead>
+                        <tbody id="phase-breakdown-body"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
-        <!-- ── Top 5 Spenders + Milestone Tracker ── -->
+        <!-- Top 5 Spenders + Milestone Tracker -->
         <div class="equal-grid">
             <div class="card">
                 <div class="card-title">
@@ -385,52 +376,50 @@
                 <div id="top-spenders"></div>
             </div>
             <div class="card">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
-                    <h3 class="card-title" style="margin:0; border:none; padding:0;">🏁 Milestone Tracker</h3>
-                    <span id="ms-summary" style="font-size:11px; color:var(--muted); font-weight:500;"></span>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+                    <h3 class="card-title" style="margin:0;border:none;padding:0;">🏁 Milestone Tracker</h3>
+                    <span id="ms-summary" style="font-size:11px;color:var(--muted);font-weight:500;"></span>
                 </div>
-                <div class="table-responsive" style="max-height:260px; overflow-y:auto;">
+                <div class="table-responsive" style="max-height:240px;overflow-y:auto;">
                     <table class="spot-table">
-                        <thead>
-                            <tr>
-                                <th scope="col">Milestone / Phase</th>
-                                <th scope="col">Due Date</th>
-                                <th scope="col">Status</th>
-                                <th scope="col">Notes</th>
-                            </tr>
-                        </thead>
+                        <thead><tr>
+                            <th scope="col">Milestone</th>
+                            <th scope="col">Due</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Notes</th>
+                        </tr></thead>
                         <tbody id="milestone-body"></tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <div class="card" style="margin-bottom: 24px;">
+        <!-- Heatmap -->
+        <div class="card" style="margin-bottom:24px;">
             <h3 class="card-title">🌡️ Resource Utilization Heatmap</h3>
             <div class="table-responsive">
                 <table class="heatmap-table" id="heatmap-body"></table>
             </div>
             <div class="heatmap-legend">
-                <div class="legend-item"><div class="legend-dot" style="background:#fee2e2; border:1px solid #fca5a5;"></div><span><strong style="color:#991b1b;">Over</strong> &gt;40h</span></div>
-                <div class="legend-item"><div class="legend-dot" style="background:#dcfce7; border:1px solid #86efac;"></div><span><strong style="color:#166534;">Optimal</strong> 30–40h</span></div>
-                <div class="legend-item"><div class="legend-dot" style="background:#fffbeb; border:1px solid #fde68a;"></div><span><strong style="color:#92400e;">Low</strong> 1–29h</span></div>
-                <div class="legend-item"><div class="legend-dot" style="background:#f8fafc; border:1px solid var(--border);"></div><span>No entry</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background:#fee2e2;border:1px solid #fca5a5;"></div><span><strong style="color:#991b1b;">Over</strong> &gt;40h</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background:#dcfce7;border:1px solid #86efac;"></div><span><strong style="color:#166534;">Optimal</strong> 30–40h</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background:#fffbeb;border:1px solid #fde68a;"></div><span><strong style="color:#92400e;">Low</strong> 1–29h</span></div>
+                <div class="legend-item"><div class="legend-dot" style="background:#f8fafc;border:1px solid var(--border);"></div><span>No entry</span></div>
             </div>
         </div>
 
+        <!-- Weekly Performance Metrics -->
         <div class="card">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap: wrap; gap: 10px;">
-                <h3 class="card-title" style="margin:0; border:none; padding:0;">📊 Weekly Performance Metrics</h3>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+                <h3 class="card-title" style="margin:0;border:none;padding:0;">📊 Weekly Performance Metrics</h3>
                 <select id="weekSelect" class="btn-select no-print" onchange="updateWeeklySpotlight(this.value)"></select>
             </div>
             <div class="table-responsive">
                 <table class="spot-table">
-                    <thead>
-                        <tr>
-                            <th scope="col">Resource</th><th scope="col">Role</th><th scope="col">Status</th>
-                            <th scope="col">Planned (h)</th><th scope="col">Actual (h)</th><th scope="col">Variance (h)</th><th scope="col">Spend</th>
-                        </tr>
-                    </thead>
+                    <thead><tr>
+                        <th scope="col">Resource</th><th scope="col">Role</th><th scope="col">Status</th>
+                        <th scope="col">Planned (h)</th><th scope="col">Actual (h)</th><th scope="col">Variance (h)</th><th scope="col">Spend</th>
+                    </tr></thead>
                     <tbody id="spotlight-body"></tbody>
                 </table>
             </div>
@@ -440,30 +429,24 @@
 </div>
 
 <script>
-    // Register the DataLabels plugin for Chart.js
     Chart.register(ChartDataLabels);
 
-    /* ── CONNECTED API URL ───────────────────────────────────────── */
-    const API_URL = "https://script.google.com/macros/s/AKfycbyoU4NiluGpZqzoSqxEWWmb5IKj0ttIHq2bStmPP3Ijd557ZaPlz3BQf2wWVLUZG3vM/exec";
-    
-    const RATE_FALLBACK     = 100;   
-    const THRESH_OVER       = 40;    
-    const THRESH_GOOD       = 30;    
-    const VARIANCE_FACTOR   = 1.2;   
-    const VARIANCE_UNDER    = 0.8;
-    const ACTIVE_DAYS       = 14;
-    const CHART_COLORS      = ['#004a99','#3b82f6','#10b981','#f59e0b','#8b5cf6','#ec4899','#14b8a6'];
+    const API_URL        = "https://script.google.com/macros/s/AKfycbyoU4NiluGpZqzoSqxEWWmb5IKj0ttIHq2bStmPP3Ijd557ZaPlz3BQf2wWVLUZG3vM/exec";
+    const RATE_FALLBACK  = 100;
+    const THRESH_OVER    = 40;
+    const THRESH_GOOD    = 30;
+    const VARIANCE_FACTOR= 1.2;
+    const VARIANCE_UNDER = 0.8;
+    const ACTIVE_DAYS    = 14;
+    const CHART_COLORS   = ['#004a99','#3b82f6','#10b981','#f59e0b','#8b5cf6','#ec4899','#14b8a6'];
 
-    let globalData = { actuals: [], plan: [], rawPhases: [], milestones: [] };
+    let globalData = { actuals:[], plan:[], rawPhases:[], milestones:[] };
     let chartRefs  = {};
     let sparkRefs  = {};
     let _escEl     = null;
-    let _debounceTimer = null;
+    let _debounce  = null;
 
-    function debouncedProcess() {
-        clearTimeout(_debounceTimer);
-        _debounceTimer = setTimeout(processData, 350);
-    }
+    function debouncedProcess() { clearTimeout(_debounce); _debounce = setTimeout(processData, 350); }
 
     function esc(str) {
         if (!_escEl) _escEl = document.createElement('div');
@@ -471,15 +454,13 @@
         return _escEl.innerHTML;
     }
 
-    function formatDateForUI(isoString) {
-        if (!isoString) return '—';
-        // Parse as local date to avoid UTC off-by-one in western timezones
-        const parts = String(isoString).split('T')[0].split('-');
-        if (parts.length === 3) {
-            const d = new Date(+parts[0], +parts[1] - 1, +parts[2]);
-            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        }
-        return new Date(isoString).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    function fmt(n) { return Math.round(n).toLocaleString(); }
+
+    function formatDateForUI(iso) {
+        if (!iso) return '—';
+        const p = String(iso).split('T')[0].split('-');
+        if (p.length === 3) return new Date(+p[0], +p[1]-1, +p[2]).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+        return new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric'});
     }
 
     function parseDateSafe(str) {
@@ -488,412 +469,320 @@
         if (isNaN(d.getTime())) {
             const months = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
             const parts  = String(str).split('-');
-            if (parts.length === 2 && months[parts[0]] !== undefined) {
-                d = new Date(new Date().getFullYear(), months[parts[0]], parseInt(parts[1], 10));
-            }
+            if (parts.length === 2 && months[parts[0]] !== undefined)
+                d = new Date(new Date().getFullYear(), months[parts[0]], parseInt(parts[1],10));
         }
         if (isNaN(d.getTime())) return null;
-        const day  = d.getDay();
-        const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-        const monday = new Date(d);
-        monday.setDate(diff);
-        return monday.toISOString().split('T')[0];
+        const day = d.getDay(), diff = d.getDate() - day + (day===0 ? -6 : 1);
+        const mon = new Date(d); mon.setDate(diff);
+        return mon.toISOString().split('T')[0];
     }
 
+    /* ── FETCH ─────────────────────────────────────────────── */
     async function fetchData() {
-        const debug  = document.getElementById('debug-info');
-        const loader = document.getElementById('loader');
+        const debug = document.getElementById('debug-info');
+        const loader= document.getElementById('loader');
         debug.style.display = 'none';
-        loader.style.display = 'flex';
+        loader.style.display= 'flex';
         document.getElementById('dashboard').style.display = 'none';
-
         try {
             const res  = await fetch(API_URL);
-            if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
             if (data.error) throw new Error(data.error);
-
             globalData = {
-                actuals:   Array.isArray(data.actuals)   ? data.actuals   : [],
-                plan:      Array.isArray(data.plan)       ? data.plan      : [],
-                rawPhases: Array.isArray(data.rawPhases)  ? data.rawPhases : [],
+                actuals:    Array.isArray(data.actuals)    ? data.actuals    : [],
+                plan:       Array.isArray(data.plan)       ? data.plan       : [],
+                rawPhases:  Array.isArray(data.rawPhases)  ? data.rawPhases  : [],
                 milestones: Array.isArray(data.milestones) ? data.milestones : [],
             };
             const now = new Date();
-            document.getElementById('sync-time').textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('sync-time').textContent = now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
             document.getElementById('last-synced').style.display = 'inline-flex';
             processData();
-        } catch (e) {
+        } catch(e) {
             loader.style.display = 'none';
             debug.style.display  = 'block';
             debug.innerHTML = `<div class="error-box"><h3>⚠️ Connection Error</h3><p>${esc(e.message)}</p><button class="btn btn-primary" onclick="fetchData()" style="margin-top:10px;">🔄 Retry</button></div>`;
         }
     }
 
+    /* ── PROCESS ───────────────────────────────────────────── */
     function processData() {
-        const weeks  = {}, people = {}, phases = {};
-        const totals = { burn: 0, hours: 0, bill: 0, nb: 0 };
+        const weeks={}, people={}, phases={};
+        const totals={ burn:0, hours:0, bill:0, nb:0 };
         const budget = parseFloat(document.getElementById('budgetLimit').value) || 0;
-
-        const sortedPhases = [...globalData.rawPhases].sort((a, b) => b.length - a.length);
+        const sortedPhases = [...globalData.rawPhases].sort((a,b)=>b.length-a.length);
 
         globalData.actuals.forEach(r => {
-            const w = parseDateSafe(r.Date);
-            if (!w) return;
-
-            const h       = parseFloat(r['Time in Hours']) || 0;
-            const s       = parseFloat(r.Subtotal)         || 0;
-            const isBill  = parseFloat(r.Rate)             > 0;
-            const taskTxt = String(r['Task/Deliverable']   || '').toLowerCase();
-
-            if (!weeks[w]) weeks[w] = { burn:0, act:0, plan:0, bill:0, nb:0 };
-            weeks[w].burn += s; weeks[w].act  += h;
-            if (isBill) weeks[w].bill += h; else weeks[w].nb += h;
-
-            let match = 'Other/General';
-            for (let p of sortedPhases) {
-                if (taskTxt.includes(p.toLowerCase())) {
-                    match = p;
-                    break; 
-                }
-            }
-            if (s > 0) { 
-                phases[match] = (phases[match] || 0) + s;
-            }
-
-            const pKey = r.Person;
-            if (!people[pKey]) people[pKey] = { weeks: {}, actualLast: null, plannedFirst: null, plannedLast: null, rate: parseFloat(r.Rate) || 0 };
-            people[pKey].weeks[w] = (people[pKey].weeks[w] || 0) + h;
-            
-            if (!people[pKey].actualLast || new Date(r.Date) > new Date(people[pKey].actualLast)) {
-                people[pKey].actualLast = r.Date;
-            }
-
-            totals.burn  += s; totals.hours += h;
-            if (isBill) totals.bill += h; else totals.nb += h;
+            const w = parseDateSafe(r.Date); if (!w) return;
+            const h = parseFloat(r['Time in Hours'])||0;
+            const s = parseFloat(r.Subtotal)||0;
+            const isBill = parseFloat(r.Rate)>0;
+            const taskTxt = String(r['Task/Deliverable']||'').toLowerCase();
+            if (!weeks[w]) weeks[w]={burn:0,act:0,plan:0,bill:0,nb:0};
+            weeks[w].burn+=s; weeks[w].act+=h;
+            if(isBill) weeks[w].bill+=h; else weeks[w].nb+=h;
+            let match='Other/General';
+            for(let p of sortedPhases){ if(taskTxt.includes(p.toLowerCase())){match=p;break;} }
+            if(s>0) phases[match]=(phases[match]||0)+s;
+            if(!people[r.Person]) people[r.Person]={weeks:{},actualLast:null,plannedFirst:null,plannedLast:null,rate:parseFloat(r.Rate)||0};
+            people[r.Person].weeks[w]=(people[r.Person].weeks[w]||0)+h;
+            if(!people[r.Person].actualLast||new Date(r.Date)>new Date(people[r.Person].actualLast)) people[r.Person].actualLast=r.Date;
+            totals.burn+=s; totals.hours+=h;
+            if(isBill) totals.bill+=h; else totals.nb+=h;
         });
 
-        let eacRem = 0;
+        let eacRem=0;
         globalData.plan.forEach(p => {
             const w = parseDateSafe(p.dateStr);
-            
-            if (!people[p.person]) people[p.person] = { weeks: {}, actualLast: null, plannedFirst: null, plannedLast: null, rate: p.plannedRate || RATE_FALLBACK };
-
-            if (p.planH > 0) {
-                if (!people[p.person].plannedFirst || new Date(p.dateStr) < new Date(people[p.person].plannedFirst)) {
-                    people[p.person].plannedFirst = p.dateStr;
-                }
-                if (!people[p.person].plannedLast || new Date(p.dateStr) > new Date(people[p.person].plannedLast)) {
-                    people[p.person].plannedLast = p.dateStr;
-                }
+            if(!people[p.person]) people[p.person]={weeks:{},actualLast:null,plannedFirst:null,plannedLast:null,rate:p.plannedRate||RATE_FALLBACK};
+            if(p.planH>0){
+                if(!people[p.person].plannedFirst||new Date(p.dateStr)<new Date(people[p.person].plannedFirst)) people[p.person].plannedFirst=p.dateStr;
+                if(!people[p.person].plannedLast ||new Date(p.dateStr)>new Date(people[p.person].plannedLast))  people[p.person].plannedLast=p.dateStr;
             }
-
-            if (w && weeks[w]) weeks[w].plan += p.planH;
-            
-            if (new Date(p.dateStr) > new Date()) {
-                eacRem += p.planH * (people[p.person].rate || p.plannedRate || RATE_FALLBACK);
-            }
+            if(w&&weeks[w]) weeks[w].plan+=p.planH;
+            if(new Date(p.dateStr)>new Date()) eacRem+=p.planH*(people[p.person].rate||p.plannedRate||RATE_FALLBACK);
         });
 
         updateUI(weeks, people, phases, totals, eacRem, budget);
     }
 
+    /* ── UPDATE UI ─────────────────────────────────────────── */
     function updateUI(weeks, people, phases, totals, eacRem, budget) {
         document.getElementById('loader').style.display    = 'none';
         document.getElementById('dashboard').style.display = 'block';
 
-        const weekCount  = Math.max(Object.keys(weeks).length, 1); 
-        const remain     = budget - totals.burn;
-        const eac        = totals.burn + eacRem;
-        const benchPct   = totals.hours > 0 ? (totals.nb   / totals.hours) * 100 : 0;
-        const effPct     = totals.hours > 0 ? (totals.bill / totals.hours) * 100 : 0;
+        const sortedLabels = Object.keys(weeks).sort();
+        const sortedW      = [...sortedLabels].reverse();
+        const weekCount    = Math.max(sortedLabels.length,1);
+        const remain  = budget - totals.burn;
+        const eac     = totals.burn + eacRem;
+        const benchPct= totals.hours>0 ? (totals.nb  /totals.hours)*100 : 0;
+        const effPct  = totals.hours>0 ? (totals.bill/totals.hours)*100 : 0;
 
         document.getElementById('kpi-burn').textContent   = `€${fmt(totals.burn)}`;
         document.getElementById('kpi-remain').textContent = `€${fmt(remain)}`;
         document.getElementById('kpi-eac').textContent    = `€${fmt(eac)}`;
-        document.getElementById('kpi-velo').textContent   = `${(totals.hours / weekCount).toFixed(1)}h/wk`;
+        document.getElementById('kpi-velo').textContent   = `${(totals.hours/weekCount).toFixed(1)}h/wk`;
         document.getElementById('kpi-bench').textContent  = `${benchPct.toFixed(0)}%`;
         document.getElementById('kpi-eff').textContent    = `${effPct.toFixed(0)}%`;
 
-        const burnRatio = budget > 0 ? totals.burn / budget : 0;
-        setTrend('kpi-burn-trend',   burnRatio < 0.7 ? 'ok' : burnRatio < 0.9 ? 'warn' : 'bad', burnRatio < 0.7 ? '▾ On Track' : burnRatio < 0.9 ? '▴ Watch' : '▴ High');
-        setTrend('kpi-remain-trend', remain >= 0 ? 'ok' : 'bad', remain >= 0 ? '✓ Positive' : '✕ Overrun');
-        setTrend('kpi-eac-trend',    eac <= budget ? 'ok' : eac <= budget * 1.1 ? 'warn' : 'bad', eac <= budget ? '✓ Within Budget' : '▴ Over Budget');
-        
-        const sortedLabels = Object.keys(weeks).sort();
-        const weekVals = sortedLabels.map(l => weeks[l].act);
-        const avgVelo  = weekVals.length > 1 ? weekVals.slice(0, -1).reduce((a, b) => a + b, 0) / (weekVals.length - 1) : 0;
-        const latestV  = weekVals[weekVals.length - 1] || 0;
-        const veloTrend = avgVelo === 0 ? 'ok' : latestV >= avgVelo * 1.05 ? 'ok' : latestV >= avgVelo * 0.85 ? 'warn' : 'bad';
-        setTrend('kpi-velo-trend',  veloTrend, veloTrend === 'ok' ? '▴ Up' : veloTrend === 'warn' ? '▾ Steady' : '▾ Down');
-        setTrend('kpi-bench-trend', benchPct < 15 ? 'ok' : benchPct < 25 ? 'warn' : 'bad', benchPct < 15 ? '✓ Low' : benchPct < 25 ? '▴ Moderate' : '▴ High');
-        setTrend('kpi-eff-trend',   effPct >= 75 ? 'ok' : effPct >= 60 ? 'warn' : 'bad', effPct >= 75 ? '✓ Healthy' : effPct >= 60 ? '▾ Low' : '▾ Critical');
+        const burnRatio = budget>0 ? totals.burn/budget : 0;
+        setTrend('kpi-burn-trend',  burnRatio<0.7?'ok':burnRatio<0.9?'warn':'bad', burnRatio<0.7?'▾ On Track':burnRatio<0.9?'▴ Watch':'▴ High');
+        setTrend('kpi-remain-trend',remain>=0?'ok':'bad', remain>=0?'✓ Positive':'✕ Overrun');
+        setTrend('kpi-eac-trend',   eac<=budget?'ok':eac<=budget*1.1?'warn':'bad', eac<=budget?'✓ Within Budget':'▴ Over Budget');
+        const wVals=sortedLabels.map(l=>weeks[l].act);
+        const avgV =wVals.length>1?wVals.slice(0,-1).reduce((a,b)=>a+b,0)/(wVals.length-1):0;
+        const latV =wVals[wVals.length-1]||0;
+        const vT   =avgV===0?'ok':latV>=avgV*1.05?'ok':latV>=avgV*0.85?'warn':'bad';
+        setTrend('kpi-velo-trend',  vT, vT==='ok'?'▴ Up':vT==='warn'?'▾ Steady':'▾ Down');
+        setTrend('kpi-bench-trend', benchPct<15?'ok':benchPct<25?'warn':'bad', benchPct<15?'✓ Low':benchPct<25?'▴ Moderate':'▴ High');
+        setTrend('kpi-eff-trend',   effPct>=75?'ok':effPct>=60?'warn':'bad', effPct>=75?'✓ Healthy':effPct>=60?'▾ Low':'▾ Critical');
 
-        // EAC Confidence card
-        const futureWeeks = [...new Set(
-            globalData.plan.filter(p => new Date(p.dateStr) > new Date())
-                .map(p => parseDateSafe(p.dateStr)).filter(Boolean)
-        )].length;
-        const confLabel = futureWeeks === 0 ? 'No Data' : futureWeeks < 4 ? 'Low' : futureWeeks < 8 ? 'Medium' : 'High';
-        const confType  = futureWeeks === 0 ? 'bad' : futureWeeks < 4 ? 'warn' : futureWeeks < 8 ? 'warn' : 'ok';
-        document.getElementById('kpi-conf').textContent = confLabel;
-        setTrend('kpi-conf-trend', confType, `${futureWeeks} wks planned`);
+        // EAC Confidence
+        const futureWks=[...new Set(globalData.plan.filter(p=>new Date(p.dateStr)>new Date()).map(p=>parseDateSafe(p.dateStr)).filter(Boolean))].length;
+        const confLabel=futureWks===0?'No Data':futureWks<4?'Low':futureWks<8?'Medium':'High';
+        const confType =futureWks===0?'bad':futureWks<4?'warn':futureWks<8?'warn':'ok';
+        document.getElementById('kpi-conf').textContent=confLabel;
+        setTrend('kpi-conf-trend',confType,`${futureWks} wks planned`);
 
-        // RAG Banner
+        document.getElementById('weekSelect').innerHTML=sortedW.map(w=>`<option value="${w}">${w}</option>`).join('');
+
         renderRAGBanner(weeks, people, totals, budget, eac, sortedLabels);
-
-        // Sparklines (last 6 weeks)
-        const last6 = sortedLabels.slice(-6);
-        renderSparkline('spark-velo',  last6.map(l => weeks[l]?.act  || 0), '#3b82f6');
-        renderSparkline('spark-bench', last6.map(l => weeks[l]?.act > 0 ? (weeks[l].nb   / weeks[l].act) * 100 : 0), '#f59e0b');
-        renderSparkline('spark-eff',   last6.map(l => weeks[l]?.act > 0 ? (weeks[l].bill  / weeks[l].act) * 100 : 0), '#10b981');
-
-        const sortedW = [...sortedLabels].reverse();
-        document.getElementById('weekSelect').innerHTML = sortedW.map(w => `<option value="${w}">${w}</option>`).join('');
-
+        renderSparklines(weeks, sortedLabels);
         renderHeatmap(people, sortedLabels);
         renderExceptions(weeks, people, sortedW[0]);
         renderCharts(weeks, phases, budget, sortedLabels);
-        renderMilestones();
-        renderPredictiveRolloffClean(people);
         renderPhaseBreakdown(phases);
         renderTopSpenders(sortedW[0]);
+        renderMilestones();
+        renderRolloff(people);
         updateWeeklySpotlight(sortedW[0]);
     }
 
-    function setTrend(id, type, label) {
-        const el = document.getElementById(id);
-        if (!el) return;
-        const map = { ok: 'trend-ok', warn: 'trend-warn', bad: 'trend-bad' };
-        el.innerHTML = `<span class="kpi-trend ${map[type]}">${label}</span>`;
-    }
-    function fmt(n) { return Math.round(n).toLocaleString(); }
-
-    function renderHeatmap(people, allWeeks) {
-        const table = document.getElementById('heatmap-body');
-        const rows  = [];
-        rows.push(`<thead><tr><th scope="col">Resource</th>${allWeeks.map(w => `<th scope="col">${esc(w.substring(5))}</th>`).join('')}</tr></thead><tbody>`);
-        Object.keys(people).sort().forEach(p => {
-            const cells = allWeeks.map(w => {
-                const h   = people[p].weeks[w] || 0;
-                const cls = h > THRESH_OVER ? 'h-over' : h >= THRESH_GOOD ? 'h-good' : h > 0 ? 'h-bench' : '';
-                return `<td class="${cls}">${h > 0 ? h.toFixed(1) : '–'}</td>`;
-            });
-            rows.push(`<tr><td>${esc(p)}</td>${cells.join('')}</tr>`);
-        });
-        rows.push(`</tbody>`);
-        table.innerHTML = rows.join('');
+    function setTrend(id,type,label){
+        const el=document.getElementById(id); if(!el) return;
+        el.innerHTML=`<span class="kpi-trend trend-${type}">${label}</span>`;
     }
 
-    function renderExceptions(weeks, people, latest) {
-        const flags   = document.getElementById('red-flags');
-        const missing = document.getElementById('missing-timesheets');
-        flags.innerHTML = missing.innerHTML = '';
-
-        let flagCount = 0, missCount = 0;
-        const today = new Date();
-
-        globalData.plan.forEach(p => {
-            if (parseDateSafe(p.dateStr) !== latest) return;
-            
-            const act = people[p.person]?.weeks[latest] || 0;
-            
-            if (act === 0 && p.planH > 0) {
-                const plannedFirst = people[p.person].plannedFirst ? new Date(people[p.person].plannedFirst) : null;
-                
-                if (plannedFirst && plannedFirst > today) {
-                    missing.innerHTML += `
-                        <div class="alert-item">
-                            <span>⚠️ <strong>${esc(p.person)}</strong> <span style="color:var(--muted)">(Starts ${formatDateForUI(people[p.person].plannedFirst)})</span></span>
-                            <span class="badge badge-neutral">Not Onboarded Yet</span>
-                        </div>`;
-                } else {
-                    const actualLast = people[p.person].actualLast ? new Date(people[p.person].actualLast) : null;
-                    const referenceDate = actualLast || plannedFirst; 
-                    
-                    const daysSince = referenceDate ? Math.round((today - referenceDate) / 86400000) : 0;
-
-                    if(daysSince > 7) {
-                        missing.innerHTML += `
-                            <div class="alert-item" style="flex-direction:column; align-items:flex-start; gap:4px;">
-                                <div>⚠️ <strong>${esc(p.person)}</strong></div>
-                                <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
-                                    <span style="color:var(--muted); font-size:11px;">(Since ${formatDateForUI(referenceDate.toISOString())})</span>
-                                    <span class="badge badge-purple">Delinquent (${daysSince}d)</span>
-                                </div>
-                            </div>`;
-                    } else {
-                        missing.innerHTML += `
-                            <div class="alert-item">
-                                <span>⚠️ <strong>${esc(p.person)}</strong> <span style="color:var(--muted)">(${esc(latest)})</span></span>
-                                <span class="badge badge-warning">Missed Entry</span>
-                            </div>`;
-                    }
-                }
-                missCount++;
-            } 
-            else if (act > p.planH * VARIANCE_FACTOR) {
-                const overPct = Math.round(((act - p.planH) / p.planH) * 100);
-                flags.innerHTML += `
-                    <div class="alert-item">
-                        <span>🔴 <strong>${esc(p.person)}</strong>: <span style="font-family:'DM Mono',monospace">${act}h</span> vs <span style="font-family:'DM Mono',monospace">${p.planH}h</span> (+${overPct}%)</span>
-                        <span class="badge badge-danger">RED FLAG</span>
-                    </div>`;
-                flagCount++;
-            }
-            else if (act > 0 && act < p.planH * VARIANCE_UNDER) {
-                const underPct = Math.round(((p.planH - act) / p.planH) * 100);
-                flags.innerHTML += `
-                    <div class="alert-item">
-                        <span>🟢 <strong>${esc(p.person)}</strong>: <span style="font-family:'DM Mono',monospace">${act}h</span> vs <span style="font-family:'DM Mono',monospace">${p.planH}h</span> (-${underPct}%)</span>
-                        <span class="badge badge-success">GREEN FLAG</span>
-                    </div>`;
-                flagCount++;
-            }
-        });
-
-        if (flagCount === 0) flags.innerHTML   = '<p class="alert-empty">✅ No significant variances this week</p>';
-        if (missCount === 0) missing.innerHTML = `<p class="alert-empty">✅ All active timesheets submitted for the week of ${esc(latest)}</p>`;
-    }
-
-    function renderMilestones() {
-        const body  = document.getElementById('milestone-body');
-        const sumEl = document.getElementById('ms-summary');
-        const data  = globalData.milestones;
-        
-        if (!body) return;
-
-        if (!data || data.length === 0) {
-            body.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px;">No milestone data — expose ResourcePlan D2:V2 in your Apps Script.</td></tr>';
-            if (sumEl) sumEl.textContent = '';
-            return;
-        }
-
-        const today = new Date();
-        const statusMap = {
-            'complete':    { cls: 'ms-complete', icon: '✓', label: 'Complete'    },
-            'on track':    { cls: 'ms-on-track', icon: '●', label: 'On Track'    },
-            'on-track':    { cls: 'ms-on-track', icon: '●', label: 'On Track'    },
-            'at risk':     { cls: 'ms-at-risk',  icon: '▲', label: 'At Risk'     },
-            'at-risk':     { cls: 'ms-at-risk',  icon: '▲', label: 'At Risk'     },
-            'delayed':     { cls: 'ms-delayed',  icon: '✕', label: 'Delayed'     },
-            'not started': { cls: 'ms-on-track', icon: '○', label: 'Not Started' },
-        };
-
-        function deriveStatus(ms) {
-            // Honour explicit status from API first
-            const raw = (ms.status || ms.Status || '').toString().toLowerCase().trim();
-            if (statusMap[raw]) return statusMap[raw];
-            // Fallback: derive from due date
-            const parsedStr = parseDateSafe(ms.due || ms.Due || '');
-            if (!parsedStr) return statusMap['on-track'];
-            const due = new Date(parsedStr);
-            if (isNaN(due)) return statusMap['on-track'];
-            const daysUntil = Math.round((due - today) / 86400000);
-            if (daysUntil < 0)   return statusMap['complete'];
-            if (daysUntil <= 14) return statusMap['at-risk'];
-            return statusMap['on-track'];
-        }
-
-        const counts = { complete: 0, 'on-track': 0, 'at-risk': 0, delayed: 0 };
-        
-        body.innerHTML = data.map(ms => {
-            const name  = ms.name  || ms.Name  || ms.milestone || ms.Milestone || '—';
-            const due   = ms.due   || ms.Due   || ms.date      || ms.Date      || '';
-            const notes = ms.notes || ms.Notes || ms.note      || ms.Note      || '';
-            const s     = deriveStatus(ms);
-            
-            const sKey = s.label.toLowerCase().replace(' ', '-');
-            if (counts[sKey] !== undefined) counts[sKey]++;
-            
-            return `<tr>
-                <td><strong>${esc(name)}</strong></td>
-                <td class="mono" style="white-space:nowrap;">${due ? formatDateForUI(due) : '—'}</td>
-                <td><span class="${s.cls}">${s.icon} ${s.label}</span></td>
-                <td style="color:var(--muted);font-size:11px;">${esc(notes)}</td>
-            </tr>`;
-        }).join('');
-
-        if (sumEl) {
-            sumEl.innerHTML = `<b>${counts.complete}</b> done &nbsp;·&nbsp; <b>${counts['on-track']}</b> on track &nbsp;·&nbsp; <b>${counts['at-risk']}</b> at risk &nbsp;·&nbsp; <b>${counts.delayed}</b> delayed`;
-        }
-    }
-
-    /* ── RAG Health Banner ─────────────────────────────────── */
+    /* ── RAG BANNER ────────────────────────────────────────── */
     function renderRAGBanner(weeks, people, totals, budget, eac, sortedLabels) {
-        const today = new Date();
-        const burnRatio = budget > 0 ? totals.burn / budget : 0;
-        const budgetRAG = burnRatio < 0.7 ? 'green' : burnRatio < 0.9 ? 'amber' : 'red';
-
-        const futureWks = [...new Set(
-            globalData.plan.filter(p => new Date(p.dateStr) > today)
-                .map(p => parseDateSafe(p.dateStr)).filter(Boolean)
-        )].length;
-        const schedRAG = futureWks > 4 ? 'green' : futureWks > 0 ? 'amber' : 'red';
-
-        const latestW  = sortedLabels[sortedLabels.length - 1];
-        const planRows = globalData.plan.filter(p => parseDateSafe(p.dateStr) === latestW && p.planH > 0);
-        const missing  = planRows.filter(p => (people[p.person]?.weeks[latestW] || 0) === 0).length;
-        const missFrac = planRows.length > 0 ? missing / planRows.length : 0;
-        const resRAG   = missFrac < 0.1 ? 'green' : missFrac < 0.3 ? 'amber' : 'red';
-
-        const delivRAG = eac <= budget ? 'green' : eac <= budget * 1.1 ? 'amber' : 'red';
-
-        const pills = [
-            { label: 'Budget',    rag: budgetRAG },
-            { label: 'Schedule',  rag: schedRAG  },
-            { label: 'Resources', rag: resRAG    },
-            { label: 'Delivery',  rag: delivRAG  },
-        ];
-        const dotColors = { green: '#16a34a', amber: '#d97706', red: '#dc2626' };
-        document.getElementById('rag-pills').innerHTML = pills.map(p =>
-            `<span class="rag-pill rag-${p.rag}"><span class="rag-dot" style="background:${dotColors[p.rag]};"></span>${p.label}</span>`
-        ).join('');
-
-        const recentBurn = sortedLabels.slice(-4).map(l => weeks[l].burn);
-        const runRate    = recentBurn.length > 0 ? recentBurn.reduce((a, b) => a + b, 0) / recentBurn.length : 0;
-        const runway     = runRate > 0 ? ((budget - totals.burn) / runRate).toFixed(1) : '∞';
-        const cutoff     = new Date(today.getTime() - ACTIVE_DAYS * 86400000);
-        const activeRes  = Object.values(people).filter(p => p.actualLast && new Date(p.actualLast) >= cutoff).length;
-        const totalRes   = Object.keys(people).length;
-
-        document.getElementById('rag-stats').innerHTML = `
+        const today=new Date();
+        const burnRatio=budget>0?totals.burn/budget:0;
+        const budgetRAG=burnRatio<0.7?'green':burnRatio<0.9?'amber':'red';
+        const futureWks=[...new Set(globalData.plan.filter(p=>new Date(p.dateStr)>today).map(p=>parseDateSafe(p.dateStr)).filter(Boolean))].length;
+        const schedRAG=futureWks>4?'green':futureWks>0?'amber':'red';
+        const latestW=sortedLabels[sortedLabels.length-1];
+        const planRows=globalData.plan.filter(p=>parseDateSafe(p.dateStr)===latestW&&p.planH>0);
+        const missing=planRows.filter(p=>(people[p.person]?.weeks[latestW]||0)===0).length;
+        const resRAG=(planRows.length===0||missing/planRows.length<0.1)?'green':missing/planRows.length<0.3?'amber':'red';
+        const delivRAG=eac<=budget?'green':eac<=budget*1.1?'amber':'red';
+        const dotClr={green:'#16a34a',amber:'#d97706',red:'#dc2626'};
+        const pills=[{label:'Budget',rag:budgetRAG},{label:'Schedule',rag:schedRAG},{label:'Resources',rag:resRAG},{label:'Delivery',rag:delivRAG}];
+        document.getElementById('rag-pills').innerHTML=pills.map(p=>`<span class="rag-pill rag-${p.rag}"><span class="rag-dot" style="background:${dotClr[p.rag]};"></span>${p.label}</span>`).join('');
+        const recent=sortedLabels.slice(-4).map(l=>weeks[l].burn);
+        const runRate=recent.length>0?recent.reduce((a,b)=>a+b,0)/recent.length:0;
+        const runway=runRate>0?((budget-totals.burn)/runRate).toFixed(1):'∞';
+        const cutoff=new Date(today.getTime()-ACTIVE_DAYS*86400000);
+        const activeRes=Object.values(people).filter(p=>p.actualLast&&new Date(p.actualLast)>=cutoff).length;
+        document.getElementById('rag-stats').innerHTML=`
             <div class="rag-stat"><div class="rag-stat-val">${runway}</div><div class="rag-stat-lbl">Runway (wks)</div></div>
             <div class="rag-stat"><div class="rag-stat-val">€${fmt(runRate)}</div><div class="rag-stat-lbl">Run Rate /wk</div></div>
             <div class="rag-stat"><div class="rag-stat-val">${activeRes}</div><div class="rag-stat-lbl">Active (${ACTIVE_DAYS}d)</div></div>
-            <div class="rag-stat"><div class="rag-stat-val">${totalRes}</div><div class="rag-stat-lbl">Headcount</div></div>
-        `;
+            <div class="rag-stat"><div class="rag-stat-val">${Object.keys(people).length}</div><div class="rag-stat-lbl">Headcount</div></div>`;
     }
 
-    /* ── Sparklines ────────────────────────────────────────── */
-    function renderSparkline(id, data, color) {
-        const canvas = document.getElementById(id);
-        if (!canvas) return;
-        if (sparkRefs[id]) sparkRefs[id].destroy();
-        sparkRefs[id] = new Chart(canvas, {
-            type: 'line',
-            data: {
-                labels: data.map((_, i) => i),
-                datasets: [{ data, borderColor: color, borderWidth: 1.5, fill: true,
-                    backgroundColor: color + '22', tension: 0.4, pointRadius: 0 }]
-            },
-            options: {
-                responsive: false, animation: false,
-                plugins: { legend: { display: false }, datalabels: { display: false }, tooltip: { enabled: false } },
-                scales: { x: { display: false }, y: { display: false } }
+    /* ── SPARKLINES ────────────────────────────────────────── */
+    function renderSparklines(weeks, sortedLabels) {
+        const last6=sortedLabels.slice(-6);
+        drawSparkline('spark-velo',  last6.map(l=>weeks[l]?.act||0),                                          '#3b82f6');
+        drawSparkline('spark-bench', last6.map(l=>weeks[l]?.act>0?(weeks[l].nb  /weeks[l].act)*100:0),        '#f59e0b');
+        drawSparkline('spark-eff',   last6.map(l=>weeks[l]?.act>0?(weeks[l].bill/weeks[l].act)*100:0),        '#10b981');
+    }
+    function drawSparkline(id, data, color) {
+        const canvas=document.getElementById(id); if(!canvas) return;
+        if(sparkRefs[id]){sparkRefs[id].destroy();sparkRefs[id]=null;}
+        const par=canvas.parentElement;
+        canvas.width=par.offsetWidth||120; canvas.height=par.offsetHeight||28;
+        sparkRefs[id]=new Chart(canvas,{
+            type:'line',
+            data:{labels:data.map((_,i)=>i),datasets:[{data,borderColor:color,borderWidth:1.5,fill:true,backgroundColor:color+'22',tension:0.4,pointRadius:0,pointHoverRadius:0}]},
+            options:{responsive:false,animation:false,plugins:{legend:{display:false},datalabels:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}}}
+        });
+    }
+
+    /* ── HEATMAP ───────────────────────────────────────────── */
+    function renderHeatmap(people, allWeeks) {
+        const table=document.getElementById('heatmap-body');
+        const rows=[];
+        rows.push(`<thead><tr><th>Resource</th>${allWeeks.map(w=>`<th>${esc(w.substring(5))}</th>`).join('')}</tr></thead><tbody>`);
+        Object.keys(people).sort().forEach(p=>{
+            const cells=allWeeks.map(w=>{
+                const h=people[p].weeks[w]||0;
+                const cls=h>THRESH_OVER?'h-over':h>=THRESH_GOOD?'h-good':h>0?'h-bench':'';
+                return `<td class="${cls}">${h>0?h.toFixed(1):'–'}</td>`;
+            });
+            rows.push(`<tr><td>${esc(p)}</td>${cells.join('')}</tr>`);
+        });
+        rows.push('</tbody>');
+        table.innerHTML=rows.join('');
+    }
+
+    /* ── EXCEPTIONS ────────────────────────────────────────── */
+    function renderExceptions(weeks, people, latest) {
+        const flags=document.getElementById('red-flags');
+        const missing=document.getElementById('missing-timesheets');
+        flags.innerHTML=missing.innerHTML='';
+        let fc=0,mc=0;
+        const today=new Date();
+        globalData.plan.forEach(p=>{
+            if(parseDateSafe(p.dateStr)!==latest) return;
+            const act=people[p.person]?.weeks[latest]||0;
+            if(act===0&&p.planH>0){
+                const pf=people[p.person].plannedFirst?new Date(people[p.person].plannedFirst):null;
+                if(pf&&pf>today){
+                    missing.innerHTML+=`<div class="alert-item"><span>⚠️ <strong>${esc(p.person)}</strong> <span style="color:var(--muted)">(Starts ${formatDateForUI(people[p.person].plannedFirst)})</span></span><span class="badge badge-neutral">Not Onboarded Yet</span></div>`;
+                } else {
+                    const al=people[p.person].actualLast?new Date(people[p.person].actualLast):null;
+                    const ref=al||pf;
+                    const days=ref?Math.round((today-ref)/86400000):0;
+                    if(days>7) missing.innerHTML+=`<div class="alert-item" style="flex-direction:column;align-items:flex-start;gap:4px;"><div>⚠️ <strong>${esc(p.person)}</strong></div><div style="display:flex;justify-content:space-between;width:100%;align-items:center;"><span style="color:var(--muted);font-size:11px;">(Since ${formatDateForUI(ref.toISOString())})</span><span class="badge badge-purple">Delinquent (${days}d)</span></div></div>`;
+                    else missing.innerHTML+=`<div class="alert-item"><span>⚠️ <strong>${esc(p.person)}</strong> <span style="color:var(--muted)">(${esc(latest)})</span></span><span class="badge badge-warning">Missed Entry</span></div>`;
+                }
+                mc++;
+            } else if(act>p.planH*VARIANCE_FACTOR){
+                const ov=Math.round(((act-p.planH)/p.planH)*100);
+                flags.innerHTML+=`<div class="alert-item"><span>🔴 <strong>${esc(p.person)}</strong>: <span class="mono">${act}h</span> vs <span class="mono">${p.planH}h</span> (+${ov}%)</span><span class="badge badge-danger">RED FLAG</span></div>`;
+                fc++;
+            } else if(act>0&&act<p.planH*VARIANCE_UNDER){
+                const un=Math.round(((p.planH-act)/p.planH)*100);
+                flags.innerHTML+=`<div class="alert-item"><span>🟢 <strong>${esc(p.person)}</strong>: <span class="mono">${act}h</span> vs <span class="mono">${p.planH}h</span> (-${un}%)</span><span class="badge badge-success">GREEN FLAG</span></div>`;
+                fc++;
+            }
+        });
+        if(fc===0) flags.innerHTML='<p class="alert-empty">✅ No significant variances this week</p>';
+        if(mc===0) missing.innerHTML=`<p class="alert-empty">✅ All active timesheets submitted for the week of ${esc(latest)}</p>`;
+    }
+
+    /* ── CHARTS ────────────────────────────────────────────── */
+    function renderCharts(weeks, phases, budget, sortedLabels) {
+        const uiLabels=sortedLabels.map(l=>formatDateForUI(l));
+        const fontFam={family:'DM Sans',size:12};
+
+        // 1. Burn vs Budget
+        let cum=0;
+        const burnData=sortedLabels.map(l=>{cum+=weeks[l].burn;return cum;});
+        if(chartRefs.burn) chartRefs.burn.destroy();
+        chartRefs.burn=new Chart(document.getElementById('chart-burn'),{
+            type:'line',
+            data:{labels:uiLabels,datasets:[
+                {label:'Cumulative Spend',data:burnData,borderColor:'#ef4444',borderWidth:2.5,fill:true,backgroundColor:'rgba(239,68,68,0.07)',tension:0.35,pointRadius:3},
+                {label:'Budget Cap',data:Array(sortedLabels.length).fill(budget),borderColor:'#94a3b8',borderDash:[6,4],borderWidth:1.5,pointRadius:0,fill:false}
+            ]},
+            options:{responsive:true,maintainAspectRatio:false,plugins:{datalabels:{display:false},legend:{labels:{font:fontFam}}},scales:{y:{title:{display:true,text:'Cumulative Spend (€)',font:fontFam}}}}
+        });
+
+        // 2. Billable vs Non-Billable
+        if(chartRefs.bench) chartRefs.bench.destroy();
+        chartRefs.bench=new Chart(document.getElementById('chart-bench'),{
+            type:'bar',
+            data:{labels:uiLabels,datasets:[
+                {label:'Billable Hours',    data:sortedLabels.map(l=>weeks[l].bill),backgroundColor:'#10b981'},
+                {label:'Non-Billable Hours',data:sortedLabels.map(l=>weeks[l].nb),  backgroundColor:'#f59e0b'}
+            ]},
+            options:{responsive:true,maintainAspectRatio:false,plugins:{datalabels:{display:false},legend:{labels:{font:fontFam}}},scales:{x:{stacked:true},y:{stacked:true,title:{display:true,text:'Hours',font:fontFam}}}}
+        });
+
+        // 3. S-Curve: cumulative planned vs actual hours
+        let cp=0,ca=0;
+        const sCurvePlan=sortedLabels.map(l=>{cp+=weeks[l].plan||0;return cp;});
+        const sCurveAct =sortedLabels.map(l=>{ca+=weeks[l].act ||0;return ca;});
+        if(chartRefs.scurve) chartRefs.scurve.destroy();
+        chartRefs.scurve=new Chart(document.getElementById('chart-scurve'),{
+            type:'line',
+            data:{labels:uiLabels,datasets:[
+                {label:'Planned Hours',data:sCurvePlan,borderColor:'#94a3b8',borderDash:[6,4],borderWidth:2,fill:false,tension:0.3,pointRadius:2},
+                {label:'Actual Hours', data:sCurveAct, borderColor:'#3b82f6',borderWidth:2.5,fill:true,backgroundColor:'rgba(59,130,246,0.07)',tension:0.35,pointRadius:3}
+            ]},
+            options:{responsive:true,maintainAspectRatio:false,plugins:{datalabels:{display:false},legend:{labels:{font:fontFam}}},scales:{y:{title:{display:true,text:'Cumulative Hours',font:fontFam}}}}
+        });
+
+        // 4. Phase doughnut — labels outside with clamp
+        const phaseKeys=Object.keys(phases), phaseVals=Object.values(phases);
+        const phaseTotal=phaseVals.reduce((a,b)=>a+b,0);
+        if(chartRefs.phase) chartRefs.phase.destroy();
+        chartRefs.phase=new Chart(document.getElementById('chart-phase'),{
+            type:'doughnut',
+            data:{labels:phaseKeys,datasets:[{data:phaseVals,backgroundColor:CHART_COLORS,borderWidth:2,borderColor:'#fff',hoverOffset:6}]},
+            options:{responsive:true,maintainAspectRatio:false,cutout:'45%',layout:{padding:30},
+                plugins:{
+                    legend:{display:false},
+                    tooltip:{callbacks:{label:ctx=>` €${ctx.parsed.toLocaleString()} (${((ctx.parsed/phaseTotal)*100).toFixed(1)}%)`}},
+                    datalabels:{
+                        display:ctx=>(ctx.dataset.data[ctx.dataIndex]/phaseTotal)>=0.03,
+                        color:'#1e293b',align:'end',anchor:'end',clamp:true,offset:6,
+                        font:{family:'DM Sans',weight:'700',size:11},
+                        formatter:(value,ctx)=>{
+                            const pct=((value/phaseTotal)*100).toFixed(1);
+                            const lbl=ctx.chart.data.labels[ctx.dataIndex];
+                            return [(lbl.length>14?lbl.substring(0,13)+'…':lbl),`€${value.toLocaleString()} (${pct}%)`];
+                        },
+                        textAlign:'center'
+                    }
+                }
             }
         });
     }
 
-    /* ── Phase Breakdown Table ─────────────────────────────── */
+    /* ── PHASE BREAKDOWN TABLE ─────────────────────────────── */
     function renderPhaseBreakdown(phases) {
-        const body  = document.getElementById('phase-breakdown-body');
-        if (!body) return;
-        const total  = Object.values(phases).reduce((a, b) => a + b, 0);
-        const sorted = Object.entries(phases).sort((a, b) => b[1] - a[1]);
-        body.innerHTML = sorted.map(([name, val], i) => {
-            const pct   = total > 0 ? (val / total * 100).toFixed(1) : '0.0';
-            const color = CHART_COLORS[i % CHART_COLORS.length];
+        const body=document.getElementById('phase-breakdown-body'); if(!body) return;
+        const total=Object.values(phases).reduce((a,b)=>a+b,0);
+        const sorted=Object.entries(phases).sort((a,b)=>b[1]-a[1]);
+        body.innerHTML=sorted.map(([name,val],i)=>{
+            const pct=total>0?(val/total*100).toFixed(1):'0.0';
+            const color=CHART_COLORS[i%CHART_COLORS.length];
             return `<tr>
                 <td>
                     <div style="display:flex;align-items:center;gap:6px;">
@@ -905,238 +794,177 @@
                 <td class="mono" style="text-align:right;">€${val.toLocaleString()}</td>
                 <td class="mono" style="text-align:right;">${pct}%</td>
             </tr>`;
-        }).join('');
-        body.innerHTML += `<tr style="border-top:2px solid var(--border);">
+        }).join('')
+        +`<tr style="border-top:2px solid var(--border);">
             <td><strong>Total</strong></td>
             <td class="mono" style="text-align:right;"><strong>€${total.toLocaleString()}</strong></td>
             <td class="mono" style="text-align:right;"><strong>100%</strong></td>
         </tr>`;
     }
 
-    /* ── Top 5 Spenders ────────────────────────────────────── */
+    /* ── TOP 5 SPENDERS ────────────────────────────────────── */
     function renderTopSpenders(latestWeek) {
-        const container = document.getElementById('top-spenders');
-        const label     = document.getElementById('spender-week-label');
-        if (!container) return;
-        if (label) label.textContent = `Week of ${latestWeek}`;
-        const agg = {};
-        globalData.actuals
-            .filter(r => parseDateSafe(r.Date) === latestWeek)
-            .forEach(r => {
-                const name = r.Person;
-                if (!agg[name]) agg[name] = { spend: 0, hours: 0 };
-                agg[name].spend += parseFloat(r.Subtotal)         || 0;
-                agg[name].hours += parseFloat(r['Time in Hours']) || 0;
-            });
-        const sorted   = Object.entries(agg).sort((a, b) => b[1].spend - a[1].spend).slice(0, 5);
-        const maxSpend = sorted[0]?.[1].spend || 1;
-        container.innerHTML = sorted.length === 0
-            ? '<p class="alert-empty">No actuals for this week</p>'
-            : sorted.map(([name, d], i) => `
+        const container=document.getElementById('top-spenders');
+        const label=document.getElementById('spender-week-label');
+        if(!container) return;
+        if(label) label.textContent=`Week of ${latestWeek||'—'}`;
+        const agg={};
+        globalData.actuals.filter(r=>parseDateSafe(r.Date)===latestWeek).forEach(r=>{
+            if(!agg[r.Person]) agg[r.Person]={spend:0,hours:0};
+            agg[r.Person].spend+=parseFloat(r.Subtotal)||0;
+            agg[r.Person].hours+=parseFloat(r['Time in Hours'])||0;
+        });
+        const sorted=Object.entries(agg).sort((a,b)=>b[1].spend-a[1].spend).slice(0,5);
+        const maxSpend=sorted[0]?.[1].spend||1;
+        container.innerHTML=sorted.length===0
+            ?'<p class="alert-empty">No actuals for this week</p>'
+            :sorted.map(([name,d],i)=>`
                 <div class="spender-row">
-                    <span class="spender-rank">${i + 1}</span>
+                    <span class="spender-rank">${i+1}</span>
                     <div class="spender-info">
                         <div class="spender-name">${esc(name)}</div>
                         <div class="spender-meta">€${d.spend.toLocaleString()} · ${d.hours.toFixed(1)}h</div>
                     </div>
-                    <div class="spender-bar-wrap">
-                        <div class="spender-bar-fill" style="width:${(d.spend / maxSpend * 100).toFixed(0)}%;"></div>
-                    </div>
+                    <div class="spender-bar-wrap"><div class="spender-bar-fill" style="width:${(d.spend/maxSpend*100).toFixed(0)}%;"></div></div>
                 </div>`).join('');
     }
 
-    function renderPredictiveRolloffClean(people) {
-        const today = new Date();
-        const validPeople = Object.keys(people).filter(p => people[p].plannedLast);
-        const sorted = validPeople.sort((a,b) => new Date(people[a].plannedLast) - new Date(people[b].plannedLast));
-        
-        document.getElementById('rolloff-list').innerHTML = sorted.map(p => {
-            const finalDate = new Date(people[p].plannedLast);
-            const daysUntil = Math.round((finalDate - today) / 86400000);
-            
-            let statusHTML = '';
-            if (daysUntil < 0) statusHTML = `<span class="dot-indicator dot-grey"></span><span style="color:var(--muted)">Completed</span>`;
-            else if (daysUntil <= 14) statusHTML = `<span class="dot-indicator dot-red"></span><span style="color:var(--danger); font-weight:600;">Rolling Off</span>`;
-            else if (daysUntil <= 30) statusHTML = `<span class="dot-indicator dot-yellow"></span><span style="color:var(--warning); font-weight:600;">Final Month</span>`;
-            else statusHTML = `<span style="color:var(--muted)">Active</span>`;
-
+    /* ── MILESTONES ────────────────────────────────────────── */
+    function renderMilestones() {
+        const body=document.getElementById('milestone-body');
+        const sumEl=document.getElementById('ms-summary');
+        const data=globalData.milestones;
+        if(!body) return;
+        if(!data||data.length===0){
+            body.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px;">No milestone data — add milestones array to your Apps Script.</td></tr>';
+            if(sumEl) sumEl.textContent=''; return;
+        }
+        const today=new Date();
+        const statusMap={
+            'complete':   {cls:'ms-complete',icon:'✓',label:'Complete'},
+            'on track':   {cls:'ms-on-track',icon:'●',label:'On Track'},
+            'on-track':   {cls:'ms-on-track',icon:'●',label:'On Track'},
+            'at risk':    {cls:'ms-at-risk', icon:'▲',label:'At Risk'},
+            'at-risk':    {cls:'ms-at-risk', icon:'▲',label:'At Risk'},
+            'delayed':    {cls:'ms-delayed', icon:'✕',label:'Delayed'},
+            'not started':{cls:'ms-on-track',icon:'○',label:'Not Started'},
+        };
+        function derive(ms){
+            const raw=(ms.status||ms.Status||'').toString().toLowerCase().trim();
+            if(statusMap[raw]) return statusMap[raw];
+            const ps=parseDateSafe(ms.due||ms.Due||''); if(!ps) return statusMap['on-track'];
+            const due=new Date(ps); if(isNaN(due)) return statusMap['on-track'];
+            const d=Math.round((due-today)/86400000);
+            if(d<0) return statusMap['complete'];
+            if(d<=14) return statusMap['at-risk'];
+            return statusMap['on-track'];
+        }
+        const counts={complete:0,'on-track':0,'at-risk':0,delayed:0};
+        body.innerHTML=data.map(ms=>{
+            const name=ms.name||ms.Name||ms.milestone||ms.Milestone||'—';
+            const due =ms.due ||ms.Due ||ms.date||ms.Date||'';
+            const notes=ms.notes||ms.Notes||'';
+            const s=derive(ms);
+            const sk=s.label.toLowerCase().replace(' ','-');
+            if(counts[sk]!==undefined) counts[sk]++;
             return `<tr>
-                <td><strong>${esc(p)}</strong></td>
-                <td>${statusHTML}</td>
-                <td class="mono" style="text-align:right;">${formatDateForUI(people[p].plannedLast)}</td>
+                <td><strong>${esc(name)}</strong></td>
+                <td class="mono" style="white-space:nowrap;">${due?formatDateForUI(due):'—'}</td>
+                <td><span class="${s.cls}">${s.icon} ${s.label}</span></td>
+                <td style="color:var(--muted);font-size:11px;">${esc(notes)}</td>
             </tr>`;
+        }).join('');
+        if(sumEl) sumEl.innerHTML=`<b>${counts.complete}</b> done &nbsp;·&nbsp; <b>${counts['on-track']}</b> on track &nbsp;·&nbsp; <b>${counts['at-risk']}</b> at risk &nbsp;·&nbsp; <b>${counts.delayed}</b> delayed`;
+    }
+
+    /* ── ROLL-OFF ───────────────────────────────────────────── */
+    function renderRolloff(people) {
+        const today=new Date();
+        const sorted=Object.keys(people).filter(p=>people[p].plannedLast).sort((a,b)=>new Date(people[a].plannedLast)-new Date(people[b].plannedLast));
+        document.getElementById('rolloff-list').innerHTML=sorted.map(p=>{
+            const d=new Date(people[p].plannedLast);
+            const days=Math.round((d-today)/86400000);
+            let st='';
+            if(days<0)      st=`<span class="dot-indicator dot-grey"></span><span style="color:var(--muted)">Completed</span>`;
+            else if(days<=14) st=`<span class="dot-indicator dot-red"></span><span style="color:var(--danger);font-weight:600;">Rolling Off</span>`;
+            else if(days<=30) st=`<span class="dot-indicator dot-yellow"></span><span style="color:var(--warning);font-weight:600;">Final Month</span>`;
+            else              st=`<span style="color:var(--muted)">Active</span>`;
+            return `<tr><td><strong>${esc(p)}</strong></td><td>${st}</td><td class="mono" style="text-align:right;">${formatDateForUI(people[p].plannedLast)}</td></tr>`;
         }).join('');
     }
 
+    /* ── WEEKLY SPOTLIGHT ──────────────────────────────────── */
     function updateWeeklySpotlight(week) {
-        const body = document.getElementById('spotlight-body');
-        const agg  = {};
-
-        globalData.actuals.filter(r => parseDateSafe(r.Date) === week).forEach(r => {
-            const key = `${r.Person}|${r.Role}`;
-            if (!agg[key]) agg[key] = { n: r.Person, r: r.Role, a: 0, s: 0, p: 0, b: parseFloat(r.Rate) > 0 };
-            agg[key].a += parseFloat(r['Time in Hours']) || 0;
-            agg[key].s += parseFloat(r.Subtotal) || 0;
+        const body=document.getElementById('spotlight-body');
+        const agg={};
+        globalData.actuals.filter(r=>parseDateSafe(r.Date)===week).forEach(r=>{
+            const key=`${r.Person}|${r.Role}`;
+            if(!agg[key]) agg[key]={n:r.Person,r:r.Role,a:0,s:0,p:0,b:parseFloat(r.Rate)>0};
+            agg[key].a+=parseFloat(r['Time in Hours'])||0;
+            agg[key].s+=parseFloat(r.Subtotal)||0;
         });
-
-        globalData.plan.filter(p => parseDateSafe(p.dateStr) === week).forEach(p => {
-            const key = `${p.person}|${p.role}`;
-            if (agg[key]) agg[key].p = p.planH;
-            else agg[key] = { n: p.person, r: p.role, a: 0, s: 0, p: p.planH, b: false };
+        globalData.plan.filter(p=>parseDateSafe(p.dateStr)===week).forEach(p=>{
+            const key=`${p.person}|${p.role}`;
+            if(agg[key]) agg[key].p=p.planH;
+            else agg[key]={n:p.person,r:p.role,a:0,s:0,p:p.planH,b:false};
         });
-
-        body.innerHTML = Object.values(agg).map(i => {
-            const variance = i.p - i.a;
-            const varClass = variance < 0 ? 'variance-neg' : 'variance-pos';
-            const badgeClass = i.b ? 'status-bill' : 'status-nb';
-            const badgeText = i.b ? 'Billable' : 'Non-Bill';
-            const statusDisplay = (i.a === 0 && i.p > 0 && !i.b) ? `<span class="status-nb">Planned</span>` : `<span class="${badgeClass}">${badgeText}</span>`;
-
+        body.innerHTML=Object.values(agg).map(i=>{
+            const variance=i.p-i.a;
+            const varClass=variance<0?'variance-neg':'variance-pos';
+            const badgeClass=i.b?'status-bill':'status-nb';
+            const badgeText=i.b?'Billable':'Non-Bill';
+            const statusDisplay=(i.a===0&&i.p>0&&!i.b)?`<span class="status-nb">Planned</span>`:`<span class="${badgeClass}">${badgeText}</span>`;
             return `<tr>
                 <td><strong>${esc(i.n)}</strong></td>
                 <td>${esc(i.r)}</td>
                 <td>${statusDisplay}</td>
                 <td class="mono">${i.p.toFixed(1)}</td>
                 <td class="mono">${i.a.toFixed(1)}</td>
-                <td class="${varClass}">${variance >= 0 ? '+' : ''}${variance.toFixed(1)}</td>
+                <td class="${varClass}">${variance>=0?'+':''}${variance.toFixed(1)}</td>
                 <td class="mono">€${i.s.toLocaleString()}</td>
             </tr>`;
-        }).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px;">No data for this week</td></tr>';
+        }).join('')||'<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px;">No data for this week</td></tr>';
     }
 
-    function renderCharts(weeks, phases, budget, sortedLabels) {
-        const uiLabels = sortedLabels.map(l => formatDateForUI(l));
-        const fontFam  = { family: 'DM Sans', size: 12 };
-
-        // 1. Cumulative Burn vs Budget
-        let cum = 0;
-        const burnData = sortedLabels.map(l => { cum += weeks[l].burn; return cum; });
-        if (chartRefs.burn) chartRefs.burn.destroy();
-        chartRefs.burn = new Chart(document.getElementById('chart-burn'), {
-            type: 'line',
-            data: {
-                labels: uiLabels,
-                datasets: [
-                    { label: 'Cumulative Spend', data: burnData, borderColor: '#ef4444', borderWidth: 2.5, fill: true, backgroundColor: 'rgba(239,68,68,0.07)', tension: 0.35, pointRadius: 3 },
-                    { label: 'Budget Cap', data: Array(sortedLabels.length).fill(budget), borderColor: '#94a3b8', borderDash: [6, 4], borderWidth: 1.5, pointRadius: 0, fill: false }
-                ]
-            },
-            options: { responsive: true, maintainAspectRatio: false,
-                plugins: { datalabels: { display: false }, legend: { labels: { font: fontFam } } },
-                scales: { y: { title: { display: true, text: 'Cumulative Spend (€)', font: fontFam } } }
-            }
-        });
-
-        // 2. Billable vs Non-Billable
-        if (chartRefs.bench) chartRefs.bench.destroy();
-        chartRefs.bench = new Chart(document.getElementById('chart-bench'), {
-            type: 'bar',
-            data: {
-                labels: uiLabels,
-                datasets: [
-                    { label: 'Billable Hours',     data: sortedLabels.map(l => weeks[l].bill), backgroundColor: '#10b981' },
-                    { label: 'Non-Billable Hours', data: sortedLabels.map(l => weeks[l].nb),   backgroundColor: '#f59e0b' }
-                ]
-            },
-            options: { responsive: true, maintainAspectRatio: false,
-                plugins: { datalabels: { display: false }, legend: { labels: { font: fontFam } } },
-                scales: { x: { stacked: true }, y: { stacked: true, title: { display: true, text: 'Hours', font: fontFam } } }
-            }
-        });
-
-        // 3. S-Curve: Planned vs Actual cumulative hours
-        let cumPlan = 0, cumAct = 0;
-        const sCurvePlan = sortedLabels.map(l => { cumPlan += weeks[l].plan || 0; return cumPlan; });
-        const sCurveAct  = sortedLabels.map(l => { cumAct  += weeks[l].act  || 0; return cumAct;  });
-        if (chartRefs.scurve) chartRefs.scurve.destroy();
-        chartRefs.scurve = new Chart(document.getElementById('chart-scurve'), {
-            type: 'line',
-            data: {
-                labels: uiLabels,
-                datasets: [
-                    { label: 'Planned Hours', data: sCurvePlan, borderColor: '#94a3b8', borderDash: [6,4], borderWidth: 2, fill: false, tension: 0.3, pointRadius: 2 },
-                    { label: 'Actual Hours',  data: sCurveAct,  borderColor: '#3b82f6', borderWidth: 2.5, fill: true, backgroundColor: 'rgba(59,130,246,0.07)', tension: 0.35, pointRadius: 3 }
-                ]
-            },
-            options: { responsive: true, maintainAspectRatio: false,
-                plugins: { datalabels: { display: false }, legend: { labels: { font: fontFam } } },
-                scales: { y: { title: { display: true, text: 'Cumulative Hours', font: fontFam } } }
-            }
-        });
-
-        // 4. Spend by Phase — datalabels shown OUTSIDE segments
-        const phaseKeys  = Object.keys(phases);
-        const phaseVals  = Object.values(phases);
-        const phaseTotal = phaseVals.reduce((a, b) => a + b, 0);
-        if (chartRefs.phase) chartRefs.phase.destroy();
-        chartRefs.phase = new Chart(document.getElementById('chart-phase'), {
-            type: 'doughnut',
-            data: {
-                labels: phaseKeys,
-                datasets: [{ data: phaseVals, backgroundColor: CHART_COLORS, borderWidth: 2, borderColor: '#ffffff', hoverOffset: 6 }]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                cutout: '45%',
-                layout: { padding: 30 },
-                plugins: {
-                    legend: { display: false },
-                    tooltip: { callbacks: { label: ctx => ` €${ctx.parsed.toLocaleString()} (${((ctx.parsed / phaseTotal) * 100).toFixed(1)}%)` } },
-                    datalabels: {
-                        display: ctx => (ctx.dataset.data[ctx.dataIndex] / phaseTotal) >= 0.03,
-                        color: '#1e293b',
-                        align: 'end',
-                        anchor: 'end',
-                        clamp: true,
-                        offset: 6,
-                        font: { family: 'DM Sans', weight: '700', size: 11 },
-                        formatter: (value, ctx) => {
-                            const pct   = ((value / phaseTotal) * 100).toFixed(1);
-                            const label = ctx.chart.data.labels[ctx.dataIndex];
-                            const short = label.length > 14 ? label.substring(0, 13) + '…' : label;
-                            return [`${short}`, `€${value.toLocaleString()} (${pct}%)`];
-                        },
-                        textAlign: 'center',
-                    }
-                }
-            }
-        });
-    }
-
-    // ── FIXED PDF EXPORT FUNCTION ──
-    function exportPDF() {
-        const btn = document.getElementById('btn-export');
-        if (btn) { btn.textContent = '⏳ Generating…'; btn.disabled = true; }
-        
-        // Add class to trigger PDF-specific CSS (forces 1600px width and removes scrollbars)
-        document.body.classList.add('pdf-export-mode');
-
-        const el = document.getElementById('master-report');
-        
-        const opt = {
-            margin:       [10, 10, 10, 10], 
-            filename:     'Program_Status_Report.pdf',
-            image:        { type: 'jpeg', quality: 1 },
-            html2canvas:  { 
-                scale: 2, 
-                useCORS: true,
-                windowWidth: 1600 // Crucial: tricks html2canvas into capturing desktop view
-            },
-            jsPDF:        { unit: 'mm', format: 'a3', orientation: 'landscape' },
-            pagebreak:    { mode: ['css', 'legacy'] }
-        };
-
-        // Small timeout allows the browser to re-render the un-scrolled layout before taking the picture
-        setTimeout(() => {
-            html2pdf().set(opt).from(el).save().then(() => {
-                if (btn) { btn.textContent = '📄 Export PDF'; btn.disabled = false; }
-                document.body.classList.remove('pdf-export-mode'); // Restore normal view
-            }).catch(err => {
-                console.error("PDF Export Error: ", err);
-                if (btn) { btn.textContent = '📄 Export PDF'; btn.disabled = false; }
-                document.body.classList.remove('pdf-export-mode');
+    /* ── PDF EXPORT ────────────────────────────────────────── */
+    async function exportPDF() {
+        const btn=document.getElementById('btn-export');
+        if(btn){btn.textContent='⏳ Generating…';btn.disabled=true;}
+        const swaps=[];
+        try {
+            // Snapshot every canvas (charts + sparklines) → static PNG img
+            document.querySelectorAll('canvas').forEach(canvas=>{
+                try {
+                    const w=canvas.offsetWidth||canvas.width||100;
+                    const h=canvas.offsetHeight||canvas.height||40;
+                    const img=document.createElement('img');
+                    img.src=canvas.toDataURL('image/png');
+                    img.style.cssText=`width:${w}px;height:${h}px;display:block;`;
+                    canvas.parentNode.insertBefore(img,canvas);
+                    canvas.style.display='none';
+                    swaps.push({canvas,img});
+                } catch(e){}
             });
-        }, 500); 
+            document.body.classList.add('pdf-export-mode');
+            window.scrollTo(0,0);
+            await new Promise(r=>setTimeout(r,400));
+            const el=document.getElementById('master-report');
+            await html2pdf().set({
+                margin:[8,8,8,8],
+                filename:'Acquia_Program_Status_Report.pdf',
+                image:{type:'png',quality:1},
+                html2canvas:{scale:2,useCORS:true,allowTaint:true,logging:false,scrollX:0,scrollY:0,windowWidth:el.scrollWidth},
+                jsPDF:{unit:'mm',format:'a3',orientation:'landscape'},
+                pagebreak:{mode:'avoid-all',avoid:['.kpi-card','.card','tr']}
+            }).from(el).save();
+        } catch(err){
+            console.error('PDF failed:',err);
+            alert('PDF export failed: '+err.message);
+        } finally {
+            swaps.forEach(({canvas,img})=>{canvas.style.display='';if(img.parentNode)img.parentNode.removeChild(img);});
+            document.body.classList.remove('pdf-export-mode');
+            if(btn){btn.textContent='📄 Export PDF';btn.disabled=false;}
+        }
     }
 
     fetchData();
