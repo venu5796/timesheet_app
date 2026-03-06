@@ -371,7 +371,6 @@
 
 <div class="container" id="master-report">
 
-    <!-- ── Header ── -->
     <div class="header">
         <div>
             <h1>Acquia Program Control Tower</h1>
@@ -380,7 +379,7 @@
                 <input
                     type="number"
                     id="budgetLimit"
-                    value="45000"
+                    value="251392"
                     aria-label="Budget cap in euros"
                     onblur="processData()"
                     oninput="debouncedProcess()"
@@ -400,19 +399,15 @@
         </div>
     </div>
 
-    <!-- ── Error / Debug ── -->
     <div id="debug-info" role="alert" aria-live="assertive"></div>
 
-    <!-- ── Loader ── -->
     <div id="loader" role="status" aria-live="polite">
         <div class="spinner"></div>
         <span>Processing Strategic Datasets…</span>
     </div>
 
-    <!-- ── Main Dashboard ── -->
     <div id="dashboard" style="display:none;">
 
-        <!-- KPI Row -->
         <div class="kpi-row" role="region" aria-label="Key Performance Indicators">
             <div class="kpi-card">
                 <h4>Burned</h4>
@@ -446,7 +441,6 @@
             </div>
         </div>
 
-        <!-- Alert Panels -->
         <div class="alert-grid">
             <div class="alert-panel" role="region" aria-label="Variance red flags">
                 <h3 class="card-title">🚨 Variance Red Flags <small style="font-size:11px;color:var(--muted);font-weight:500;">&gt;20% Over Plan</small></h3>
@@ -458,7 +452,6 @@
             </div>
         </div>
 
-        <!-- Charts Row 1 -->
         <div class="main-grid">
             <div class="card">
                 <h3 class="card-title">📈 Cumulative Burn vs. Budget Cap</h3>
@@ -470,7 +463,6 @@
             </div>
         </div>
 
-        <!-- Charts Row 2 -->
         <div class="main-grid">
             <div class="card">
                 <h3 class="card-title">🗂️ Spend by Phase</h3>
@@ -482,7 +474,6 @@
             </div>
         </div>
 
-        <!-- Heatmap -->
         <div class="card" style="margin-bottom: 24px; page-break-before: always;">
             <h3 class="card-title">🌡️ Resource Utilization Heatmap</h3>
             <div style="overflow-x: auto;">
@@ -496,7 +487,6 @@
             </div>
         </div>
 
-        <!-- Weekly Spotlight -->
         <div class="card">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
                 <h3 class="card-title" style="margin:0; border:none; padding:0;">📊 Weekly Performance Metrics</h3>
@@ -525,10 +515,7 @@
             </div>
         </div>
 
-    </div><!-- /dashboard -->
-</div><!-- /container -->
-
-<script>
+    </div></div><script>
     /* ── Constants ──────────────────────────────────────────── */
     const API_URL           = "https://script.google.com/macros/s/AKfycbzYOSfaRk2Qu6_RXYjIRxsug-e-aL_juYrEtWrFTlszSPrRE7-e3kDnI0amMATtkmK-/exec";
     const RATE_FALLBACK     = 100;   // € default rate when unknown
