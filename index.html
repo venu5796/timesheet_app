@@ -540,9 +540,10 @@
         globalData.plan.forEach(p => {
             const w = parseDateSafe(p.dateStr);
             if(!people[p.person]) people[p.person]={weeks:{},actualLast:null,plannedFirst:null,plannedLast:null,rate:p.plannedRate||RATE_FALLBACK};
-            if(p.planH>0){
-                if(!people[p.person].plannedFirst||new Date(p.dateStr)<new Date(people[p.person].plannedFirst)) people[p.person].plannedFirst=p.dateStr;
-                if(!people[p.person].plannedLast ||new Date(p.dateStr)>new Date(people[p.person].plannedLast))  people[p.person].plannedLast=p.dateStr;
+            if(p.planH>0 && w){
+                // Store as normalised YYYY-MM-DD Monday so parseDateLocal always works in renderRolloff
+                if(!people[p.person].plannedFirst||w<people[p.person].plannedFirst) people[p.person].plannedFirst=w;
+                if(!people[p.person].plannedLast ||w>people[p.person].plannedLast)  people[p.person].plannedLast=w;
             }
             if(w&&weeks[w]) weeks[w].plan+=p.planH;
             if(new Date(p.dateStr)>new Date()) eacRem+=p.planH*(people[p.person].rate||p.plannedRate||RATE_FALLBACK);
@@ -986,44 +987,80 @@
             'not_started': {cls:'ms-on-track',icon:'○',label:'Not Started'},
             'planned':     {cls:'ms-on-track',icon:'○',label:'Planned'},
         };
-        function derive(ms){
-            const raw=(ms.status||ms.Status||'').toString().toLowerCase().trim();
+
+        // ── Group rows by milestone name ──────────────────────────────────────────
+        // The API sends one row per week a milestone spans (e.g. Sprint 0 has rows
+        // for both Mar 2 and Mar 9). We collapse to one row, using the LATEST week
+        // as the true end date. parseDateSafe() normalises any date format to the
+        // Monday YYYY-MM-DD, enabling string comparison for "latest".
+        const grouped = {};   // normalised-name → {name, latestMonISO, status, notes}
+        const order   = [];   // preserve first-seen insertion order
+
+        data.forEach(ms => {
+            const name    = (ms.name||ms.Name||ms.milestone||ms.Milestone||'—').trim();
+            const rawDue  = ms.due||ms.Due||ms.date||ms.Date||'';
+            const status  = ms.status||ms.Status||'';
+            const notes   = ms.notes||ms.Notes||'';
+            const monISO  = rawDue ? parseDateSafe(rawDue) : null;  // YYYY-MM-DD Monday
+            const key     = name.toLowerCase();
+
+            if(!grouped[key]){
+                grouped[key] = {name, latestMonISO: monISO, status, notes};
+                order.push(key);
+            } else {
+                // Keep the LATEST Monday — that week's Friday is the true end date
+                if(monISO && (!grouped[key].latestMonISO || monISO > grouped[key].latestMonISO)){
+                    grouped[key].latestMonISO = monISO;
+                }
+                // Prefer first non-empty status / notes
+                if(status && !grouped[key].status) grouped[key].status = status;
+                if(notes  && !grouped[key].notes)  grouped[key].notes  = notes;
+            }
+        });
+
+        function deriveStatus(status, latestMonISO){
+            const raw = (status||'').toString().toLowerCase().trim();
             if(raw && statusMap[raw]) return statusMap[raw];
             if(raw) return statusMap['on track'];
-            const ps=parseDateSafe(ms.due||ms.Due||''); if(!ps) return statusMap['on track'];
-            const due=new Date(ps); if(isNaN(due)) return statusMap['on track'];
-            const d=Math.round((due-today)/86400000);
-            if(d<0)   return statusMap['complete'];
-            if(d<=14) return statusMap['in progress'];
+            // No explicit status — infer from Friday of the latest week
+            if(!latestMonISO) return statusMap['on track'];
+            const monDate = parseDateLocal(latestMonISO);
+            if(!monDate) return statusMap['on track'];
+            const friDate = new Date(monDate); friDate.setDate(monDate.getDate()+4);
+            const daysLeft = Math.round((friDate - today) / 86400000);
+            if(daysLeft < 0)   return statusMap['complete'];
+            if(daysLeft <= 14) return statusMap['in progress'];
             return statusMap['on track'];
         }
-        const counts={complete:0,'on-track':0,'in-progress':0,delayed:0};
-        body.innerHTML=data.map(ms=>{
-            const name=ms.name||ms.Name||ms.milestone||ms.Milestone||'—';
-            const rawDue=ms.due||ms.Due||ms.date||ms.Date||'';
-            const notes=ms.notes||ms.Notes||'';
-            const s=derive(ms);
-            const sk=s.label.toLowerCase().replace(/ /g,'-');
-            if(counts[sk]!==undefined) counts[sk]++;
-            // Build safe week-of + ends-Friday display
-            const monISO=rawDue?parseDateSafe(rawDue):null;
-            let dueCellHtml='—';
-            if(monISO){
-                const monDate=parseDateLocal(monISO);
+
+        const counts = {complete:0,'on-track':0,'in-progress':0,delayed:0};
+        body.innerHTML = order.map(key => {
+            const g = grouped[key];
+            const s = deriveStatus(g.status, g.latestMonISO);
+            const sk = s.label.toLowerCase().replace(/ /g,'-');
+            if(counts[sk] !== undefined) counts[sk]++;
+
+            // Build date cell: "Week of [Mon]  /  Ends [Fri]"
+            let dueCellHtml = '—';
+            if(g.latestMonISO){
+                const monDate = parseDateLocal(g.latestMonISO);
                 if(monDate){
-                    const friDate=new Date(monDate); friDate.setDate(monDate.getDate()+4);
-                    const friISO=friDate.toISOString().split('T')[0];
-                    dueCellHtml=`<span style="font-size:10px;color:var(--muted);display:block;">Week of ${formatDateForUI(monISO)}</span><span>Ends ${formatDateForUI(friISO)}</span>`;
+                    const friDate = new Date(monDate); friDate.setDate(monDate.getDate()+4);
+                    const friISO  = friDate.toISOString().split('T')[0];
+                    dueCellHtml = `<span style="font-size:10px;color:var(--muted);display:block;">Week of ${formatDateForUI(g.latestMonISO)}</span>`
+                                + `<span>Ends ${formatDateForUI(friISO)}</span>`;
                 }
             }
+
             return `<tr>
-                <td><strong>${esc(name)}</strong></td>
+                <td><strong>${esc(g.name)}</strong></td>
                 <td class="mono" style="white-space:nowrap;line-height:1.6;">${dueCellHtml}</td>
                 <td><span class="${s.cls}">${s.icon} ${s.label}</span></td>
-                <td style="color:var(--muted);font-size:11px;">${esc(notes)}</td>
+                <td style="color:var(--muted);font-size:11px;">${esc(g.notes)}</td>
             </tr>`;
         }).join('');
-        if(sumEl) sumEl.innerHTML=`<b>${counts.complete}</b> done &nbsp;·&nbsp; <b>${counts['on-track']}</b> on track &nbsp;·&nbsp; <b>${counts['in-progress']}</b> in progress &nbsp;·&nbsp; <b>${counts.delayed}</b> delayed`;
+
+        if(sumEl) sumEl.innerHTML = `<b>${counts.complete}</b> done &nbsp;·&nbsp; <b>${counts['on-track']}</b> on track &nbsp;·&nbsp; <b>${counts['in-progress']}</b> in progress &nbsp;·&nbsp; <b>${counts.delayed}</b> delayed`;
     }
 
     /* ── ROLL-OFF ───────────────────────────────────────────── */
