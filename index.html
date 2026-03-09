@@ -679,29 +679,48 @@
         flags.innerHTML=missing.innerHTML='';
         let fc=0,mc=0;
         const today=new Date();
+        // Build set of who actually submitted hours this week from raw actuals
+        // (trim+lowercase to neutralise name casing/whitespace mismatches)
+        const actuallyBilledThisWeek=new Set();
+        globalData.actuals.forEach(r=>{
+            if(parseDateSafe(r.Date)===latest&&(parseFloat(r['Time in Hours'])||0)>0)
+                actuallyBilledThisWeek.add((r.Person||'').trim().toLowerCase());
+        });
+        // Aggregate plan hours per person for this week (deduplicate multiple plan rows)
+        const planByPerson={};
         globalData.plan.forEach(p=>{
-            if(parseDateSafe(p.dateStr)!==latest) return;
-            const act=people[p.person]?.weeks[latest]||0;
-            if(act===0&&p.planH>0){
-                const pf=people[p.person].plannedFirst?new Date(people[p.person].plannedFirst):null;
+            if(parseDateSafe(p.dateStr)!==latest||!(p.planH>0)) return;
+            const key=(p.person||'').trim().toLowerCase();
+            if(!planByPerson[key]) planByPerson[key]={name:p.person,planH:0};
+            planByPerson[key].planH+=p.planH;
+        });
+        Object.entries(planByPerson).forEach(([key,pd])=>{
+            const act=people[pd.name]?.weeks[latest]||0;
+            const billed=actuallyBilledThisWeek.has(key);
+            if(billed){
+                // Billed — only check for variance flags
+                if(act>pd.planH*VARIANCE_FACTOR){
+                    const ov=Math.round(((act-pd.planH)/pd.planH)*100);
+                    flags.innerHTML+=`<div class="alert-item"><span>🔴 <strong>${esc(pd.name)}</strong>: <span class="mono">${act}h</span> vs <span class="mono">${pd.planH}h</span> (+${ov}%)</span><span class="badge badge-danger">RED FLAG</span></div>`;
+                    fc++;
+                } else if(act>0&&act<pd.planH*VARIANCE_UNDER){
+                    const un=Math.round(((pd.planH-act)/pd.planH)*100);
+                    flags.innerHTML+=`<div class="alert-item"><span>🟢 <strong>${esc(pd.name)}</strong>: <span class="mono">${act}h</span> vs <span class="mono">${pd.planH}h</span> (-${un}%)</span><span class="badge badge-success">GREEN FLAG</span></div>`;
+                    fc++;
+                }
+            } else {
+                // No actuals found — flag as missing
+                const pf=people[pd.name]?.plannedFirst?new Date(people[pd.name].plannedFirst):null;
                 if(pf&&pf>today){
-                    missing.innerHTML+=`<div class="alert-item"><span>⚠️ <strong>${esc(p.person)}</strong> <span style="color:var(--muted)">(Starts ${formatDateForUI(people[p.person].plannedFirst)})</span></span><span class="badge badge-neutral">Not Onboarded Yet</span></div>`;
+                    missing.innerHTML+=`<div class="alert-item"><span>⚠️ <strong>${esc(pd.name)}</strong> <span style="color:var(--muted)">(Starts ${formatDateForUI(people[pd.name].plannedFirst)})</span></span><span class="badge badge-neutral">Not Onboarded Yet</span></div>`;
                 } else {
-                    const al=people[p.person].actualLast?new Date(people[p.person].actualLast):null;
+                    const al=people[pd.name]?.actualLast?new Date(people[pd.name].actualLast):null;
                     const ref=al||pf;
                     const days=ref?Math.round((today-ref)/86400000):0;
-                    if(days>7) missing.innerHTML+=`<div class="alert-item" style="flex-direction:column;align-items:flex-start;gap:4px;"><div>⚠️ <strong>${esc(p.person)}</strong></div><div style="display:flex;justify-content:space-between;width:100%;align-items:center;"><span style="color:var(--muted);font-size:11px;">(Since ${formatDateForUI(ref.toISOString())})</span><span class="badge badge-purple">Delinquent (${days}d)</span></div></div>`;
-                    else missing.innerHTML+=`<div class="alert-item"><span>⚠️ <strong>${esc(p.person)}</strong> <span style="color:var(--muted)">(${esc(latest)})</span></span><span class="badge badge-warning">Missed Entry</span></div>`;
+                    if(days>7) missing.innerHTML+=`<div class="alert-item" style="flex-direction:column;align-items:flex-start;gap:4px;"><div>⚠️ <strong>${esc(pd.name)}</strong></div><div style="display:flex;justify-content:space-between;width:100%;align-items:center;"><span style="color:var(--muted);font-size:11px;">(Since ${formatDateForUI(ref.toISOString())})</span><span class="badge badge-purple">Delinquent (${days}d)</span></div></div>`;
+                    else missing.innerHTML+=`<div class="alert-item"><span>⚠️ <strong>${esc(pd.name)}</strong> <span style="color:var(--muted)">(${esc(latest)})</span></span><span class="badge badge-warning">Missed Entry</span></div>`;
                 }
                 mc++;
-            } else if(act>p.planH*VARIANCE_FACTOR){
-                const ov=Math.round(((act-p.planH)/p.planH)*100);
-                flags.innerHTML+=`<div class="alert-item"><span>🔴 <strong>${esc(p.person)}</strong>: <span class="mono">${act}h</span> vs <span class="mono">${p.planH}h</span> (+${ov}%)</span><span class="badge badge-danger">RED FLAG</span></div>`;
-                fc++;
-            } else if(act>0&&act<p.planH*VARIANCE_UNDER){
-                const un=Math.round(((p.planH-act)/p.planH)*100);
-                flags.innerHTML+=`<div class="alert-item"><span>🟢 <strong>${esc(p.person)}</strong>: <span class="mono">${act}h</span> vs <span class="mono">${p.planH}h</span> (-${un}%)</span><span class="badge badge-success">GREEN FLAG</span></div>`;
-                fc++;
             }
         });
         if(fc===0) flags.innerHTML='<p class="alert-empty">✅ No significant variances this week</p>';
@@ -949,67 +968,97 @@
         }
         const today=new Date();
         const statusMap={
-            'complete':   {cls:'ms-complete',icon:'✓',label:'Complete'},
-            'completed':  {cls:'ms-complete',icon:'✓',label:'Complete'},
-            'done':       {cls:'ms-complete',icon:'✓',label:'Complete'},
-            'on track':   {cls:'ms-on-track',icon:'●',label:'On Track'},
-            'on-track':   {cls:'ms-on-track',icon:'●',label:'On Track'},
-            'on_track':   {cls:'ms-on-track',icon:'●',label:'On Track'},
-            'green':      {cls:'ms-on-track',icon:'●',label:'On Track'},
-            'at risk':    {cls:'ms-at-risk', icon:'▲',label:'At Risk'},
-            'at-risk':    {cls:'ms-at-risk', icon:'▲',label:'At Risk'},
-            'at_risk':    {cls:'ms-at-risk', icon:'▲',label:'At Risk'},
-            'amber':      {cls:'ms-at-risk', icon:'▲',label:'At Risk'},
-            'delayed':    {cls:'ms-delayed', icon:'✕',label:'Delayed'},
-            'not started':{cls:'ms-on-track',icon:'○',label:'Not Started'},
-            'not_started':{cls:'ms-on-track',icon:'○',label:'Not Started'},
-            'planned':    {cls:'ms-on-track',icon:'○',label:'Planned'},
+            'complete':    {cls:'ms-complete',icon:'✓',label:'Complete'},
+            'completed':   {cls:'ms-complete',icon:'✓',label:'Complete'},
+            'done':        {cls:'ms-complete',icon:'✓',label:'Complete'},
+            'on track':    {cls:'ms-on-track',icon:'●',label:'On Track'},
+            'on-track':    {cls:'ms-on-track',icon:'●',label:'On Track'},
+            'on_track':    {cls:'ms-on-track',icon:'●',label:'On Track'},
+            'green':       {cls:'ms-on-track',icon:'●',label:'On Track'},
+            'at risk':     {cls:'ms-at-risk', icon:'◑',label:'In Progress'},
+            'at-risk':     {cls:'ms-at-risk', icon:'◑',label:'In Progress'},
+            'at_risk':     {cls:'ms-at-risk', icon:'◑',label:'In Progress'},
+            'amber':       {cls:'ms-at-risk', icon:'◑',label:'In Progress'},
+            'in progress': {cls:'ms-at-risk', icon:'◑',label:'In Progress'},
+            'in-progress': {cls:'ms-at-risk', icon:'◑',label:'In Progress'},
+            'delayed':     {cls:'ms-delayed', icon:'✕',label:'Delayed'},
+            'not started': {cls:'ms-on-track',icon:'○',label:'Not Started'},
+            'not_started': {cls:'ms-on-track',icon:'○',label:'Not Started'},
+            'planned':     {cls:'ms-on-track',icon:'○',label:'Planned'},
         };
         function derive(ms){
-            // ① Honour explicit status from API — NEVER override with date logic
             const raw=(ms.status||ms.Status||'').toString().toLowerCase().trim();
             if(raw && statusMap[raw]) return statusMap[raw];
-            // ② Unknown non-empty string → on-track rather than misclassify
             if(raw) return statusMap['on track'];
-            // ③ No status field at all → fall back to due-date inference
             const ps=parseDateSafe(ms.due||ms.Due||''); if(!ps) return statusMap['on track'];
             const due=new Date(ps); if(isNaN(due)) return statusMap['on track'];
             const d=Math.round((due-today)/86400000);
             if(d<0)   return statusMap['complete'];
-            if(d<=14) return statusMap['at-risk'];
+            if(d<=14) return statusMap['in progress'];
             return statusMap['on track'];
         }
-        const counts={complete:0,'on-track':0,'at-risk':0,delayed:0};
+        const counts={complete:0,'on-track':0,'in-progress':0,delayed:0};
         body.innerHTML=data.map(ms=>{
             const name=ms.name||ms.Name||ms.milestone||ms.Milestone||'—';
-            const due =ms.due ||ms.Due ||ms.date||ms.Date||'';
+            const rawDue=ms.due||ms.Due||ms.date||ms.Date||'';
             const notes=ms.notes||ms.Notes||'';
             const s=derive(ms);
-            const sk=s.label.toLowerCase().replace(' ','-');
+            const sk=s.label.toLowerCase().replace(/ /g,'-');
             if(counts[sk]!==undefined) counts[sk]++;
+            // Build safe week-of + ends-Friday display
+            const monISO=rawDue?parseDateSafe(rawDue):null;
+            let dueCellHtml='—';
+            if(monISO){
+                const monDate=parseDateLocal(monISO);
+                if(monDate){
+                    const friDate=new Date(monDate); friDate.setDate(monDate.getDate()+4);
+                    const friISO=friDate.toISOString().split('T')[0];
+                    dueCellHtml=`<span style="font-size:10px;color:var(--muted);display:block;">Week of ${formatDateForUI(monISO)}</span><span>Ends ${formatDateForUI(friISO)}</span>`;
+                }
+            }
             return `<tr>
                 <td><strong>${esc(name)}</strong></td>
-                <td class="mono" style="white-space:nowrap;">${due?formatDateForUI(due):'—'}</td>
+                <td class="mono" style="white-space:nowrap;line-height:1.6;">${dueCellHtml}</td>
                 <td><span class="${s.cls}">${s.icon} ${s.label}</span></td>
                 <td style="color:var(--muted);font-size:11px;">${esc(notes)}</td>
             </tr>`;
         }).join('');
-        if(sumEl) sumEl.innerHTML=`<b>${counts.complete}</b> done &nbsp;·&nbsp; <b>${counts['on-track']}</b> on track &nbsp;·&nbsp; <b>${counts['at-risk']}</b> at risk &nbsp;·&nbsp; <b>${counts.delayed}</b> delayed`;
+        if(sumEl) sumEl.innerHTML=`<b>${counts.complete}</b> done &nbsp;·&nbsp; <b>${counts['on-track']}</b> on track &nbsp;·&nbsp; <b>${counts['in-progress']}</b> in progress &nbsp;·&nbsp; <b>${counts.delayed}</b> delayed`;
     }
 
     /* ── ROLL-OFF ───────────────────────────────────────────── */
+    // Safe helper: parse a YYYY-MM-DD string into a local Date without timezone shift
+    function parseDateLocal(str) {
+        if(!str) return null;
+        const p=String(str).split('T')[0].split('-');
+        if(p.length!==3) return null;
+        const d=new Date(+p[0],+p[1]-1,+p[2]);
+        return isNaN(d.getTime())?null:d;
+    }
     function renderRolloff(people) {
         const today=new Date();
         const sorted=Object.keys(people).filter(p=>people[p].plannedLast).sort((a,b)=>new Date(people[a].plannedLast)-new Date(people[b].plannedLast));
         document.getElementById('rolloff-list').innerHTML=sorted.map(p=>{
-            const d=new Date(people[p].plannedLast);
-            const days=Math.round((d-today)/86400000);
+            const monDate=parseDateLocal(people[p].plannedLast);
+            if(!monDate){ return ''; }
+            // Friday = Monday + 4 days
+            const friDate=new Date(monDate); friDate.setDate(monDate.getDate()+4);
+            const days=Math.round((friDate-today)/86400000);
             let st='';
-            if(days<0)      st=`<span class="dot-indicator dot-grey"></span><span style="color:var(--muted)">Completed</span>`;
+            if(days<0)        st=`<span class="dot-indicator dot-grey"></span><span style="color:var(--muted)">Completed</span>`;
             else if(days<=14) st=`<span class="dot-indicator dot-red"></span><span style="color:var(--danger);font-weight:600;">Rolling Off</span>`;
             else if(days<=30) st=`<span class="dot-indicator dot-yellow"></span><span style="color:var(--warning);font-weight:600;">Final Month</span>`;
             else              st=`<span style="color:var(--muted)">Active</span>`;
-            return `<tr><td><strong>${esc(p)}</strong></td><td>${st}</td><td class="mono" style="text-align:right;">${formatDateForUI(people[p].plannedLast)}</td></tr>`;
+            const monISO=monDate.toISOString().split('T')[0];
+            const friISO=friDate.toISOString().split('T')[0];
+            return `<tr>
+                <td><strong>${esc(p)}</strong></td>
+                <td>${st}</td>
+                <td class="mono" style="text-align:right;line-height:1.6;">
+                    <span style="font-size:10px;color:var(--muted);display:block;">Week of ${formatDateForUI(monISO)}</span>
+                    <span>Ends ${formatDateForUI(friISO)}</span>
+                </td>
+            </tr>`;
         }).join('');
     }
 
@@ -1018,19 +1067,20 @@
         const body=document.getElementById('spotlight-body');
         const agg={};
         globalData.actuals.filter(r=>parseDateSafe(r.Date)===week).forEach(r=>{
-            const key=`${r.Person}|${r.Role}`;
-            if(!agg[key]) agg[key]={n:r.Person,r:r.Role,a:0,s:0,p:0,b:parseFloat(r.Rate)>0};
+            const key=`${(r.Person||'').trim()}|${(r.Role||'').trim()}`;
+            if(!agg[key]) agg[key]={n:(r.Person||'').trim(),r:(r.Role||'').trim(),a:0,s:0,p:0,b:parseFloat(r.Rate)>0};
             agg[key].a+=parseFloat(r['Time in Hours'])||0;
             agg[key].s+=parseFloat(r.Subtotal)||0;
         });
         globalData.plan.filter(p=>parseDateSafe(p.dateStr)===week).forEach(p=>{
-            const key=`${p.person}|${p.role}`;
-            if(agg[key]) agg[key].p=p.planH;
-            else agg[key]={n:p.person,r:p.role,a:0,s:0,p:p.planH,b:false};
+            const key=`${(p.person||'').trim()}|${(p.role||'').trim()}`;
+            if(agg[key]) agg[key].p+=p.planH||0;
+            else agg[key]={n:(p.person||'').trim(),r:(p.role||'').trim(),a:0,s:0,p:p.planH||0,b:false};
         });
         body.innerHTML=Object.values(agg).map(i=>{
-            const variance=i.p-i.a;
-            const varClass=variance<0?'variance-neg':'variance-pos';
+            const variance=i.a-i.p;
+            const varClass=variance<0?'variance-pos':variance>0?'variance-neg':'';
+            const varSign=variance>0?'+':'';
             const badgeClass=i.b?'status-bill':'status-nb';
             const badgeText=i.b?'Billable':'Non-Bill';
             const statusDisplay=(i.a===0&&i.p>0&&!i.b)?`<span class="status-nb">Planned</span>`:`<span class="${badgeClass}">${badgeText}</span>`;
@@ -1040,7 +1090,7 @@
                 <td>${statusDisplay}</td>
                 <td class="mono">${i.p.toFixed(1)}</td>
                 <td class="mono">${i.a.toFixed(1)}</td>
-                <td class="${varClass}">${variance>=0?'+':''}${variance.toFixed(1)}</td>
+                <td class="${varClass}">${varSign}${variance.toFixed(1)}</td>
                 <td class="mono">€${i.s.toLocaleString()}</td>
             </tr>`;
         }).join('')||'<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px;">No data for this week</td></tr>';
