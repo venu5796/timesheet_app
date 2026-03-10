@@ -101,6 +101,21 @@
         .spender-bar-wrap { flex: 1; background: #f1f5f9; border-radius: 3px; height: 6px; max-width: 80px; }
         .spender-bar-fill { height: 6px; border-radius: 3px; background: linear-gradient(90deg, #3b82f6, #003d82); }
 
+        /* ── Weekly Summary Totals ─────────────────────────── */
+        .week-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+        .wsummary-card { background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+        .wsummary-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 8px; }
+        .wsummary-nums { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 6px; }
+        .wsummary-val { font-family: 'DM Mono', monospace; font-weight: 800; font-size: 1.15rem; color: var(--primary); }
+        .wsummary-plan { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
+        .wsummary-bar-bg { background: #e2e8f0; border-radius: 4px; height: 8px; overflow: hidden; }
+        .wsummary-bar-fill { height: 8px; border-radius: 4px; transition: width 0.4s ease; }
+        .wsummary-footer { display: flex; justify-content: space-between; margin-top: 5px; font-size: 11px; }
+        .wsummary-over  { color: var(--danger);  font-weight: 700; }
+        .wsummary-under { color: var(--success); font-weight: 700; }
+        .wsummary-zero  { color: var(--muted); }
+        @media (max-width: 768px) { .week-summary { grid-template-columns: 1fr; } }
+
         /* ── Extra milestone status ────────────────────────── */
         .ms-delayed { background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap; }
 
@@ -416,6 +431,33 @@
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
                 <h3 class="card-title" style="margin:0;border:none;padding:0;">📊 Weekly Performance Metrics</h3>
                 <select id="weekSelect" class="btn-select no-print" onchange="updateWeeklySpotlight(this.value)"></select>
+            </div>
+            <!-- Weekly totals summary bars -->
+            <div class="week-summary" id="week-summary-bars">
+                <div class="wsummary-card">
+                    <div class="wsummary-label">⏱ Hours — Actual vs Planned</div>
+                    <div class="wsummary-nums">
+                        <span class="wsummary-val" id="ws-hours-actual">—</span>
+                        <span class="wsummary-plan">of <span id="ws-hours-plan">—</span> planned</span>
+                    </div>
+                    <div class="wsummary-bar-bg"><div class="wsummary-bar-fill" id="ws-hours-bar" style="width:0%;background:#3b82f6;"></div></div>
+                    <div class="wsummary-footer">
+                        <span id="ws-hours-pct" class="wsummary-zero">—</span>
+                        <span id="ws-hours-var" class="wsummary-zero">—</span>
+                    </div>
+                </div>
+                <div class="wsummary-card">
+                    <div class="wsummary-label">💶 Budget — Actual vs Planned</div>
+                    <div class="wsummary-nums">
+                        <span class="wsummary-val" id="ws-budget-actual">—</span>
+                        <span class="wsummary-plan">of <span id="ws-budget-plan">—</span> planned</span>
+                    </div>
+                    <div class="wsummary-bar-bg"><div class="wsummary-bar-fill" id="ws-budget-bar" style="width:0%;background:#10b981;"></div></div>
+                    <div class="wsummary-footer">
+                        <span id="ws-budget-pct" class="wsummary-zero">—</span>
+                        <span id="ws-budget-var" class="wsummary-zero">—</span>
+                    </div>
+                </div>
             </div>
             <div class="table-responsive">
                 <table class="spot-table">
@@ -958,6 +1000,32 @@
     }
 
     /* ── MILESTONES ────────────────────────────────────────── */
+    // For milestones the "end" is the Friday of whichever week the date falls in.
+    // We can't use parseDateSafe (snaps to Monday) — instead snap forward to Friday.
+    function parseDateToFriday(str) {
+        if(!str) return null;
+        let d = new Date(str);
+        if(isNaN(d.getTime())) {
+            // Try Mon-DD format
+            const months={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+            const parts=String(str).split('-');
+            if(parts.length===2&&months[parts[0]]!==undefined)
+                d=new Date(new Date().getFullYear(),months[parts[0]],parseInt(parts[1],10));
+        }
+        if(isNaN(d.getTime())) return null;
+        // Snap to Friday of the same week (Mon=1…Fri=5, Sat=6, Sun=0)
+        const day=d.getDay(); // 0=Sun,1=Mon,…,6=Sat
+        // Days until Friday: Fri=5, so offset = (5 - day + 7) % 7
+        // But if already Friday, offset=0; Saturday→6 days back? No — snap to nearest Friday:
+        // If day is Sat(6) or Sun(0), treat as belonging to NEXT week's Friday
+        let offset;
+        if(day===6) offset=6;       // Sat → +6 to next Friday
+        else if(day===0) offset=5;  // Sun → +5 to Friday
+        else offset=5-day;          // Mon→+4, Tue→+3, Wed→+2, Thu→+1, Fri→0
+        const fri=new Date(d); fri.setDate(d.getDate()+offset);
+        return fri.toISOString().split('T')[0]; // YYYY-MM-DD of that Friday
+    }
+
     function renderMilestones() {
         const body=document.getElementById('milestone-body');
         const sumEl=document.getElementById('ms-summary');
@@ -990,43 +1058,40 @@
 
         // ── Group rows by milestone name ──────────────────────────────────────────
         // The API sends one row per week a milestone spans (e.g. Sprint 0 has rows
-        // for both Mar 2 and Mar 9). We collapse to one row, using the LATEST week
-        // as the true end date. parseDateSafe() normalises any date format to the
-        // Monday YYYY-MM-DD, enabling string comparison for "latest".
-        const grouped = {};   // normalised-name → {name, latestMonISO, status, notes}
-        const order   = [];   // preserve first-seen insertion order
+        // for Mar 2 and Mar 9). We collapse duplicates, keeping the LATEST Friday
+        // as the true end date. Comparison is on the Friday ISO string (YYYY-MM-DD).
+        const grouped = {};
+        const order   = [];
 
         data.forEach(ms => {
-            const name    = (ms.name||ms.Name||ms.milestone||ms.Milestone||'—').trim();
-            const rawDue  = ms.due||ms.Due||ms.date||ms.Date||'';
-            const status  = ms.status||ms.Status||'';
-            const notes   = ms.notes||ms.Notes||'';
-            const monISO  = rawDue ? parseDateSafe(rawDue) : null;  // YYYY-MM-DD Monday
-            const key     = name.toLowerCase();
+            const name   = (ms.name||ms.Name||ms.milestone||ms.Milestone||'—').trim();
+            const rawDue = ms.due||ms.Due||ms.date||ms.Date||'';
+            const status = ms.status||ms.Status||'';
+            const notes  = ms.notes||ms.Notes||'';
+            // Snap this date to the Friday of its working week
+            const friISO = rawDue ? parseDateToFriday(rawDue) : null;
+            const key    = name.toLowerCase();
 
             if(!grouped[key]){
-                grouped[key] = {name, latestMonISO: monISO, status, notes};
+                grouped[key] = {name, latestFriISO: friISO, status, notes};
                 order.push(key);
             } else {
-                // Keep the LATEST Monday — that week's Friday is the true end date
-                if(monISO && (!grouped[key].latestMonISO || monISO > grouped[key].latestMonISO)){
-                    grouped[key].latestMonISO = monISO;
+                // Keep the LATEST Friday — that is the true milestone end date
+                if(friISO && (!grouped[key].latestFriISO || friISO > grouped[key].latestFriISO)){
+                    grouped[key].latestFriISO = friISO;
                 }
-                // Prefer first non-empty status / notes
                 if(status && !grouped[key].status) grouped[key].status = status;
                 if(notes  && !grouped[key].notes)  grouped[key].notes  = notes;
             }
         });
 
-        function deriveStatus(status, latestMonISO){
+        function deriveStatus(status, friISO){
             const raw = (status||'').toString().toLowerCase().trim();
             if(raw && statusMap[raw]) return statusMap[raw];
             if(raw) return statusMap['on track'];
-            // No explicit status — infer from Friday of the latest week
-            if(!latestMonISO) return statusMap['on track'];
-            const monDate = parseDateLocal(latestMonISO);
-            if(!monDate) return statusMap['on track'];
-            const friDate = new Date(monDate); friDate.setDate(monDate.getDate()+4);
+            if(!friISO) return statusMap['on track'];
+            const friDate = parseDateLocal(friISO);
+            if(!friDate) return statusMap['on track'];
             const daysLeft = Math.round((friDate - today) / 86400000);
             if(daysLeft < 0)   return statusMap['complete'];
             if(daysLeft <= 14) return statusMap['in progress'];
@@ -1036,19 +1101,19 @@
         const counts = {complete:0,'on-track':0,'in-progress':0,delayed:0};
         body.innerHTML = order.map(key => {
             const g = grouped[key];
-            const s = deriveStatus(g.status, g.latestMonISO);
+            const s = deriveStatus(g.status, g.latestFriISO);
             const sk = s.label.toLowerCase().replace(/ /g,'-');
             if(counts[sk] !== undefined) counts[sk]++;
 
-            // Build date cell: "Week of [Mon]  /  Ends [Fri]"
+            // Date cell: derive the Monday of the same week as latestFriISO
             let dueCellHtml = '—';
-            if(g.latestMonISO){
-                const monDate = parseDateLocal(g.latestMonISO);
-                if(monDate){
-                    const friDate = new Date(monDate); friDate.setDate(monDate.getDate()+4);
-                    const friISO  = friDate.toISOString().split('T')[0];
-                    dueCellHtml = `<span style="font-size:10px;color:var(--muted);display:block;">Week of ${formatDateForUI(g.latestMonISO)}</span>`
-                                + `<span>Ends ${formatDateForUI(friISO)}</span>`;
+            if(g.latestFriISO){
+                const friDate = parseDateLocal(g.latestFriISO);
+                if(friDate){
+                    const monDate = new Date(friDate); monDate.setDate(friDate.getDate()-4);
+                    const monISO  = monDate.toISOString().split('T')[0];
+                    dueCellHtml = `<span style="font-size:10px;color:var(--muted);display:block;">Week of ${formatDateForUI(monISO)}</span>`
+                                + `<span>Ends ${formatDateForUI(g.latestFriISO)}</span>`;
                 }
             }
 
@@ -1114,7 +1179,48 @@
             if(agg[key]) agg[key].p+=p.planH||0;
             else agg[key]={n:(p.person||'').trim(),r:(p.role||'').trim(),a:0,s:0,p:p.planH||0,b:false};
         });
-        body.innerHTML=Object.values(agg).map(i=>{
+
+        // ── Weekly summary totals ──────────────────────────────
+        const rows = Object.values(agg);
+        const totalPlanH  = rows.reduce((s,i)=>s+i.p, 0);
+        const totalActH   = rows.reduce((s,i)=>s+i.a, 0);
+        const totalActS   = rows.reduce((s,i)=>s+i.s, 0);
+        // Planned budget = planned hours × rate (use rate from actuals where available,
+        // fall back to plannedRate from plan rows via people lookup)
+        const totalPlanS  = rows.reduce((s,i)=>{
+            if(i.p===0) return s;
+            // best rate estimate: if person billed, i.s/i.a gives rate; else use plan rate
+            const rate = (i.a>0&&i.b) ? i.s/i.a : (i.b ? 100 : 0);
+            return s + i.p * rate;
+        }, 0);
+
+        function fillBar(actId, planId, barId, pctId, varId, actual, planned, isBudget) {
+            const fmt2 = v => isBudget ? `€${Math.round(v).toLocaleString()}` : `${v.toFixed(1)}h`;
+            const pct  = planned>0 ? Math.min((actual/planned)*100, 150) : 0;
+            const barW = Math.min(pct, 100);
+            const over  = actual > planned*1.05;
+            const under = actual < planned*0.9;
+            const diff  = actual - planned;
+            const diffTxt = (diff>=0?'+':'')+fmt2(diff);
+            const barColor = over ? '#ef4444' : under ? '#f59e0b' : '#10b981';
+            document.getElementById(actId).textContent  = fmt2(actual);
+            document.getElementById(planId).textContent = fmt2(planned);
+            document.getElementById(barId).style.width  = barW+'%';
+            document.getElementById(barId).style.background = barColor;
+            const pctEl = document.getElementById(pctId);
+            pctEl.textContent  = planned>0 ? `${Math.round(pct)}% utilised` : 'No plan data';
+            pctEl.className    = over?'wsummary-over':under?'wsummary-under':'wsummary-zero';
+            const varEl = document.getElementById(varId);
+            varEl.textContent  = planned>0 ? `${diffTxt} vs plan` : '';
+            varEl.className    = over?'wsummary-over':under?'wsummary-under':'wsummary-zero';
+        }
+        fillBar('ws-hours-actual','ws-hours-plan','ws-hours-bar','ws-hours-pct','ws-hours-var',
+                totalActH, totalPlanH, false);
+        fillBar('ws-budget-actual','ws-budget-plan','ws-budget-bar','ws-budget-pct','ws-budget-var',
+                totalActS, totalPlanS, true);
+
+        // ── Per-resource table ─────────────────────────────────
+        body.innerHTML=rows.map(i=>{
             const variance=i.a-i.p;
             const varClass=variance<0?'variance-pos':variance>0?'variance-neg':'';
             const varSign=variance>0?'+':'';
