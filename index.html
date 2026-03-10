@@ -101,21 +101,6 @@
         .spender-bar-wrap { flex: 1; background: #f1f5f9; border-radius: 3px; height: 6px; max-width: 80px; }
         .spender-bar-fill { height: 6px; border-radius: 3px; background: linear-gradient(90deg, #3b82f6, #003d82); }
 
-        /* ── Weekly Summary Totals ─────────────────────────── */
-        .week-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
-        .wsummary-card { background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
-        .wsummary-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 8px; }
-        .wsummary-nums { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 6px; }
-        .wsummary-val { font-family: 'DM Mono', monospace; font-weight: 800; font-size: 1.15rem; color: var(--primary); }
-        .wsummary-plan { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
-        .wsummary-bar-bg { background: #e2e8f0; border-radius: 4px; height: 8px; overflow: hidden; }
-        .wsummary-bar-fill { height: 8px; border-radius: 4px; transition: width 0.4s ease; }
-        .wsummary-footer { display: flex; justify-content: space-between; margin-top: 5px; font-size: 11px; }
-        .wsummary-over  { color: var(--danger);  font-weight: 700; }
-        .wsummary-under { color: var(--warning); font-weight: 700; }
-        .wsummary-zero  { color: var(--muted); }
-        @media (max-width: 768px) { .week-summary { grid-template-columns: 1fr; } }
-
         /* ── Extra milestone status ────────────────────────── */
         .ms-delayed { background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap; }
 
@@ -317,7 +302,7 @@
             <div class="alert-panel">
                 <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
                     <span style="margin:0;">🚨 Variance Flags</span>
-                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    <div style="display:flex;align-items:center;gap:8px;">
                         <small style="font-size:11px;color:var(--muted);font-weight:500;">&gt;20% Over/Under Plan</small>
                         <select id="alertWeekSelect" class="btn-select no-print" style="font-size:11px;padding:4px 8px;" onchange="refreshAlertPanels(this.value)"></select>
                     </div>
@@ -439,35 +424,6 @@
                 <h3 class="card-title" style="margin:0;border:none;padding:0;">📊 Weekly Performance Metrics</h3>
                 <select id="weekSelect" class="btn-select no-print" onchange="updateWeeklySpotlight(this.value)"></select>
             </div>
-            <!-- Weekly totals: Hours (all) + Budget (billable only) -->
-            <div class="week-summary">
-                <div class="wsummary-card">
-                    <div class="wsummary-label">⏱ Total Hours — Actual vs Planned <span style="font-weight:400;color:var(--muted);font-size:10px;">(billable + non-billable)</span></div>
-                    <div class="wsummary-nums">
-                        <span class="wsummary-val" id="ws-hours-actual">—</span>
-                        <span class="wsummary-plan">of <span id="ws-hours-plan">—</span> planned</span>
-                    </div>
-                    <div class="wsummary-bar-bg"><div class="wsummary-bar-fill" id="ws-hours-bar" style="width:0%;background:#3b82f6;"></div></div>
-                    <div class="wsummary-footer"><span id="ws-hours-pct" class="wsummary-zero">—</span><span id="ws-hours-var" class="wsummary-zero">—</span></div>
-                    <!-- Billable / Non-billable breakdown -->
-                    <div style="display:flex;gap:16px;margin-top:8px;padding-top:8px;border-top:1px solid #f1f5f9;">
-                        <div style="font-size:11px;color:var(--muted);">🟢 Billable: <strong id="ws-hours-bill" style="color:#10b981;font-family:'DM Mono',monospace;">—</strong></div>
-                        <div style="font-size:11px;color:var(--muted);">🟡 Non-Billable: <strong id="ws-hours-nb" style="color:#f59e0b;font-family:'DM Mono',monospace;">—</strong></div>
-                    </div>
-                </div>
-                <div class="wsummary-card">
-                    <div class="wsummary-label">💶 Budget Spend — Actual vs Planned <span style="font-weight:400;color:var(--muted);font-size:10px;">(billable only · non-billable €0)</span></div>
-                    <div class="wsummary-nums">
-                        <span class="wsummary-val" id="ws-budget-actual">—</span>
-                        <span class="wsummary-plan">of <span id="ws-budget-plan">—</span> planned</span>
-                    </div>
-                    <div class="wsummary-bar-bg"><div class="wsummary-bar-fill" id="ws-budget-bar" style="width:0%;background:#10b981;"></div></div>
-                    <div class="wsummary-footer"><span id="ws-budget-pct" class="wsummary-zero">—</span><span id="ws-budget-var" class="wsummary-zero">—</span></div>
-                    <div style="font-size:11px;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px solid #f1f5f9;">
-                        Planned budget = planned billable hours × resource rate
-                    </div>
-                </div>
-            </div>
             <div class="table-responsive">
                 <table class="spot-table">
                     <thead><tr>
@@ -563,23 +519,61 @@
 
     /* ── PROCESS ───────────────────────────────────────────── */
     function processData() {
-        const weeks={}, people={}, phases={}, phasesPlanned={};
+        const weeks={}, people={};
         const totals={ burn:0, hours:0, bill:0, nb:0 };
         const budget = parseFloat(document.getElementById('budgetLimit').value) || 0;
-        const sortedPhases = [...globalData.rawPhases].sort((a,b)=>b.length-a.length);
+
+        // ── Build milestone date ranges ───────────────────────────────────────────
+        // Each milestone name → {name, startISO, endISO (Friday of last week)}
+        // Uses same grouping logic as renderMilestones: keep earliest start, latest end.
+        const msRanges = {};  // lowerName → {name, start:YYYY-MM-DD, end:YYYY-MM-DD (Friday)}
+        globalData.milestones.forEach(ms => {
+            const name   = (ms.name||ms.Name||ms.milestone||ms.Milestone||'').trim();
+            if(!name) return;
+            const rawDue = ms.due||ms.Due||ms.date||ms.Date||'';
+            const monISO = rawDue ? parseDateSafe(rawDue) : null;
+            if(!monISO) return;
+            const key = name.toLowerCase();
+            // Friday of this week = Monday + 4
+            const monDate = (()=>{const p=monISO.split('-');return new Date(+p[0],+p[1]-1,+p[2]);})();
+            const friDate = new Date(monDate); friDate.setDate(monDate.getDate()+4);
+            const friISO  = friDate.toISOString().split('T')[0];
+            if(!msRanges[key]){
+                msRanges[key] = {name, start:monISO, end:friISO};
+            } else {
+                if(monISO < msRanges[key].start) msRanges[key].start = monISO;
+                if(friISO > msRanges[key].end)   msRanges[key].end   = friISO;
+            }
+        });
+
+        // Helper: which milestone does a date ISO fall into?
+        function dateToPhase(dateISO) {
+            if(!dateISO) return null;
+            const d = dateISO.substring(0,10);
+            for(const key of Object.keys(msRanges)){
+                if(d >= msRanges[key].start && d <= msRanges[key].end) return key;
+            }
+            return null;
+        }
+
+        // ── Accumulators keyed by lowerName ──────────────────────────────────────
+        const phasesActual  = {};   // lowerName → actual spend €
+        const phasesPlanned = {};   // lowerName → planned spend €
 
         globalData.actuals.forEach(r => {
             const w = parseDateSafe(r.Date); if (!w) return;
             const h = parseFloat(r['Time in Hours'])||0;
             const s = parseFloat(r.Subtotal)||0;
             const isBill = parseFloat(r.Rate)>0;
-            const taskTxt = String(r['Task/Deliverable']||'').toLowerCase();
             if (!weeks[w]) weeks[w]={burn:0,act:0,plan:0,bill:0,nb:0};
             weeks[w].burn+=s; weeks[w].act+=h;
             if(isBill) weeks[w].bill+=h; else weeks[w].nb+=h;
-            let match='Other/General';
-            for(let p of sortedPhases){ if(taskTxt.includes(p.toLowerCase())){match=p;break;} }
-            if(s>0) phases[match]=(phases[match]||0)+s;
+            // Accumulate actual spend into phase by date
+            if(s>0){
+                const phKey = dateToPhase(w);
+                if(phKey) phasesActual[phKey] = (phasesActual[phKey]||0) + s;
+                else      phasesActual['__other__'] = (phasesActual['__other__']||0) + s;
+            }
             if(!people[r.Person]) people[r.Person]={weeks:{},actualLast:null,plannedFirst:null,plannedLast:null,rate:parseFloat(r.Rate)||0};
             people[r.Person].weeks[w]=(people[r.Person].weeks[w]||0)+h;
             if(!people[r.Person].actualLast||new Date(r.Date)>new Date(people[r.Person].actualLast)) people[r.Person].actualLast=r.Date;
@@ -597,29 +591,31 @@
             }
             if(w&&weeks[w]) weeks[w].plan+=p.planH;
             if(new Date(p.dateStr)>new Date()) eacRem+=p.planH*(people[p.person].rate||p.plannedRate||RATE_FALLBACK);
-
-            // ── Planned spend per phase ──────────────────────────────────────────
-            // Use role/phase field of the plan row to match against phase keywords,
-            // same longest-match logic as actuals. Rate from the person record (built
-            // by actuals loop above) or from plan row, or fallback.
-            if(p.planH > 0) {
-                const roleTxt = String(p.role||p.phase||p.task||'').toLowerCase();
-                let phaseMatch = 'Other/General';
-                for(let ph of sortedPhases){ if(roleTxt.includes(ph.toLowerCase())){phaseMatch=ph;break;} }
-                const rate = people[p.person]?.rate || p.plannedRate || RATE_FALLBACK;
-                // Only count billable planned hours (rate > 0)
-                if(rate > 0) phasesPlanned[phaseMatch] = (phasesPlanned[phaseMatch]||0) + (p.planH * rate);
+            // Accumulate planned spend into phase by date
+            if(p.planH>0 && w){
+                const rate   = people[p.person]?.rate || p.plannedRate || RATE_FALLBACK;
+                const phKey  = dateToPhase(w);
+                const planCost = p.planH * rate;
+                if(phKey) phasesPlanned[phKey] = (phasesPlanned[phKey]||0) + planCost;
+                else      phasesPlanned['__other__'] = (phasesPlanned['__other__']||0) + planCost;
             }
         });
 
-        updateUI(weeks, people, phases, phasesPlanned, totals, eacRem, budget);
+        // Build ordered phase list: milestone insertion order, then __other__ last
+        const msOrder = Object.keys(msRanges); // already insertion-ordered
+        // Store for rendering
+        globalData._msRanges     = msRanges;
+        globalData._msOrder      = msOrder;
+        globalData._phasesActual  = phasesActual;
+        globalData._phasesPlanned = phasesPlanned;
         globalData._people = people;
         globalData._weeks  = weeks;
-        globalData._phasesPlanned = phasesPlanned;
+
+        updateUI(weeks, people, phasesActual, phasesPlanned, msOrder, msRanges, totals, eacRem, budget);
     }
 
     /* ── UPDATE UI ─────────────────────────────────────────── */
-    function updateUI(weeks, people, phases, phasesPlanned, totals, eacRem, budget) {
+    function updateUI(weeks, people, phasesActual, phasesPlanned, msOrder, msRanges, totals, eacRem, budget) {
         document.getElementById('loader').style.display    = 'none';
         document.getElementById('dashboard').style.display = 'block';
 
@@ -657,20 +653,18 @@
         document.getElementById('kpi-conf').textContent=confLabel;
         setTrend('kpi-conf-trend',confType,`${futureWks} wks planned`);
 
+        // Populate all week dropdowns
         const weekOptHtml = sortedW.map(w=>`<option value="${w}">${w}</option>`).join('');
-        document.getElementById('weekSelect').innerHTML      = weekOptHtml;
-        document.getElementById('alertWeekSelect').innerHTML = weekOptHtml;
-        const delinqEl = document.getElementById('delinqWeekSelect');
-        if(delinqEl) delinqEl.innerHTML = weekOptHtml;
-        const spenderEl = document.getElementById('spenderWeekSelect');
-        if(spenderEl) spenderEl.innerHTML = weekOptHtml;
+        ['weekSelect','alertWeekSelect','delinqWeekSelect','spenderWeekSelect'].forEach(id=>{
+            const el=document.getElementById(id); if(el) el.innerHTML=weekOptHtml;
+        });
 
         renderRAGBanner(weeks, people, totals, budget, eac, sortedLabels);
         renderSparklines(weeks, sortedLabels);
         renderHeatmap(people, sortedLabels);
         renderExceptions(weeks, people, sortedW[0]);
-        renderCharts(weeks, phases, phasesPlanned, budget, sortedLabels);
-        renderPhaseBreakdown(phases, phasesPlanned);
+        renderCharts(weeks, phasesActual, phasesPlanned, msOrder, msRanges, budget, sortedLabels);
+        renderPhaseBreakdown(phasesActual, phasesPlanned, msOrder, msRanges);
         renderTopSpenders(sortedW[0]);
         renderMilestones();
         renderRolloff(people);
@@ -747,9 +741,11 @@
 
     /* ── REFRESH ALERT PANELS (on dropdown change) ─────────── */
     function refreshAlertPanels(week) {
-        const people = globalData._people || {};
-        const weeks  = globalData._weeks  || {};
-        renderExceptions(weeks, people, week);
+        // Sync the other dropdown to the same week
+        ['alertWeekSelect','delinqWeekSelect'].forEach(id=>{
+            const el=document.getElementById(id); if(el) el.value=week;
+        });
+        renderExceptions(globalData._weeks||{}, globalData._people||{}, week);
     }
 
     /* ── EXCEPTIONS ────────────────────────────────────────── */
@@ -808,7 +804,7 @@
     }
 
     /* ── CHARTS ────────────────────────────────────────────── */
-    function renderCharts(weeks, phases, phasesPlanned, budget, sortedLabels) {
+    function renderCharts(weeks, phasesActual, phasesPlanned, msOrder, msRanges, budget, sortedLabels) {
         const uiLabels=sortedLabels.map(l=>formatDateForUI(l));
         const fontFam={family:'DM Sans',size:12};
         const monoFont={family:'DM Mono',weight:'bold',size:13};
@@ -955,45 +951,58 @@
             }
         });
 
-        // 4. Phase horizontal bar — actual spend vs planned spend per phase
-        const allPhaseKeys = [...new Set([...Object.keys(phases), ...Object.keys(phasesPlanned)])];
-        // Sort by planned descending so biggest phases appear at top
-        allPhaseKeys.sort((a,b) => (phasesPlanned[b]||0) - (phasesPlanned[a]||0));
-        const phaseActVals  = allPhaseKeys.map(k => Math.round(phases[k]||0));
-        const phasePlanVals = allPhaseKeys.map(k => Math.round(phasesPlanned[k]||0));
-        const phaseColors   = allPhaseKeys.map((_,i) => CHART_COLORS[i % CHART_COLORS.length]);
+        // 4. Phase horizontal grouped bar — Actual vs Planned per milestone phase
+        // Use milestone insertion order; append __other__ if it has data
+        const phaseOrder = [...msOrder];
+        if((phasesActual['__other__']||0)+(phasesPlanned['__other__']||0)>0) phaseOrder.push('__other__');
+        const phaseLabels   = phaseOrder.map(k => k==='__other__' ? 'Other' : (msRanges[k]?.name||k));
+        const phaseActVals  = phaseOrder.map(k => Math.round(phasesActual[k]||0));
+        const phasePlanVals = phaseOrder.map(k => Math.round(phasesPlanned[k]||0));
+        const phaseColors   = phaseOrder.map((_,i) => CHART_COLORS[i % CHART_COLORS.length]);
+
         if(chartRefs.phase) chartRefs.phase.destroy();
+        // Dynamic height: at least 240px, 52px per phase
+        const phaseCanvasWrap = document.getElementById('chart-phase').parentNode;
+        const dynH = Math.max(240, phaseOrder.length * 52);
+        phaseCanvasWrap.style.height = dynH + 'px';
+
         chartRefs.phase = new Chart(document.getElementById('chart-phase'), {
             type: 'bar',
             data: {
-                labels: allPhaseKeys,
+                labels: phaseLabels,
                 datasets: [
                     {
-                        label: 'Actual Spend',
-                        data: phaseActVals,
-                        backgroundColor: phaseColors.map(c => c + 'cc'),
-                        borderColor: phaseColors,
-                        borderWidth: 1.5,
-                        borderRadius: 4,
-                        datalabels: {
-                            display: ctx => ctx.dataset.data[ctx.dataIndex] > 0,
-                            anchor: 'end', align: 'end', clamp: true,
-                            color: '#1e293b', font: {family:'DM Mono', weight:'bold', size:11},
-                            formatter: v => v > 0 ? '€'+v.toLocaleString() : ''
-                        }
-                    },
-                    {
-                        label: 'Planned Spend',
+                        label: 'Planned (€)',
                         data: phasePlanVals,
                         backgroundColor: '#e2e8f0',
                         borderColor: '#94a3b8',
                         borderWidth: 1.5,
                         borderRadius: 4,
                         datalabels: {
-                            display: ctx => ctx.dataset.data[ctx.dataIndex] > 0,
-                            anchor: 'end', align: 'end', clamp: true,
-                            color: '#64748b', font: {family:'DM Mono', weight:'bold', size:11},
-                            formatter: v => v > 0 ? '€'+v.toLocaleString() : ''
+                            display: ctx => phasePlanVals[ctx.dataIndex] > 0,
+                            anchor: 'end', align: 'right', clamp: true,
+                            color: '#64748b',
+                            font: {family:'DM Mono', weight:'700', size:11},
+                            formatter: v => '€' + v.toLocaleString()
+                        }
+                    },
+                    {
+                        label: 'Actual (€)',
+                        data: phaseActVals,
+                        backgroundColor: phaseColors.map(c => c + 'dd'),
+                        borderColor: phaseColors,
+                        borderWidth: 1.5,
+                        borderRadius: 4,
+                        datalabels: {
+                            display: ctx => phaseActVals[ctx.dataIndex] > 0,
+                            anchor: 'end', align: 'right', clamp: true,
+                            color: '#1e293b',
+                            font: {family:'DM Mono', weight:'700', size:11},
+                            formatter: (v, ctx) => {
+                                const plan = phasePlanVals[ctx.dataIndex];
+                                const pct  = plan > 0 ? ' (' + ((v/plan)*100).toFixed(0) + '%)' : '';
+                                return '€' + v.toLocaleString() + pct;
+                            }
                         }
                     }
                 ]
@@ -1001,17 +1010,17 @@
             options: {
                 indexAxis: 'y',
                 responsive: true, maintainAspectRatio: false,
-                layout: { padding: { right: 80, top: 8, bottom: 8, left: 4 } },
+                layout: { padding: { right: 120, top: 8, bottom: 8, left: 4 } },
                 plugins: {
-                    legend: { labels: { font: fontFam } },
+                    legend: { position: 'top', labels: { font: fontFam, boxWidth: 12 } },
                     tooltip: {
                         callbacks: {
                             label: ctx => {
-                                const act  = phaseActVals[ctx.dataIndex];
-                                const plan = phasePlanVals[ctx.dataIndex];
-                                if(ctx.datasetIndex === 0) return ` Actual: €${act.toLocaleString()}`;
-                                const pct  = plan > 0 ? ((act/plan)*100).toFixed(0) : '—';
-                                return ` Planned: €${plan.toLocaleString()} (${pct}% consumed)`;
+                                const i = ctx.dataIndex;
+                                const act  = phaseActVals[i], plan = phasePlanVals[i];
+                                if(ctx.datasetIndex === 0) return ` Planned: €${plan.toLocaleString()}`;
+                                const pct = plan > 0 ? ' — ' + ((act/plan)*100).toFixed(0) + '% of plan' : '';
+                                return ` Actual: €${act.toLocaleString()}${pct}`;
                             }
                         }
                     },
@@ -1029,46 +1038,48 @@
     }
 
     /* ── PHASE BREAKDOWN TABLE ─────────────────────────────── */
-    function renderPhaseBreakdown(phases, phasesPlanned) {
+    function renderPhaseBreakdown(phasesActual, phasesPlanned, msOrder, msRanges) {
         const body = document.getElementById('phase-breakdown-body'); if(!body) return;
-        // Union of all phases from both actual and planned
-        const allKeys = [...new Set([...Object.keys(phases), ...Object.keys(phasesPlanned)])];
-        // Sort by planned descending (mirrors chart order)
-        allKeys.sort((a,b) => (phasesPlanned[b]||0) - (phasesPlanned[a]||0));
-        const totalAct  = allKeys.reduce((s,k) => s+(phases[k]||0), 0);
-        const totalPlan = allKeys.reduce((s,k) => s+(phasesPlanned[k]||0), 0);
 
-        body.innerHTML = allKeys.map((name, i) => {
-            const act  = Math.round(phases[name]||0);
-            const plan = Math.round(phasesPlanned[name]||0);
-            const pct  = plan > 0 ? ((act/plan)*100).toFixed(0) : '—';
-            const barW = plan > 0 ? Math.min((act/plan)*100, 100).toFixed(1) : 0;
-            const over  = plan > 0 && act > plan;
-            const color = CHART_COLORS[i % CHART_COLORS.length];
+        // Build ordered list: milestone order first, then __other__ if present
+        const phaseOrder = [...msOrder];
+        if((phasesActual['__other__']||0)+(phasesPlanned['__other__']||0)>0) phaseOrder.push('__other__');
+
+        let totalAct = 0, totalPlan = 0;
+        body.innerHTML = phaseOrder.map((key, i) => {
+            const label = key === '__other__' ? 'Other / General' : (msRanges[key]?.name || key);
+            const act   = Math.round(phasesActual[key]||0);
+            const plan  = Math.round(phasesPlanned[key]||0);
+            totalAct  += act;
+            totalPlan += plan;
+            const pct     = plan > 0 ? ((act/plan)*100).toFixed(0) : '—';
+            const barW    = plan > 0 ? Math.min((act/plan)*100, 100).toFixed(1) : 0;
+            const over    = plan > 0 && act > plan;
+            const low     = plan > 0 && parseFloat(pct) < 50;
+            const color   = CHART_COLORS[i % CHART_COLORS.length];
             const barColor = over ? '#ef4444' : color;
-            const pctClass = over ? 'style="color:#ef4444;font-weight:700;"'
-                           : (pct !== '—' && parseFloat(pct) < 50) ? 'style="color:#f59e0b;font-weight:700;"'
-                           : '';
+            const pctStyle = over ? 'color:#ef4444;font-weight:700;'
+                           : low  ? 'color:#f59e0b;font-weight:700;' : '';
             return `<tr>
                 <td>
                     <div style="display:flex;align-items:center;gap:6px;">
                         <span style="width:10px;height:10px;border-radius:2px;background:${color};flex-shrink:0;display:inline-block;"></span>
-                        <strong>${esc(name)}</strong>
+                        <strong>${esc(label)}</strong>
                     </div>
                     <div style="margin-top:5px;background:#e2e8f0;border-radius:3px;height:5px;overflow:hidden;">
                         <div style="width:${barW}%;height:5px;border-radius:3px;background:${barColor};transition:width 0.4s;"></div>
                     </div>
                 </td>
                 <td class="mono" style="text-align:right;white-space:nowrap;">€${act.toLocaleString()}</td>
-                <td class="mono" style="text-align:right;white-space:nowrap;color:var(--muted);">€${plan > 0 ? plan.toLocaleString() : '—'}</td>
-                <td class="mono" style="text-align:right;" ${pctClass}>${pct !== '—' ? pct+'%' : '—'}</td>
+                <td class="mono" style="text-align:right;white-space:nowrap;color:var(--muted);">€${plan>0?plan.toLocaleString():'—'}</td>
+                <td class="mono" style="text-align:right;${pctStyle}">${pct !== '—' ? pct+'%' : '—'}</td>
             </tr>`;
         }).join('')
         + `<tr style="border-top:2px solid var(--border);">
             <td><strong>Total</strong></td>
-            <td class="mono" style="text-align:right;"><strong>€${Math.round(totalAct).toLocaleString()}</strong></td>
-            <td class="mono" style="text-align:right;color:var(--muted);"><strong>€${Math.round(totalPlan).toLocaleString()}</strong></td>
-            <td class="mono" style="text-align:right;"><strong>${totalPlan > 0 ? ((totalAct/totalPlan)*100).toFixed(0)+'%' : '—'}</strong></td>
+            <td class="mono" style="text-align:right;"><strong>€${totalAct.toLocaleString()}</strong></td>
+            <td class="mono" style="text-align:right;color:var(--muted);"><strong>€${totalPlan>0?totalPlan.toLocaleString():'—'}</strong></td>
+            <td class="mono" style="text-align:right;"><strong>${totalPlan>0?((totalAct/totalPlan)*100).toFixed(0)+'%':'—'}</strong></td>
         </tr>`;
     }
 
@@ -1241,91 +1252,26 @@
 
     /* ── WEEKLY SPOTLIGHT ──────────────────────────────────── */
     function updateWeeklySpotlight(week) {
-        const body = document.getElementById('spotlight-body');
-        const agg  = {};
-
-        // Gather actuals: track billable hours, non-billable hours, and spend separately
-        globalData.actuals.filter(r => parseDateSafe(r.Date) === week).forEach(r => {
-            const key      = `${(r.Person||'').trim()}|${(r.Role||'').trim()}`;
-            const isBill   = parseFloat(r.Rate) > 0;
-            const h        = parseFloat(r['Time in Hours']) || 0;
-            const s        = parseFloat(r.Subtotal) || 0;
-            if (!agg[key]) agg[key] = {n:(r.Person||'').trim(), r:(r.Role||'').trim(), a:0, bill:0, nb:0, s:0, p:0, b:isBill, rate:parseFloat(r.Rate)||0};
-            agg[key].a    += h;
-            agg[key].s    += s;
-            if (isBill) agg[key].bill += h; else agg[key].nb += h;
+        const body=document.getElementById('spotlight-body');
+        const agg={};
+        globalData.actuals.filter(r=>parseDateSafe(r.Date)===week).forEach(r=>{
+            const key=`${(r.Person||'').trim()}|${(r.Role||'').trim()}`;
+            if(!agg[key]) agg[key]={n:(r.Person||'').trim(),r:(r.Role||'').trim(),a:0,s:0,p:0,b:parseFloat(r.Rate)>0};
+            agg[key].a+=parseFloat(r['Time in Hours'])||0;
+            agg[key].s+=parseFloat(r.Subtotal)||0;
         });
-
-        // Merge plan hours; capture rate for budget estimation
-        globalData.plan.filter(p => parseDateSafe(p.dateStr) === week).forEach(p => {
-            const key = `${(p.person||'').trim()}|${(p.role||'').trim()}`;
-            if (agg[key]) {
-                agg[key].p += p.planH || 0;
-                if (!agg[key].rate && p.plannedRate) agg[key].rate = p.plannedRate;
-            } else {
-                agg[key] = {n:(p.person||'').trim(), r:(p.role||'').trim(), a:0, bill:0, nb:0, s:0, p:p.planH||0, b:!!p.plannedRate, rate:p.plannedRate||0};
-            }
+        globalData.plan.filter(p=>parseDateSafe(p.dateStr)===week).forEach(p=>{
+            const key=`${(p.person||'').trim()}|${(p.role||'').trim()}`;
+            if(agg[key]) agg[key].p+=p.planH||0;
+            else agg[key]={n:(p.person||'').trim(),r:(p.role||'').trim(),a:0,s:0,p:p.planH||0,b:false};
         });
-
-        const rows = Object.values(agg);
-
-        // ── Summary bar calculations ────────────────────────────────────────────────
-        // Hours: ALL hours (billable + non-billable) vs ALL planned hours
-        const totalActH  = rows.reduce((s,i) => s + i.a,    0);
-        const totalBillH = rows.reduce((s,i) => s + i.bill, 0);
-        const totalNbH   = rows.reduce((s,i) => s + i.nb,   0);
-        const totalPlanH = rows.reduce((s,i) => s + i.p,    0);
-
-        // Budget: actual spend (billable Subtotal only — non-billable Rate=0 → Subtotal=0)
-        // vs planned billable spend (planned hours × rate, only for billable resources)
-        const totalActS  = rows.reduce((s,i) => s + i.s, 0);
-        const totalPlanS = rows.reduce((s,i) => {
-            if (!i.b || i.p === 0) return s;
-            const rate = i.rate || RATE_FALLBACK;
-            return s + i.p * rate;
-        }, 0);
-
-        function fillSummaryBar(actId, planId, barId, pctId, varId, actual, planned, isBudget) {
-            const fmtV = v => isBudget ? `€${Math.round(v).toLocaleString()}` : `${v.toFixed(1)}h`;
-            const pct  = planned > 0 ? (actual / planned) * 100 : 0;
-            const barW = Math.min(pct, 100);
-            const over  = pct > 105;
-            const under = pct < 90 && planned > 0;
-            const diff  = actual - planned;
-            const diffTxt = (diff >= 0 ? '+' : '') + fmtV(diff);
-            const barColor = over ? '#ef4444' : under ? '#f59e0b' : '#10b981';
-            const el = id => document.getElementById(id);
-            el(actId).textContent = fmtV(actual);
-            el(planId).textContent = fmtV(planned);
-            el(barId).style.width      = barW + '%';
-            el(barId).style.background = barColor;
-            el(pctId).textContent = planned > 0 ? `${Math.round(pct)}% utilised` : 'No plan data';
-            el(pctId).className   = over ? 'wsummary-over' : under ? 'wsummary-under' : 'wsummary-zero';
-            el(varId).textContent = planned > 0 ? `${diffTxt} vs plan` : '';
-            el(varId).className   = over ? 'wsummary-over' : under ? 'wsummary-under' : 'wsummary-zero';
-        }
-
-        fillSummaryBar('ws-hours-actual','ws-hours-plan','ws-hours-bar','ws-hours-pct','ws-hours-var',
-                       totalActH, totalPlanH, false);
-        fillSummaryBar('ws-budget-actual','ws-budget-plan','ws-budget-bar','ws-budget-pct','ws-budget-var',
-                       totalActS, totalPlanS, true);
-
-        // Billable / Non-billable breakdown chips
-        const bEl = document.getElementById('ws-hours-bill');
-        const nEl = document.getElementById('ws-hours-nb');
-        if (bEl) bEl.textContent = totalBillH.toFixed(1) + 'h';
-        if (nEl) nEl.textContent = totalNbH.toFixed(1) + 'h';
-
-        // ── Per-resource table ──────────────────────────────────────────────────────
-        body.innerHTML = rows.map(i => {
-            const variance   = i.a - i.p;
-            const varClass   = variance < 0 ? 'variance-pos' : variance > 0 ? 'variance-neg' : '';
-            const varSign    = variance > 0 ? '+' : '';
-            const badgeClass = i.b ? 'status-bill' : 'status-nb';
-            const badgeText  = i.b ? 'Billable' : 'Non-Bill';
-            const statusDisplay = (i.a === 0 && i.p > 0 && !i.b)
-                ? `<span class="status-nb">Planned</span>`
-                : `<span class="${badgeClass}">${badgeText}</span>`;
+        body.innerHTML=Object.values(agg).map(i=>{
+            const variance=i.a-i.p;
+            const varClass=variance<0?'variance-pos':variance>0?'variance-neg':'';
+            const varSign=variance>0?'+':'';
+            const badgeClass=i.b?'status-bill':'status-nb';
+            const badgeText=i.b?'Billable':'Non-Bill';
+            const statusDisplay=(i.a===0&&i.p>0&&!i.b)?`<span class="status-nb">Planned</span>`:`<span class="${badgeClass}">${badgeText}</span>`;
             return `<tr>
                 <td><strong>${esc(i.n)}</strong></td>
                 <td>${esc(i.r)}</td>
@@ -1335,7 +1281,7 @@
                 <td class="${varClass}">${varSign}${variance.toFixed(1)}</td>
                 <td class="mono">€${i.s.toLocaleString()}</td>
             </tr>`;
-        }).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px;">No data for this week</td></tr>';
+        }).join('')||'<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px;">No data for this week</td></tr>';
     }
 
     /* ── PDF EXPORT ────────────────────────────────────────── */
