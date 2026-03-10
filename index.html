@@ -327,7 +327,10 @@
             <div class="alert-panel">
                 <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
                     <span style="margin:0;">📋 Delinquency & Missing</span>
-                    <small style="font-size:11px;color:var(--muted);font-weight:500;">Scheduled but 0h</small>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <small style="font-size:11px;color:var(--muted);font-weight:500;">Scheduled but 0h</small>
+                        <select id="delinqWeekSelect" class="btn-select no-print" style="font-size:11px;padding:4px 8px;" onchange="refreshAlertPanels(this.value)"></select>
+                    </div>
                 </div>
                 <div id="missing-timesheets"></div>
             </div>
@@ -366,11 +369,11 @@
             </div>
         </div>
 
-        <!-- Phase doughnut + Phase breakdown table -->
+        <!-- Phase chart + Phase breakdown table -->
         <div class="equal-grid">
             <div class="card">
-                <h3 class="card-title">🗂️ Spend by Phase (Billable €)</h3>
-                <div style="height:310px;width:100%;position:relative;"><canvas id="chart-phase"></canvas></div>
+                <h3 class="card-title">🗂️ Spend by Phase — Actual vs Planned (€)</h3>
+                <div style="height:340px;width:100%;position:relative;"><canvas id="chart-phase"></canvas></div>
             </div>
             <div class="card">
                 <h3 class="card-title">📋 Phase Cost Breakdown</h3>
@@ -378,8 +381,9 @@
                     <table class="phase-table">
                         <thead><tr>
                             <th>Phase</th>
-                            <th style="text-align:right;">Spend (€)</th>
-                            <th style="text-align:right;">% of Total</th>
+                            <th style="text-align:right;">Actual (€)</th>
+                            <th style="text-align:right;">Planned (€)</th>
+                            <th style="text-align:right;">% of Planned</th>
                         </tr></thead>
                         <tbody id="phase-breakdown-body"></tbody>
                     </table>
@@ -559,7 +563,7 @@
 
     /* ── PROCESS ───────────────────────────────────────────── */
     function processData() {
-        const weeks={}, people={}, phases={};
+        const weeks={}, people={}, phases={}, phasesPlanned={};
         const totals={ burn:0, hours:0, bill:0, nb:0 };
         const budget = parseFloat(document.getElementById('budgetLimit').value) || 0;
         const sortedPhases = [...globalData.rawPhases].sort((a,b)=>b.length-a.length);
@@ -588,22 +592,34 @@
             const w = parseDateSafe(p.dateStr);
             if(!people[p.person]) people[p.person]={weeks:{},actualLast:null,plannedFirst:null,plannedLast:null,rate:p.plannedRate||RATE_FALLBACK};
             if(p.planH>0 && w){
-                // Store as normalised YYYY-MM-DD Monday so parseDateLocal always works in renderRolloff
                 if(!people[p.person].plannedFirst||w<people[p.person].plannedFirst) people[p.person].plannedFirst=w;
                 if(!people[p.person].plannedLast ||w>people[p.person].plannedLast)  people[p.person].plannedLast=w;
             }
             if(w&&weeks[w]) weeks[w].plan+=p.planH;
             if(new Date(p.dateStr)>new Date()) eacRem+=p.planH*(people[p.person].rate||p.plannedRate||RATE_FALLBACK);
+
+            // ── Planned spend per phase ──────────────────────────────────────────
+            // Use role/phase field of the plan row to match against phase keywords,
+            // same longest-match logic as actuals. Rate from the person record (built
+            // by actuals loop above) or from plan row, or fallback.
+            if(p.planH > 0) {
+                const roleTxt = String(p.role||p.phase||p.task||'').toLowerCase();
+                let phaseMatch = 'Other/General';
+                for(let ph of sortedPhases){ if(roleTxt.includes(ph.toLowerCase())){phaseMatch=ph;break;} }
+                const rate = people[p.person]?.rate || p.plannedRate || RATE_FALLBACK;
+                // Only count billable planned hours (rate > 0)
+                if(rate > 0) phasesPlanned[phaseMatch] = (phasesPlanned[phaseMatch]||0) + (p.planH * rate);
+            }
         });
 
-        updateUI(weeks, people, phases, totals, eacRem, budget);
-        // Store for on-demand re-renders (alert panels, spenders)
+        updateUI(weeks, people, phases, phasesPlanned, totals, eacRem, budget);
         globalData._people = people;
         globalData._weeks  = weeks;
+        globalData._phasesPlanned = phasesPlanned;
     }
 
     /* ── UPDATE UI ─────────────────────────────────────────── */
-    function updateUI(weeks, people, phases, totals, eacRem, budget) {
+    function updateUI(weeks, people, phases, phasesPlanned, totals, eacRem, budget) {
         document.getElementById('loader').style.display    = 'none';
         document.getElementById('dashboard').style.display = 'block';
 
@@ -644,14 +660,17 @@
         const weekOptHtml = sortedW.map(w=>`<option value="${w}">${w}</option>`).join('');
         document.getElementById('weekSelect').innerHTML      = weekOptHtml;
         document.getElementById('alertWeekSelect').innerHTML = weekOptHtml;
-        document.getElementById('spenderWeekSelect').innerHTML = weekOptHtml;
+        const delinqEl = document.getElementById('delinqWeekSelect');
+        if(delinqEl) delinqEl.innerHTML = weekOptHtml;
+        const spenderEl = document.getElementById('spenderWeekSelect');
+        if(spenderEl) spenderEl.innerHTML = weekOptHtml;
 
         renderRAGBanner(weeks, people, totals, budget, eac, sortedLabels);
         renderSparklines(weeks, sortedLabels);
         renderHeatmap(people, sortedLabels);
         renderExceptions(weeks, people, sortedW[0]);
-        renderCharts(weeks, phases, budget, sortedLabels);
-        renderPhaseBreakdown(phases);
+        renderCharts(weeks, phases, phasesPlanned, budget, sortedLabels);
+        renderPhaseBreakdown(phases, phasesPlanned);
         renderTopSpenders(sortedW[0]);
         renderMilestones();
         renderRolloff(people);
@@ -789,7 +808,7 @@
     }
 
     /* ── CHARTS ────────────────────────────────────────────── */
-    function renderCharts(weeks, phases, budget, sortedLabels) {
+    function renderCharts(weeks, phases, phasesPlanned, budget, sortedLabels) {
         const uiLabels=sortedLabels.map(l=>formatDateForUI(l));
         const fontFam={family:'DM Sans',size:12};
         const monoFont={family:'DM Mono',weight:'bold',size:13};
@@ -936,57 +955,120 @@
             }
         });
 
-        // 4. Phase doughnut — labels outside with clamp
-        const phaseKeys=Object.keys(phases), phaseVals=Object.values(phases);
-        const phaseTotal=phaseVals.reduce((a,b)=>a+b,0);
+        // 4. Phase horizontal bar — actual spend vs planned spend per phase
+        const allPhaseKeys = [...new Set([...Object.keys(phases), ...Object.keys(phasesPlanned)])];
+        // Sort by planned descending so biggest phases appear at top
+        allPhaseKeys.sort((a,b) => (phasesPlanned[b]||0) - (phasesPlanned[a]||0));
+        const phaseActVals  = allPhaseKeys.map(k => Math.round(phases[k]||0));
+        const phasePlanVals = allPhaseKeys.map(k => Math.round(phasesPlanned[k]||0));
+        const phaseColors   = allPhaseKeys.map((_,i) => CHART_COLORS[i % CHART_COLORS.length]);
         if(chartRefs.phase) chartRefs.phase.destroy();
-        chartRefs.phase=new Chart(document.getElementById('chart-phase'),{
-            type:'doughnut',
-            data:{labels:phaseKeys,datasets:[{data:phaseVals,backgroundColor:CHART_COLORS,borderWidth:2,borderColor:'#fff',hoverOffset:6}]},
-            options:{responsive:true,maintainAspectRatio:false,cutout:'45%',layout:{padding:30},
-                plugins:{
-                    legend:{display:false},
-                    tooltip:{callbacks:{label:ctx=>` €${ctx.parsed.toLocaleString()} (${((ctx.parsed/phaseTotal)*100).toFixed(1)}%)`}},
-                    datalabels:{
-                        display:ctx=>(ctx.dataset.data[ctx.dataIndex]/phaseTotal)>=0.03,
-                        color:'#1e293b',align:'end',anchor:'end',clamp:true,offset:6,
-                        font:{family:'DM Sans',weight:'700',size:11},
-                        formatter:(value,ctx)=>{
-                            const pct=((value/phaseTotal)*100).toFixed(1);
-                            const lbl=ctx.chart.data.labels[ctx.dataIndex];
-                            return [(lbl.length>14?lbl.substring(0,13)+'…':lbl),`€${value.toLocaleString()} (${pct}%)`];
-                        },
-                        textAlign:'center'
+        chartRefs.phase = new Chart(document.getElementById('chart-phase'), {
+            type: 'bar',
+            data: {
+                labels: allPhaseKeys,
+                datasets: [
+                    {
+                        label: 'Actual Spend',
+                        data: phaseActVals,
+                        backgroundColor: phaseColors.map(c => c + 'cc'),
+                        borderColor: phaseColors,
+                        borderWidth: 1.5,
+                        borderRadius: 4,
+                        datalabels: {
+                            display: ctx => ctx.dataset.data[ctx.dataIndex] > 0,
+                            anchor: 'end', align: 'end', clamp: true,
+                            color: '#1e293b', font: {family:'DM Mono', weight:'bold', size:11},
+                            formatter: v => v > 0 ? '€'+v.toLocaleString() : ''
+                        }
+                    },
+                    {
+                        label: 'Planned Spend',
+                        data: phasePlanVals,
+                        backgroundColor: '#e2e8f0',
+                        borderColor: '#94a3b8',
+                        borderWidth: 1.5,
+                        borderRadius: 4,
+                        datalabels: {
+                            display: ctx => ctx.dataset.data[ctx.dataIndex] > 0,
+                            anchor: 'end', align: 'end', clamp: true,
+                            color: '#64748b', font: {family:'DM Mono', weight:'bold', size:11},
+                            formatter: v => v > 0 ? '€'+v.toLocaleString() : ''
+                        }
                     }
+                ]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true, maintainAspectRatio: false,
+                layout: { padding: { right: 80, top: 8, bottom: 8, left: 4 } },
+                plugins: {
+                    legend: { labels: { font: fontFam } },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => {
+                                const act  = phaseActVals[ctx.dataIndex];
+                                const plan = phasePlanVals[ctx.dataIndex];
+                                if(ctx.datasetIndex === 0) return ` Actual: €${act.toLocaleString()}`;
+                                const pct  = plan > 0 ? ((act/plan)*100).toFixed(0) : '—';
+                                return ` Planned: €${plan.toLocaleString()} (${pct}% consumed)`;
+                            }
+                        }
+                    },
+                    datalabels: {}
+                },
+                scales: {
+                    x: {
+                        ticks: { callback: v => '€'+(v>=1000?(v/1000).toFixed(0)+'k':v), font: fontFam },
+                        grid: { color: '#f1f5f9' }
+                    },
+                    y: { ticks: { font: fontFam } }
                 }
             }
         });
     }
 
     /* ── PHASE BREAKDOWN TABLE ─────────────────────────────── */
-    function renderPhaseBreakdown(phases) {
-        const body=document.getElementById('phase-breakdown-body'); if(!body) return;
-        const total=Object.values(phases).reduce((a,b)=>a+b,0);
-        const sorted=Object.entries(phases).sort((a,b)=>b[1]-a[1]);
-        body.innerHTML=sorted.map(([name,val],i)=>{
-            const pct=total>0?(val/total*100).toFixed(1):'0.0';
-            const color=CHART_COLORS[i%CHART_COLORS.length];
+    function renderPhaseBreakdown(phases, phasesPlanned) {
+        const body = document.getElementById('phase-breakdown-body'); if(!body) return;
+        // Union of all phases from both actual and planned
+        const allKeys = [...new Set([...Object.keys(phases), ...Object.keys(phasesPlanned)])];
+        // Sort by planned descending (mirrors chart order)
+        allKeys.sort((a,b) => (phasesPlanned[b]||0) - (phasesPlanned[a]||0));
+        const totalAct  = allKeys.reduce((s,k) => s+(phases[k]||0), 0);
+        const totalPlan = allKeys.reduce((s,k) => s+(phasesPlanned[k]||0), 0);
+
+        body.innerHTML = allKeys.map((name, i) => {
+            const act  = Math.round(phases[name]||0);
+            const plan = Math.round(phasesPlanned[name]||0);
+            const pct  = plan > 0 ? ((act/plan)*100).toFixed(0) : '—';
+            const barW = plan > 0 ? Math.min((act/plan)*100, 100).toFixed(1) : 0;
+            const over  = plan > 0 && act > plan;
+            const color = CHART_COLORS[i % CHART_COLORS.length];
+            const barColor = over ? '#ef4444' : color;
+            const pctClass = over ? 'style="color:#ef4444;font-weight:700;"'
+                           : (pct !== '—' && parseFloat(pct) < 50) ? 'style="color:#f59e0b;font-weight:700;"'
+                           : '';
             return `<tr>
                 <td>
                     <div style="display:flex;align-items:center;gap:6px;">
                         <span style="width:10px;height:10px;border-radius:2px;background:${color};flex-shrink:0;display:inline-block;"></span>
-                        ${esc(name)}
+                        <strong>${esc(name)}</strong>
                     </div>
-                    <div class="phase-bar-wrap"><div class="phase-bar-fill" style="width:${pct}%;background:${color};"></div></div>
+                    <div style="margin-top:5px;background:#e2e8f0;border-radius:3px;height:5px;overflow:hidden;">
+                        <div style="width:${barW}%;height:5px;border-radius:3px;background:${barColor};transition:width 0.4s;"></div>
+                    </div>
                 </td>
-                <td class="mono" style="text-align:right;">€${val.toLocaleString()}</td>
-                <td class="mono" style="text-align:right;">${pct}%</td>
+                <td class="mono" style="text-align:right;white-space:nowrap;">€${act.toLocaleString()}</td>
+                <td class="mono" style="text-align:right;white-space:nowrap;color:var(--muted);">€${plan > 0 ? plan.toLocaleString() : '—'}</td>
+                <td class="mono" style="text-align:right;" ${pctClass}>${pct !== '—' ? pct+'%' : '—'}</td>
             </tr>`;
         }).join('')
-        +`<tr style="border-top:2px solid var(--border);">
+        + `<tr style="border-top:2px solid var(--border);">
             <td><strong>Total</strong></td>
-            <td class="mono" style="text-align:right;"><strong>€${total.toLocaleString()}</strong></td>
-            <td class="mono" style="text-align:right;"><strong>100%</strong></td>
+            <td class="mono" style="text-align:right;"><strong>€${Math.round(totalAct).toLocaleString()}</strong></td>
+            <td class="mono" style="text-align:right;color:var(--muted);"><strong>€${Math.round(totalPlan).toLocaleString()}</strong></td>
+            <td class="mono" style="text-align:right;"><strong>${totalPlan > 0 ? ((totalAct/totalPlan)*100).toFixed(0)+'%' : '—'}</strong></td>
         </tr>`;
     }
 
