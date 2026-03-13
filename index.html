@@ -441,7 +441,7 @@
 <script>
     Chart.register(ChartDataLabels);
 
-    const API_URL        = "https://script.google.com/macros/s/AKfycbyoU4NiluGpZqzoSqxEWWmb5IKj0ttIHq2bStmPP3Ijd557ZaPlz3BQf2wWVLUZG3vM/exec";
+    const API_URL        = "https://script.google.com/macros/s/AKfycbzSFOkxaBA1JJiLFcA6PjMI2c5UvrUq8PtyXMkkx-6U4hozEUoU7pFiVztJTRbvov-e/exec";
     const RATE_FALLBACK  = 100;
     const THRESH_OVER    = 40;
     const THRESH_GOOD    = 30;
@@ -450,7 +450,7 @@
     const ACTIVE_DAYS    = 14;
     const CHART_COLORS   = ['#004a99','#3b82f6','#10b981','#f59e0b','#8b5cf6','#ec4899','#14b8a6'];
 
-    let globalData = { actuals:[], plan:[], rawPhases:[], milestones:[] };
+    let globalData = { actuals:[], plan:[], rawPhases:[], milestones:[], unknownTasks:[] };
     let chartRefs  = {};
     let sparkRefs  = {};
     let _escEl     = null;
@@ -473,19 +473,59 @@
         return new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric'});
     }
 
-    function parseDateSafe(str) {
+    function toLocalISO(d) {
+        var y = d.getFullYear();
+        var m = String(d.getMonth()+1); if(m.length<2) m='0'+m;
+        var day = String(d.getDate()); if(day.length<2) day='0'+day;
+        return y+'-'+m+'-'+day;
+    }
+
+        function parseDateSafe(str) {
         if (!str) return null;
-        let d = new Date(str);
-        if (isNaN(d.getTime())) {
-            const months = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
-            const parts  = String(str).split('-');
+        const s = String(str).trim();
+        const months = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+
+        let d = null;
+
+        // Format 1: YYYY-MM-DD (ISO) — from Phases tab / ResourcePlan
+        if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+            const p = s.split('-');
+            d = new Date(+p[0], +p[1]-1, +p[2]);
+        }
+        // Format 2: DD-Mon-YY  e.g. "11-Mar-26" — TimeEntries export format
+        else if (/^\d{1,2}-[A-Za-z]{3}-\d{2}$/.test(s)) {
+            const p   = s.split('-');
+            const day = parseInt(p[0], 10);
+            const mon = months[p[1].charAt(0).toUpperCase() + p[1].slice(1).toLowerCase()];
+            const yr  = 2000 + parseInt(p[2], 10);
+            if (mon !== undefined) d = new Date(yr, mon, day);
+        }
+        // Format 3: DD-Mon-YYYY e.g. "11-Mar-2026"
+        else if (/^\d{1,2}-[A-Za-z]{3}-\d{4}$/.test(s)) {
+            const p   = s.split('-');
+            const day = parseInt(p[0], 10);
+            const mon = months[p[1].charAt(0).toUpperCase() + p[1].slice(1).toLowerCase()];
+            const yr  = parseInt(p[2], 10);
+            if (mon !== undefined) d = new Date(yr, mon, day);
+        }
+        // Format 4: Mon-DD  e.g. "Mar-2"
+        else {
+            const parts = s.split('-');
             if (parts.length === 2 && months[parts[0]] !== undefined)
                 d = new Date(new Date().getFullYear(), months[parts[0]], parseInt(parts[1],10));
         }
-        if (isNaN(d.getTime())) return null;
-        const day = d.getDay(), diff = d.getDate() - day + (day===0 ? -6 : 1);
+
+        // Fallback: let the browser try
+        if (!d || isNaN(d.getTime())) {
+            d = new Date(s);
+        }
+        if (!d || isNaN(d.getTime())) return null;
+
+        // Snap to Monday of that week
+        const day = d.getDay();
+        const diff = d.getDate() - day + (day === 0 ? -6 : 1);
         const mon = new Date(d); mon.setDate(diff);
-        return mon.toISOString().split('T')[0];
+        return toLocalISO(mon);
     }
 
     /* ── FETCH ─────────────────────────────────────────────── */
@@ -501,10 +541,11 @@
             const data = await res.json();
             if (data.error) throw new Error(data.error);
             globalData = {
-                actuals:    Array.isArray(data.actuals)    ? data.actuals    : [],
-                plan:       Array.isArray(data.plan)       ? data.plan       : [],
-                rawPhases:  Array.isArray(data.rawPhases)  ? data.rawPhases  : [],
-                milestones: Array.isArray(data.milestones) ? data.milestones : [],
+                actuals:      Array.isArray(data.actuals)      ? data.actuals      : [],
+                plan:         Array.isArray(data.plan)         ? data.plan         : [],
+                rawPhases:    Array.isArray(data.rawPhases)    ? data.rawPhases    : [],
+                milestones:   Array.isArray(data.milestones)   ? data.milestones   : [],
+                unknownTasks: Array.isArray(data.unknownTasks) ? data.unknownTasks : [],
             };
             const now = new Date();
             document.getElementById('sync-time').textContent = now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
@@ -523,40 +564,74 @@
         const totals={ burn:0, hours:0, bill:0, nb:0 };
         const budget = parseFloat(document.getElementById('budgetLimit').value) || 0;
 
-        // ── Build milestone date ranges ───────────────────────────────────────────
-        // Each milestone name → {name, startISO, endISO (Friday of last week)}
-        // Uses same grouping logic as renderMilestones: keep earliest start, latest end.
-        const msRanges = {};  // lowerName → {name, start:YYYY-MM-DD, end:YYYY-MM-DD (Friday)}
-        globalData.milestones.forEach(ms => {
-            const name   = (ms.name||ms.Name||ms.milestone||ms.Milestone||'').trim();
-            if(!name) return;
-            const rawDue = ms.due||ms.Due||ms.date||ms.Date||'';
-            const monISO = rawDue ? parseDateSafe(rawDue) : null;
-            if(!monISO) return;
-            const key = name.toLowerCase();
-            // Friday of this week = Monday + 4
-            const monDate = (()=>{const p=monISO.split('-');return new Date(+p[0],+p[1]-1,+p[2]);})();
-            const friDate = new Date(monDate); friDate.setDate(monDate.getDate()+4);
-            const friISO  = friDate.toISOString().split('T')[0];
-            if(!msRanges[key]){
-                msRanges[key] = {name, start:monISO, end:friISO};
-            } else {
-                if(monISO < msRanges[key].start) msRanges[key].start = monISO;
-                if(friISO > msRanges[key].end)   msRanges[key].end   = friISO;
-            }
+        // ── Build canonical phase list from rawPhases (sourced from Phases tab) ────
+        // rawPhases is the ordered array of phase names sent by the GS backend.
+        // This is now authoritative — no need to also scan milestones for names.
+        const phaseSet  = new Set();
+        const phaseOrder = [];
+        globalData.rawPhases.forEach(ph => {
+            const n = String(ph||'').trim();
+            if(n && !phaseSet.has(n.toLowerCase())){ phaseSet.add(n.toLowerCase()); phaseOrder.push(n); }
         });
+        // Ensure __other__ display name is always available
+        phaseOrder.push('__other__');
+        phaseSet.add('__other__');
 
-        // Helper: which milestone does a date ISO fall into?
-        function dateToPhase(dateISO) {
-            if(!dateISO) return null;
-            const d = dateISO.substring(0,10);
-            for(const key of Object.keys(msRanges)){
-                if(d >= msRanges[key].start && d <= msRanges[key].end) return key;
+        // Sort by length DESC so longer names match before shorter substrings
+        const sortedCandidates = [...phaseOrder].filter(p => p !== '__other__').sort((a,b) => b.length - a.length);
+
+        // ── Normalise helper ─────────────────────────────────────────────────────
+        function norm(s){ return String(s||'').toLowerCase().replace(/[\s\-_\/]+/g,' ').trim(); }
+
+        // matchPlanPhase: direct lookup using explicit p.phase from GS
+        function matchPlanPhase(raw) {
+            const r = norm(raw);
+            if(!r) return '__other__';
+            for(const c of sortedCandidates){ if(norm(c)===r) return c.toLowerCase(); }
+            for(const c of sortedCandidates){
+                const nc = norm(c);
+                if(r.startsWith(nc)||nc.startsWith(r)) return c.toLowerCase();
             }
-            return null;
+            return '__other__';
         }
 
-        // ── Accumulators keyed by lowerName ──────────────────────────────────────
+        // matchTaskPhase: maps TimeEntries Task/Deliverable → phase key
+        // Extracts prefix before " - " separator then matches via:
+        //   1. Exact match
+        //   2. Attempt STARTS WITH phase name  ("sprint 0 tpm" starts with "sprint 0")
+        //   3. Phase name STARTS WITH attempt  ("final uat" matches "final uat / launch readiness")
+        // Intentionally does NOT use includes() to avoid "Pre Kick Off" matching "Kick Off"
+        const taskPhaseCache = {};
+        function matchTaskPhase(taskRaw) {
+            const key = String(taskRaw||'').trim();
+            if(taskPhaseCache[key] !== undefined) return taskPhaseCache[key];
+
+            const sepIdx = key.search(/\s*-\s+/);
+            const toTry  = [];
+            if(sepIdx > 0) toTry.push(key.substring(0, sepIdx).trim());
+            toTry.push(key);
+
+            for(const attempt of toTry){
+                const a = norm(attempt);
+                // 1. Exact match
+                for(const c of sortedCandidates){
+                    if(norm(c)===a){ taskPhaseCache[key]=c.toLowerCase(); return c.toLowerCase(); }
+                }
+                // 2. Attempt starts with phase name
+                for(const c of sortedCandidates){
+                    const nc = norm(c);
+                    if(a.startsWith(nc)){ taskPhaseCache[key]=c.toLowerCase(); return c.toLowerCase(); }
+                }
+                // 3. Phase name starts with attempt
+                for(const c of sortedCandidates){
+                    const nc = norm(c);
+                    if(nc.startsWith(a)){ taskPhaseCache[key]=c.toLowerCase(); return c.toLowerCase(); }
+                }
+            }
+            taskPhaseCache[key]='__other__'; return '__other__';
+        }
+
+        // ── Accumulators ─────────────────────────────────────────────────────────
         const phasesActual  = {};   // lowerName → actual spend €
         const phasesPlanned = {};   // lowerName → planned spend €
 
@@ -568,11 +643,9 @@
             if (!weeks[w]) weeks[w]={burn:0,act:0,plan:0,bill:0,nb:0};
             weeks[w].burn+=s; weeks[w].act+=h;
             if(isBill) weeks[w].bill+=h; else weeks[w].nb+=h;
-            // Accumulate actual spend into phase by date
             if(s>0){
-                const phKey = dateToPhase(w);
-                if(phKey) phasesActual[phKey] = (phasesActual[phKey]||0) + s;
-                else      phasesActual['__other__'] = (phasesActual['__other__']||0) + s;
+                const phKey = matchTaskPhase(r['Task/Deliverable']);
+                phasesActual[phKey] = (phasesActual[phKey]||0) + s;
             }
             if(!people[r.Person]) people[r.Person]={weeks:{},actualLast:null,plannedFirst:null,plannedLast:null,rate:parseFloat(r.Rate)||0};
             people[r.Person].weeks[w]=(people[r.Person].weeks[w]||0)+h;
@@ -591,31 +664,38 @@
             }
             if(w&&weeks[w]) weeks[w].plan+=p.planH;
             if(new Date(p.dateStr)>new Date()) eacRem+=p.planH*(people[p.person].rate||p.plannedRate||RATE_FALLBACK);
-            // Accumulate planned spend into phase by date
-            if(p.planH>0 && w){
+            // Planned spend per phase — use explicit p.phase field from GS (now always populated)
+            if(p.planH>0){
+                const phKey  = matchPlanPhase(p.phase||'');
                 const rate   = people[p.person]?.rate || p.plannedRate || RATE_FALLBACK;
-                const phKey  = dateToPhase(w);
-                const planCost = p.planH * rate;
-                if(phKey) phasesPlanned[phKey] = (phasesPlanned[phKey]||0) + planCost;
-                else      phasesPlanned['__other__'] = (phasesPlanned['__other__']||0) + planCost;
+                phasesPlanned[phKey] = (phasesPlanned[phKey]||0) + (p.planH * rate);
             }
         });
 
-        // Build ordered phase list: milestone insertion order, then __other__ last
-        const msOrder = Object.keys(msRanges); // already insertion-ordered
-        // Store for rendering
-        globalData._msRanges     = msRanges;
-        globalData._msOrder      = msOrder;
+        // Build display-order array of canonical lower-keys that have any data
+        const activeKeys = new Set([...Object.keys(phasesActual), ...Object.keys(phasesPlanned)]);
+        const orderedKeys = phaseOrder
+            .filter(n => n !== '__other__')
+            .map(n => n.toLowerCase())
+            .filter(k => activeKeys.has(k));
+        if(activeKeys.has('__other__')) orderedKeys.push('__other__');
+        // name lookup: lowerKey → display name
+        const phaseNameMap = {};
+        phaseOrder.filter(n => n !== '__other__').forEach(n => { phaseNameMap[n.toLowerCase()] = n; });
+        phaseNameMap['__other__'] = 'Others';
+
         globalData._phasesActual  = phasesActual;
         globalData._phasesPlanned = phasesPlanned;
+        globalData._phaseOrder    = orderedKeys;
+        globalData._phaseNameMap  = phaseNameMap;
         globalData._people = people;
         globalData._weeks  = weeks;
 
-        updateUI(weeks, people, phasesActual, phasesPlanned, msOrder, msRanges, totals, eacRem, budget);
+        updateUI(weeks, people, phasesActual, phasesPlanned, orderedKeys, phaseNameMap, totals, eacRem, budget);
     }
 
     /* ── UPDATE UI ─────────────────────────────────────────── */
-    function updateUI(weeks, people, phasesActual, phasesPlanned, msOrder, msRanges, totals, eacRem, budget) {
+    function updateUI(weeks, people, phasesActual, phasesPlanned, phaseOrder, phaseNameMap, totals, eacRem, budget) {
         document.getElementById('loader').style.display    = 'none';
         document.getElementById('dashboard').style.display = 'block';
 
@@ -646,14 +726,12 @@
         setTrend('kpi-bench-trend', benchPct<15?'ok':benchPct<25?'warn':'bad', benchPct<15?'✓ Low':benchPct<25?'▴ Moderate':'▴ High');
         setTrend('kpi-eff-trend',   effPct>=75?'ok':effPct>=60?'warn':'bad', effPct>=75?'✓ Healthy':effPct>=60?'▾ Low':'▾ Critical');
 
-        // EAC Confidence
         const futureWks=[...new Set(globalData.plan.filter(p=>new Date(p.dateStr)>new Date()).map(p=>parseDateSafe(p.dateStr)).filter(Boolean))].length;
         const confLabel=futureWks===0?'No Data':futureWks<4?'Low':futureWks<8?'Medium':'High';
         const confType =futureWks===0?'bad':futureWks<4?'warn':futureWks<8?'warn':'ok';
         document.getElementById('kpi-conf').textContent=confLabel;
         setTrend('kpi-conf-trend',confType,`${futureWks} wks planned`);
 
-        // Populate all week dropdowns
         const weekOptHtml = sortedW.map(w=>`<option value="${w}">${w}</option>`).join('');
         ['weekSelect','alertWeekSelect','delinqWeekSelect','spenderWeekSelect'].forEach(id=>{
             const el=document.getElementById(id); if(el) el.innerHTML=weekOptHtml;
@@ -663,8 +741,8 @@
         renderSparklines(weeks, sortedLabels);
         renderHeatmap(people, sortedLabels);
         renderExceptions(weeks, people, sortedW[0]);
-        renderCharts(weeks, phasesActual, phasesPlanned, msOrder, msRanges, budget, sortedLabels);
-        renderPhaseBreakdown(phasesActual, phasesPlanned, msOrder, msRanges);
+        renderCharts(weeks, phasesActual, phasesPlanned, phaseOrder, phaseNameMap, budget, sortedLabels);
+        renderPhaseBreakdown(phasesActual, phasesPlanned, phaseOrder, phaseNameMap);
         renderTopSpenders(sortedW[0]);
         renderMilestones();
         renderRolloff(people);
@@ -739,9 +817,8 @@
         table.innerHTML=rows.join('');
     }
 
-    /* ── REFRESH ALERT PANELS (on dropdown change) ─────────── */
+    /* ── REFRESH ALERT PANELS ──────────────────────────────── */
     function refreshAlertPanels(week) {
-        // Sync the other dropdown to the same week
         ['alertWeekSelect','delinqWeekSelect'].forEach(id=>{
             const el=document.getElementById(id); if(el) el.value=week;
         });
@@ -804,7 +881,7 @@
     }
 
     /* ── CHARTS ────────────────────────────────────────────── */
-    function renderCharts(weeks, phasesActual, phasesPlanned, msOrder, msRanges, budget, sortedLabels) {
+    function renderCharts(weeks, phasesActual, phasesPlanned, phaseOrder, phaseNameMap, budget, sortedLabels) {
         const uiLabels=sortedLabels.map(l=>formatDateForUI(l));
         const fontFam={family:'DM Sans',size:12};
         const monoFont={family:'DM Mono',weight:'bold',size:13};
@@ -951,20 +1028,16 @@
             }
         });
 
-        // 4. Phase horizontal grouped bar — Actual vs Planned per milestone phase
-        // Use milestone insertion order; append __other__ if it has data
-        const phaseOrder = [...msOrder];
-        if((phasesActual['__other__']||0)+(phasesPlanned['__other__']||0)>0) phaseOrder.push('__other__');
-        const phaseLabels   = phaseOrder.map(k => k==='__other__' ? 'Other' : (msRanges[k]?.name||k));
+        // 4. Phase horizontal grouped bar — Actual vs Planned, keyed by phase name
+        const phaseLabels   = phaseOrder.map(k => phaseNameMap[k]||k);
         const phaseActVals  = phaseOrder.map(k => Math.round(phasesActual[k]||0));
         const phasePlanVals = phaseOrder.map(k => Math.round(phasesPlanned[k]||0));
         const phaseColors   = phaseOrder.map((_,i) => CHART_COLORS[i % CHART_COLORS.length]);
 
         if(chartRefs.phase) chartRefs.phase.destroy();
-        // Dynamic height: at least 240px, 52px per phase
-        const phaseCanvasWrap = document.getElementById('chart-phase').parentNode;
-        const dynH = Math.max(240, phaseOrder.length * 52);
-        phaseCanvasWrap.style.height = dynH + 'px';
+        // Adjust canvas height dynamically: 52px per phase, min 240px
+        const phaseWrap = document.getElementById('chart-phase').parentNode;
+        phaseWrap.style.height = Math.max(240, phaseOrder.length * 56) + 'px';
 
         chartRefs.phase = new Chart(document.getElementById('chart-phase'), {
             type: 'bar',
@@ -1010,13 +1083,13 @@
             options: {
                 indexAxis: 'y',
                 responsive: true, maintainAspectRatio: false,
-                layout: { padding: { right: 120, top: 8, bottom: 8, left: 4 } },
+                layout: { padding: { right: 130, top: 8, bottom: 8, left: 4 } },
                 plugins: {
                     legend: { position: 'top', labels: { font: fontFam, boxWidth: 12 } },
                     tooltip: {
                         callbacks: {
                             label: ctx => {
-                                const i = ctx.dataIndex;
+                                const i    = ctx.dataIndex;
                                 const act  = phaseActVals[i], plan = phasePlanVals[i];
                                 if(ctx.datasetIndex === 0) return ` Planned: €${plan.toLocaleString()}`;
                                 const pct = plan > 0 ? ' — ' + ((act/plan)*100).toFixed(0) + '% of plan' : '';
@@ -1027,10 +1100,7 @@
                     datalabels: {}
                 },
                 scales: {
-                    x: {
-                        ticks: { callback: v => '€'+(v>=1000?(v/1000).toFixed(0)+'k':v), font: fontFam },
-                        grid: { color: '#f1f5f9' }
-                    },
+                    x: { ticks: { callback: v=>'€'+(v>=1000?(v/1000).toFixed(0)+'k':v), font:fontFam }, grid:{color:'#f1f5f9'} },
                     y: { ticks: { font: fontFam } }
                 }
             }
@@ -1038,33 +1108,36 @@
     }
 
     /* ── PHASE BREAKDOWN TABLE ─────────────────────────────── */
-    function renderPhaseBreakdown(phasesActual, phasesPlanned, msOrder, msRanges) {
+    function renderPhaseBreakdown(phasesActual, phasesPlanned, phaseOrder, phaseNameMap) {
         const body = document.getElementById('phase-breakdown-body'); if(!body) return;
-
-        // Build ordered list: milestone order first, then __other__ if present
-        const phaseOrder = [...msOrder];
-        if((phasesActual['__other__']||0)+(phasesPlanned['__other__']||0)>0) phaseOrder.push('__other__');
-
         let totalAct = 0, totalPlan = 0;
         body.innerHTML = phaseOrder.map((key, i) => {
-            const label = key === '__other__' ? 'Other / General' : (msRanges[key]?.name || key);
+            const label = phaseNameMap[key] || key;
             const act   = Math.round(phasesActual[key]||0);
             const plan  = Math.round(phasesPlanned[key]||0);
-            totalAct  += act;
-            totalPlan += plan;
-            const pct     = plan > 0 ? ((act/plan)*100).toFixed(0) : '—';
-            const barW    = plan > 0 ? Math.min((act/plan)*100, 100).toFixed(1) : 0;
-            const over    = plan > 0 && act > plan;
-            const low     = plan > 0 && parseFloat(pct) < 50;
-            const color   = CHART_COLORS[i % CHART_COLORS.length];
+            totalAct += act; totalPlan += plan;
+            const pct      = plan > 0 ? ((act/plan)*100).toFixed(0) : '—';
+            const barW     = plan > 0 ? Math.min((act/plan)*100, 100).toFixed(1) : 0;
+            const over     = plan > 0 && act > plan;
+            const low      = plan > 0 && !over && parseFloat(pct) < 50;
+            const color    = key === '__other__' ? '#94a3b8' : CHART_COLORS[i % CHART_COLORS.length];
             const barColor = over ? '#ef4444' : color;
-            const pctStyle = over ? 'color:#ef4444;font-weight:700;'
-                           : low  ? 'color:#f59e0b;font-weight:700;' : '';
+            const pctStyle = over ? 'color:#ef4444;font-weight:700;' : low ? 'color:#f59e0b;font-weight:700;' : '';
+
+            // "Others" row gets an expandable drill-down button
+            const isOther  = key === '__other__';
+            const drillBtn = isOther && globalData.unknownTasks.length > 0
+                ? `<button onclick="toggleOthersDrill()" style="margin-left:8px;font-size:10px;padding:2px 7px;border-radius:10px;border:1px solid var(--border);background:#f8fafc;cursor:pointer;color:var(--muted);font-weight:600;">Details ▾</button>`
+                : '';
+            const drillRow = isOther
+                ? `<tr id="others-drill" style="display:none;"><td colspan="4" style="padding:8px 12px 12px;background:#f8fafc;"><div style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">Unmatched Task/Deliverable values</div><div style="display:flex;flex-wrap:wrap;gap:6px;">${globalData.unknownTasks.map(t=>`<span style="background:white;border:1px solid var(--border);border-radius:6px;padding:3px 9px;font-size:11px;font-family:'DM Mono',monospace;">${esc(t)}</span>`).join('')||'<span style="color:var(--muted);">None — all tasks matched to phases ✓</span>'}</div></td></tr>`
+                : '';
+
             return `<tr>
                 <td>
                     <div style="display:flex;align-items:center;gap:6px;">
                         <span style="width:10px;height:10px;border-radius:2px;background:${color};flex-shrink:0;display:inline-block;"></span>
-                        <strong>${esc(label)}</strong>
+                        <strong>${esc(label)}</strong>${drillBtn}
                     </div>
                     <div style="margin-top:5px;background:#e2e8f0;border-radius:3px;height:5px;overflow:hidden;">
                         <div style="width:${barW}%;height:5px;border-radius:3px;background:${barColor};transition:width 0.4s;"></div>
@@ -1072,8 +1145,8 @@
                 </td>
                 <td class="mono" style="text-align:right;white-space:nowrap;">€${act.toLocaleString()}</td>
                 <td class="mono" style="text-align:right;white-space:nowrap;color:var(--muted);">€${plan>0?plan.toLocaleString():'—'}</td>
-                <td class="mono" style="text-align:right;${pctStyle}">${pct !== '—' ? pct+'%' : '—'}</td>
-            </tr>`;
+                <td class="mono" style="text-align:right;${pctStyle}">${pct!=='—'?pct+'%':'—'}</td>
+            </tr>${drillRow}`;
         }).join('')
         + `<tr style="border-top:2px solid var(--border);">
             <td><strong>Total</strong></td>
@@ -1081,6 +1154,16 @@
             <td class="mono" style="text-align:right;color:var(--muted);"><strong>€${totalPlan>0?totalPlan.toLocaleString():'—'}</strong></td>
             <td class="mono" style="text-align:right;"><strong>${totalPlan>0?((totalAct/totalPlan)*100).toFixed(0)+'%':'—'}</strong></td>
         </tr>`;
+    }
+
+    function toggleOthersDrill() {
+        const row = document.getElementById('others-drill');
+        if(!row) return;
+        const isHidden = row.style.display === 'none';
+        row.style.display = isHidden ? 'table-row' : 'none';
+        // Update button label
+        const btn = document.querySelector('[onclick="toggleOthersDrill()"]');
+        if(btn) btn.textContent = isHidden ? 'Details ▴' : 'Details ▾';
     }
 
     /* ── TOP 5 SPENDERS ────────────────────────────────────── */
@@ -1197,7 +1280,7 @@
                 const monDate = parseDateLocal(g.latestMonISO);
                 if(monDate){
                     const friDate = new Date(monDate); friDate.setDate(monDate.getDate()+4);
-                    const friISO  = friDate.toISOString().split('T')[0];
+                    const friISO  = toLocalISO(friDate);
                     dueCellHtml = `<span style="font-size:10px;color:var(--muted);display:block;">Week of ${formatDateForUI(g.latestMonISO)}</span>`
                                 + `<span>Ends ${formatDateForUI(friISO)}</span>`;
                 }
@@ -1223,28 +1306,31 @@
         const d=new Date(+p[0],+p[1]-1,+p[2]);
         return isNaN(d.getTime())?null:d;
     }
+
     function renderRolloff(people) {
         const today=new Date();
         const sorted=Object.keys(people).filter(p=>people[p].plannedLast).sort((a,b)=>new Date(people[a].plannedLast)-new Date(people[b].plannedLast));
         document.getElementById('rolloff-list').innerHTML=sorted.map(p=>{
             const monDate=parseDateLocal(people[p].plannedLast);
             if(!monDate){ return ''; }
-            // Friday = Monday + 4 days
-            const friDate=new Date(monDate); friDate.setDate(monDate.getDate()+4);
-            const days=Math.round((friDate-today)/86400000);
+            // Roll-off = following Monday (Monday + 7 days)
+            // Using next Monday instead of Friday gives the team a full final week
+            // before transition — e.g. last planned week Mon May18 → rolls off Mon May25
+            const rolloffDate=new Date(monDate); rolloffDate.setDate(monDate.getDate()+7);
+            const days=Math.round((rolloffDate-today)/86400000);
             let st='';
             if(days<0)        st=`<span class="dot-indicator dot-grey"></span><span style="color:var(--muted)">Completed</span>`;
             else if(days<=14) st=`<span class="dot-indicator dot-red"></span><span style="color:var(--danger);font-weight:600;">Rolling Off</span>`;
             else if(days<=30) st=`<span class="dot-indicator dot-yellow"></span><span style="color:var(--warning);font-weight:600;">Final Month</span>`;
             else              st=`<span style="color:var(--muted)">Active</span>`;
-            const monISO=monDate.toISOString().split('T')[0];
-            const friISO=friDate.toISOString().split('T')[0];
+            const monISO=toLocalISO(monDate);
+            const rolloffISO=toLocalISO(rolloffDate);
             return `<tr>
                 <td><strong>${esc(p)}</strong></td>
                 <td>${st}</td>
                 <td class="mono" style="text-align:right;line-height:1.6;">
-                    <span style="font-size:10px;color:var(--muted);display:block;">Week of ${formatDateForUI(monISO)}</span>
-                    <span>Ends ${formatDateForUI(friISO)}</span>
+                    <span style="font-size:10px;color:var(--muted);display:block;">Last week ${formatDateForUI(monISO)}</span>
+                    <span>Roll-off ${formatDateForUI(rolloffISO)}</span>
                 </td>
             </tr>`;
         }).join('');
