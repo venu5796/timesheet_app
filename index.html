@@ -191,6 +191,57 @@
             .btn { width: 100%; justify-content: center; margin-bottom: 8px;}
         }
 
+        /* ── Tab Navigation ────────────────────────────────── */
+        .tab-nav { display: flex; gap: 6px; margin-bottom: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 5px; width: fit-content; }
+        .tab-btn { padding: 8px 20px; border-radius: 8px; border: none; background: transparent; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; transition: all 0.18s; white-space: nowrap; }
+        .tab-btn:hover { background: #f1f5f9; color: var(--text); }
+        .tab-btn.active { background: var(--primary); color: white; }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* ── Jira Section Styles ────────────────────────────── */
+        .jira-sprint-bar { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px 24px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-around; flex-wrap: wrap; gap: 12px; }
+        .jsb-stat { text-align: center; }
+        .jsb-val { font-size: 22px; font-weight: 800; color: var(--primary); font-family: 'DM Mono', monospace; }
+        .jsb-lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+        .jsb-divider { width: 1px; height: 38px; background: var(--border); }
+        .jira-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 20px; }
+        @media(max-width:900px){ .jira-two-col { grid-template-columns: 1fr; } }
+        .jira-metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 20px; }
+        .jira-mcard { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+        .jira-mlabel { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; font-weight: 600; }
+        .jira-mrow { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+        .jira-mval { font-size: 22px; font-weight: 800; color: var(--primary); font-family: 'DM Mono', monospace; }
+        .jira-rag { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 20px; white-space: nowrap; }
+        .jira-rag-g { background: #dcfce7; color: #166534; }
+        .jira-rag-a { background: #fffbeb; color: #92400e; }
+        .jira-rag-r { background: #fee2e2; color: #991b1b; }
+        .jira-pts-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; margin-bottom: 20px; }
+        .jira-bar-track { background: #f1f5f9; border-radius: 4px; height: 10px; width: 100%; overflow: hidden; margin: 8px 0 6px; }
+        .jira-bar-fill { height: 100%; border-radius: 4px; transition: width .8s ease; }
+        .jira-bar-green { background: var(--success); }
+        .jira-bar-amber { background: var(--warning); }
+        .jira-bar-red   { background: var(--danger); }
+        .jira-status-row { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+        .jira-status-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+        .jira-status-lbl { font-size: 12px; color: var(--muted); min-width: 95px; }
+        .jira-status-cnt { font-size: 12px; font-weight: 700; color: var(--text); min-width: 20px; text-align: right; }
+        .jira-lpill { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 20px; margin: 2px 3px 2px 0; font-weight: 600; }
+        .jl-blocked  { background: #fee2e2; color: #991b1b; }
+        .jl-nci      { background: #fffbeb; color: #92400e; }
+        .jl-dep      { background: #eff6ff; color: #1d4ed8; }
+        .jl-nr       { background: #f1f5f9; color: #475569; }
+        .jira-table  { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .jira-table th { text-align: left; padding: 8px 12px; background: #f8fafc; font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; border-bottom: 2px solid var(--border); }
+        .jira-table td { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; vertical-align: top; }
+        .jira-table tr:last-child td { border-bottom: none; }
+        .jira-table tr:hover td { background: #f8fafc; }
+        .jira-key { color: var(--accent); font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 700; }
+        .jira-avatar { width: 22px; height: 22px; border-radius: 50%; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 700; flex-shrink: 0; }
+        .jira-age-warn { color: var(--danger); font-weight: 700; font-size: 12px; }
+        .jira-age-ok   { color: var(--muted); font-size: 12px; }
+        .jira-empty    { color: var(--muted); font-size: 12px; text-align: center; padding: 20px 0; }
+
         /* ── PDF EXPORT CSS (active only during export) ────── */
         body.pdf-export-mode { background: white !important; padding: 0 !important; }
         .pdf-export-mode .container { max-width: none !important; width: 100% !important; padding: 16px !important; }
@@ -247,6 +298,16 @@
     </div>
 
     <div id="dashboard" style="display:none;">
+
+        <!-- Tab Navigation -->
+        <div class="tab-nav no-print">
+            <button class="tab-btn active" onclick="switchTab('program')">📊 Program</button>
+            <button class="tab-btn" onclick="switchTab('jira-high')">🔵 Jira — High Level</button>
+            <button class="tab-btn" onclick="switchTab('jira-sprint')">🎯 Jira — Sprint View</button>
+        </div>
+
+        <!-- ══ PROGRAM TAB ══════════════════════════════════ -->
+        <div id="tab-program" class="tab-panel active">
 
         <!-- RAG Health Banner -->
         <div class="rag-banner" id="rag-banner" role="region" aria-label="Project health">
@@ -435,13 +496,194 @@
             </div>
         </div>
 
-    </div>
-</div>
+        </div><!-- end #tab-program -->
+
+        <!-- ══ JIRA HIGH LEVEL TAB ══════════════════════════ -->
+        <div id="tab-jira-high" class="tab-panel">
+
+            <!-- Phase metric cards -->
+            <div class="jira-metrics-grid" style="grid-template-columns:repeat(4,1fr);" id="hl-phase-cards"></div>
+
+            <!-- Pipeline flow + Sprint completion -->
+            <div class="jira-two-col">
+                <div class="card">
+                    <h3 class="card-title">🔄 Pipeline flow — issues across phases</h3>
+                    <div style="height:160px;width:100%;"><canvas id="hl-chart-pipeline"></canvas></div>
+                </div>
+                <div class="card">
+                    <h3 class="card-title">🏃 Sprint completion rate</h3>
+                    <div style="height:160px;width:100%;"><canvas id="hl-chart-velocity"></canvas></div>
+                </div>
+            </div>
+
+            <!-- Total issues trend -->
+            <div class="card" style="margin-bottom:20px;">
+                <h3 class="card-title">📈 Issues per sprint — volume over time</h3>
+                <div style="height:200px;width:100%;"><canvas id="hl-chart-trend"></canvas></div>
+            </div>
+
+            <!-- Full issues table — all sprints -->
+            <div class="card">
+                <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+                    <span>📋 All issues</span>
+                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                        <select id="hl-filter-phase" class="btn-select no-print" style="font-size:11px;padding:4px 8px;" onchange="jRenderHighLevelTable()">
+                            <option value="">All phases</option>
+                            <option value="qualification">Qualification</option>
+                            <option value="development">Development</option>
+                            <option value="uat">UAT</option>
+                            <option value="done">Done</option>
+                        </select>
+                        <select id="hl-filter-sprint" class="btn-select no-print" style="font-size:11px;padding:4px 8px;" onchange="jRenderHighLevelTable()">
+                            <option value="">All sprints</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="jira-table">
+                        <thead><tr>
+                            <th style="width:90px;">Key</th>
+                            <th>Summary</th>
+                            <th style="width:130px;">Assignee</th>
+                            <th style="width:100px;">Status</th>
+                            <th style="width:110px;">Phase</th>
+                            <th style="width:110px;">Sprint</th>
+                            <th style="width:55px;">Pts</th>
+                        </tr></thead>
+                        <tbody id="hl-issues-body">
+                            <tr><td colspan="7" class="jira-empty">Loading…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div><!-- end #tab-jira-high -->
+
+        <!-- ══ JIRA SPRINT VIEW TAB ══════════════════════════ -->
+        <div id="tab-jira-sprint" class="tab-panel">
+
+            <!-- Sprint selector -->
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap;">
+                <span style="font-size:13px;font-weight:600;color:var(--muted);">Sprint</span>
+                <select id="sprint-selector" class="btn-select no-print" style="font-size:13px;padding:6px 12px;font-weight:600;" onchange="jRenderSprintView()"></select>
+                <span id="sv-sprint-dates" style="font-size:12px;color:var(--muted);"></span>
+            </div>
+
+            <!-- Sprint overview bar -->
+            <div class="jira-sprint-bar" style="margin-bottom:20px;">
+                <div class="jsb-stat"><div class="jsb-val" id="jsb-total">—</div><div class="jsb-lbl">Total</div></div>
+                <div class="jsb-divider"></div>
+                <div class="jsb-stat"><div class="jsb-val" id="jsb-done" style="color:#10b981;">—</div><div class="jsb-lbl">Done</div></div>
+                <div class="jsb-divider"></div>
+                <div class="jsb-stat"><div class="jsb-val" id="jsb-dev" style="color:#3b82f6;">—</div><div class="jsb-lbl">Development</div></div>
+                <div class="jsb-divider"></div>
+                <div class="jsb-stat"><div class="jsb-val" id="jsb-uat" style="color:#f59e0b;">—</div><div class="jsb-lbl">UAT</div></div>
+                <div class="jsb-divider"></div>
+                <div class="jsb-stat"><div class="jsb-val" id="jsb-qual">—</div><div class="jsb-lbl">Qualification</div></div>
+                <div class="jsb-divider"></div>
+                <div class="jsb-stat"><div class="jsb-val" id="jsb-blocked" style="color:var(--danger);">—</div><div class="jsb-lbl">Flagged</div></div>
+                <div class="jsb-divider"></div>
+                <div class="jsb-stat"><div class="jsb-val" id="jsb-days">—</div><div class="jsb-lbl">Days left</div></div>
+            </div>
+
+            <!-- Story point progress -->
+            <div class="jira-pts-card" style="margin-bottom:20px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <span style="font-size:13px;font-weight:700;color:var(--primary);" id="jira-pts-label">— / — pts</span>
+                    <span style="font-size:13px;font-weight:800;color:var(--primary);font-family:'DM Mono',monospace;" id="jira-pts-pct">0%</span>
+                </div>
+                <div class="jira-bar-track"><div id="jira-pts-bar" class="jira-bar-fill jira-bar-amber" style="width:0%"></div></div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);">
+                    <span id="jira-pts-done">0 pts done</span>
+                    <span id="jira-pts-rem">0 remaining</span>
+                </div>
+            </div>
+
+            <!-- Charts row 1: Burndown + Status breakdown -->
+            <div class="jira-two-col" style="margin-bottom:16px;">
+                <div class="card">
+                    <h3 class="card-title">📉 Burndown — points over time</h3>
+                    <div style="height:220px;width:100%;"><canvas id="sv-chart-burndown"></canvas></div>
+                </div>
+                <div class="card">
+                    <h3 class="card-title">📊 Status breakdown — all statuses</h3>
+                    <div id="sv-status-breakdown"></div>
+                </div>
+            </div>
+
+            <!-- Charts row 2: Labels + Assignee workload -->
+            <div class="jira-two-col" style="margin-bottom:16px;">
+                <div class="card">
+                    <h3 class="card-title">🏷️ Label distribution</h3>
+                    <div style="height:220px;width:100%;"><canvas id="sv-chart-labels"></canvas></div>
+                </div>
+                <div class="card">
+                    <h3 class="card-title">👤 Assignee workload — story points</h3>
+                    <div style="height:220px;width:100%;"><canvas id="sv-chart-workload"></canvas></div>
+                </div>
+            </div>
+
+            <!-- Aging + Blocked issues -->
+            <div class="jira-two-col" style="margin-bottom:16px;">
+                <div class="card">
+                    <div class="card-title">⏱️ Aging issues <span style="font-size:11px;font-weight:500;color:var(--muted);">stuck in development &gt;48h</span></div>
+                    <div class="table-responsive" style="max-height:240px;overflow-y:auto;">
+                        <table class="jira-table">
+                            <thead><tr>
+                                <th style="width:90px;">Key</th>
+                                <th>Summary</th>
+                                <th style="width:100px;">Status</th>
+                                <th style="width:80px;">Age</th>
+                            </tr></thead>
+                            <tbody id="sv-aging-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">🚩 Flagged / blocked issues</div>
+                    <div class="table-responsive" style="max-height:240px;overflow-y:auto;">
+                        <table class="jira-table">
+                            <thead><tr>
+                                <th style="width:90px;">Key</th>
+                                <th>Summary</th>
+                                <th style="width:130px;">Assignee</th>
+                                <th style="width:110px;">Label</th>
+                            </tr></thead>
+                            <tbody id="sv-blocked-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Full sprint issues table -->
+            <div class="card">
+                <h3 class="card-title">📋 Sprint issues</h3>
+                <div class="table-responsive">
+                    <table class="jira-table">
+                        <thead><tr>
+                            <th style="width:90px;">Key</th>
+                            <th>Summary</th>
+                            <th style="width:130px;">Assignee</th>
+                            <th style="width:140px;">Status</th>
+                            <th style="width:55px;">Pts</th>
+                            <th style="width:80px;">Updated</th>
+                        </tr></thead>
+                        <tbody id="jira-issues-body">
+                            <tr><td colspan="6" class="jira-empty">Waiting for data sync…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div><!-- end #tab-jira-sprint -->
+
+    </div><!-- end #dashboard -->
+</div><!-- end .container -->
 
 <script>
     Chart.register(ChartDataLabels);
 
-    const API_URL        = "https://script.google.com/macros/s/AKfycbzSFOkxaBA1JJiLFcA6PjMI2c5UvrUq8PtyXMkkx-6U4hozEUoU7pFiVztJTRbvov-e/exec";
+    const API_URL        = "https://script.google.com/macros/s/AKfycbwYPUVgcoxmz9muTTsfGksw3J8xlj_yvjN9WIrHUD5MxtbMp4ACONv5fICYmJIgfNet/exec";
     const RATE_FALLBACK  = 100;
     const THRESH_OVER    = 40;
     const THRESH_GOOD    = 30;
@@ -546,11 +788,15 @@
                 rawPhases:    Array.isArray(data.rawPhases)    ? data.rawPhases    : [],
                 milestones:   Array.isArray(data.milestones)   ? data.milestones   : [],
                 unknownTasks: Array.isArray(data.unknownTasks) ? data.unknownTasks : [],
+                jiraSummary:  Array.isArray(data.jiraSummary)  ? data.jiraSummary  : [],
+                jiraIssues:   Array.isArray(data.jiraIssues)   ? data.jiraIssues   : [],
+                jiraConfig:   (data.jiraConfig && typeof data.jiraConfig === 'object') ? data.jiraConfig : {},
             };
             const now = new Date();
             document.getElementById('sync-time').textContent = now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
             document.getElementById('last-synced').style.display = 'inline-flex';
             processData();
+            renderJiraTab();
         } catch(e) {
             loader.style.display = 'none';
             debug.style.display  = 'block';
@@ -1409,6 +1655,527 @@
             document.body.classList.remove('pdf-export-mode');
             if(btn){btn.textContent='📄 Export PDF';btn.disabled=false;}
         }
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       TAB SWITCHER
+    ═══════════════════════════════════════════════════════════ */
+    function switchTab(name) {
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('tab-' + name).classList.add('active');
+        document.querySelectorAll('.tab-btn').forEach(b => {
+            if (b.getAttribute('onclick') === `switchTab('${name}')`) b.classList.add('active');
+        });
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       JIRA SHARED HELPERS
+    ═══════════════════════════════════════════════════════════ */
+    let JIRA_SPRINT_DAYS = 10;
+    let jiraChartRefs    = {};
+
+    // Exact status → phase category mapping for Veolia workflow
+    function jStatusCategory(s) {
+        const sl = (s || "").trim().toUpperCase();
+        if (["NEW","DISCOVERY_CH","STORY APPROVAL"].includes(sl))                                            return "qualification";
+        if (["READY FOR DEVELOPMENT","RE-OPENED_CH","IN PROGRESS","READY FOR REVIEW",
+             "CODE REVIEW","READY FOR QA","QA","UAT RELEASE QUEUE"].includes(sl))                           return "development";
+        if (["READY FOR UAT","UAT","RE-OPENED IN UAT","PROD RELEASE QUEUE"].includes(sl))                   return "uat";
+        if (sl === "DONE")                                                                                   return "done";
+        return "other";
+    }
+
+    function jStatusColor(s) {
+        const cat = jStatusCategory(s);
+        if (cat === "done")          return "#10b981";
+        if (cat === "development")   return "#3b82f6";
+        if (cat === "uat")           return "#f59e0b";
+        if (cat === "qualification") return "#94a3b8";
+        return "#8b5cf6";
+    }
+
+    function jLabelClass(l) {
+        return { "blocked":"jl-blocked","needs-client-input":"jl-nci","dependency":"jl-dep","needs-review":"jl-nr" }[l] || "jl-nr";
+    }
+
+    function jInitials(name) {
+        if (!name || name === "Unassigned") return "?";
+        return name.split(" ").map(p => p[0]).join("").toUpperCase().slice(0,2);
+    }
+
+    function jAvatarColor(name) {
+        const cols = ["#004a99","#3b82f6","#10b981","#f59e0b","#8b5cf6","#ec4899","#14b8a6"];
+        let hash = 0;
+        for (let i = 0; i < (name||"").length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+        return cols[Math.abs(hash) % cols.length];
+    }
+
+    function jDaysSince(dateStr) {
+        if (!dateStr) return "—";
+        const d = new Date(dateStr);
+        if (isNaN(d)) return dateStr;
+        const diff = Math.floor((Date.now() - d) / 86400000);
+        if (diff === 0) return "Today";
+        if (diff === 1) return "1d ago";
+        return diff + "d ago";
+    }
+
+    function jGetSummary(key) {
+        const r = (globalData.jiraSummary || []).find(r => r.metric === key);
+        return r ? r.value : 0;
+    }
+
+    function jRagCls(r) { return { GREEN:"jira-rag-g", AMBER:"jira-rag-a", RED:"jira-rag-r" }[r] || ""; }
+    function jRagTxt(r) { return { GREEN:"On track", AMBER:"At risk", RED:"Critical" }[r] || ""; }
+
+    function jDestroyChart(id) {
+        if (jiraChartRefs[id]) { jiraChartRefs[id].destroy(); delete jiraChartRefs[id]; }
+    }
+
+    // Returns unique sorted sprint names from Jira_CT
+    function jGetSprints() {
+        const seen = new Set();
+        (globalData.jiraIssues || []).forEach(i => { if (i.sprint) seen.add(i.sprint.trim()); });
+        return [...seen].sort();
+    }
+
+    // Returns issues filtered to a specific sprint (or all if sprint is "")
+    function jFilterIssues(sprint) {
+        const issues = globalData.jiraIssues || [];
+        if (!sprint) return issues;
+        return issues.filter(i => (i.sprint||"").trim() === sprint);
+    }
+
+    const tickColor  = "#64748b";
+    const gridColor  = "rgba(0,0,0,0.05)";
+    const baseScale  = {
+        x: { grid:{color:gridColor}, ticks:{color:tickColor, font:{family:"DM Sans",size:11}} },
+        y: { grid:{color:gridColor}, ticks:{color:tickColor, font:{family:"DM Sans",size:11}}, beginAtZero:true }
+    };
+
+    /* ══════════════════════════════════════════════════════════
+       HIGH LEVEL TAB
+    ═══════════════════════════════════════════════════════════ */
+    function jRenderHighLevel() {
+        const issues = globalData.jiraIssues || [];
+        const total  = issues.length || 1;
+
+        // Phase counts
+        const cats = [
+            { key:"qualification", label:"Qualification", color:"#94a3b8", bg:"#f1f5f9" },
+            { key:"development",   label:"Development",   color:"#3b82f6", bg:"#eff6ff" },
+            { key:"uat",           label:"UAT",           color:"#f59e0b", bg:"#fffbeb" },
+            { key:"done",          label:"Done",          color:"#10b981", bg:"#f0fdf4" },
+        ];
+        const catCounts = {};
+        issues.forEach(i => { const c = jStatusCategory(i.status); catCounts[c]=(catCounts[c]||0)+1; });
+
+        // Phase metric cards
+        const grid = document.getElementById("hl-phase-cards");
+        grid.innerHTML = cats.map(c => {
+            const n   = catCounts[c.key] || 0;
+            const pct = Math.round(n / total * 100);
+            return `<div class="jira-mcard" style="border-top:3px solid ${c.color};">
+                <div class="jira-mlabel">${c.label}</div>
+                <div class="jira-mrow">
+                    <span class="jira-mval" style="color:${c.color};">${n}</span>
+                    <span style="font-size:12px;color:var(--muted);">${pct}%</span>
+                </div>
+                <div class="jira-bar-track" style="margin-top:8px;">
+                    <div class="jira-bar-fill" style="width:${pct}%;background:${c.color};"></div>
+                </div>
+            </div>`;
+        }).join("");
+
+        // Populate sprint filter in high level table
+        const sprintSel = document.getElementById("hl-filter-sprint");
+        const sprints   = jGetSprints();
+        sprintSel.innerHTML = `<option value="">All sprints</option>` +
+            sprints.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
+
+        jRenderHighLevelCharts(issues, cats, catCounts, total);
+        jRenderHighLevelTable();
+    }
+
+    function jRenderHighLevelCharts(issues, cats, catCounts, total) {
+        const sprints = jGetSprints();
+
+        // Pipeline flow — horizontal stacked bar showing phase proportions
+        jDestroyChart("hl-pipeline");
+        jiraChartRefs["hl-pipeline"] = new Chart(document.getElementById("hl-chart-pipeline"), {
+            type:"bar",
+            data:{
+                labels: ["All issues"],
+                datasets: cats.map(c => ({
+                    label:           c.label,
+                    data:            [catCounts[c.key] || 0],
+                    backgroundColor: c.color,
+                    borderRadius:    4,
+                }))
+            },
+            options:{
+                responsive:true, maintainAspectRatio:false, indexAxis:"y",
+                scales:{
+                    x:{ stacked:true, grid:{color:gridColor}, ticks:{color:tickColor,font:{family:"DM Sans",size:11}} },
+                    y:{ stacked:true, display:false }
+                },
+                plugins:{
+                    legend:{ display:true, position:"bottom", labels:{color:tickColor,font:{family:"DM Sans",size:11},boxWidth:12,padding:12} },
+                    datalabels:{ display:true, color:"#fff", font:{family:"DM Sans",size:11,weight:"bold"},
+                        formatter:(v) => v > 0 ? v : "" }
+                }
+            }
+        });
+
+        // Sprint completion rate — committed vs done story points per sprint
+        const sprintPts = sprints.map(sp => {
+            const si = issues.filter(i => (i.sprint||"").trim() === sp);
+            const committed = si.reduce((a,i) => a + (parseFloat(i.story_points)||0), 0);
+            const done      = si.filter(i => jStatusCategory(i.status) === "done")
+                                .reduce((a,i) => a + (parseFloat(i.story_points)||0), 0);
+            return { sprint:sp, committed:Math.round(committed), done:Math.round(done) };
+        });
+
+        jDestroyChart("hl-velocity");
+        jiraChartRefs["hl-velocity"] = new Chart(document.getElementById("hl-chart-velocity"), {
+            type:"bar",
+            data:{
+                labels: sprintPts.map(s => s.sprint),
+                datasets:[
+                    { label:"Committed", data:sprintPts.map(s=>s.committed), backgroundColor:"rgba(148,163,184,0.4)", borderRadius:4 },
+                    { label:"Done",      data:sprintPts.map(s=>s.done),      backgroundColor:"#10b981",              borderRadius:4 }
+                ]
+            },
+            options:{
+                responsive:true, maintainAspectRatio:false,
+                scales: baseScale,
+                plugins:{
+                    legend:{ display:true, labels:{color:tickColor,font:{family:"DM Sans",size:11},boxWidth:12,padding:12} },
+                    datalabels:{ display:false }
+                }
+            }
+        });
+
+        // Issues per sprint trend — stacked by phase
+        const sprintCatCounts = sprints.map(sp => {
+            const si     = issues.filter(i => (i.sprint||"").trim() === sp);
+            const counts = {};
+            cats.forEach(c => { counts[c.key] = si.filter(i => jStatusCategory(i.status) === c.key).length; });
+            return { sprint:sp, ...counts };
+        });
+
+        jDestroyChart("hl-trend");
+        jiraChartRefs["hl-trend"] = new Chart(document.getElementById("hl-chart-trend"), {
+            type:"bar",
+            data:{
+                labels: sprints,
+                datasets: cats.map(c => ({
+                    label:           c.label,
+                    data:            sprintCatCounts.map(s => s[c.key]),
+                    backgroundColor: c.color,
+                    borderRadius:    3,
+                }))
+            },
+            options:{
+                responsive:true, maintainAspectRatio:false,
+                scales:{
+                    x:{ stacked:true, ...baseScale.x },
+                    y:{ stacked:true, ...baseScale.y }
+                },
+                plugins:{
+                    legend:{ display:true, labels:{color:tickColor,font:{family:"DM Sans",size:11},boxWidth:12,padding:12} },
+                    datalabels:{ display:false }
+                }
+            }
+        });
+    }
+
+    function jRenderHighLevelTable() {
+        const phaseFilter  = (document.getElementById("hl-filter-phase")  || {}).value || "";
+        const sprintFilter = (document.getElementById("hl-filter-sprint") || {}).value || "";
+        let issues = globalData.jiraIssues || [];
+        if (phaseFilter)  issues = issues.filter(i => jStatusCategory(i.status) === phaseFilter);
+        if (sprintFilter) issues = issues.filter(i => (i.sprint||"").trim() === sprintFilter);
+
+        const tbody = document.getElementById("hl-issues-body");
+        if (!issues.length) {
+            tbody.innerHTML = `<tr><td colspan="7" class="jira-empty">No issues match the current filter.</td></tr>`;
+            return;
+        }
+        tbody.innerHTML = issues.map(issue => {
+            const cat   = jStatusCategory(issue.status);
+            const cats  = { qualification:"Qualification", development:"Development", uat:"UAT", done:"Done", other:"Other" };
+            const catCol= jStatusColor(issue.status);
+            const sCol  = jStatusColor(issue.status);
+            const col   = jAvatarColor(issue.assignee);
+            return `<tr>
+                <td><span class="jira-key">${esc(issue.key||"—")}</span></td>
+                <td style="font-size:12px;color:var(--text);">${esc(issue.summary||"—")}</td>
+                <td>
+                    <div style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);">
+                        <span class="jira-avatar" style="background:${col};">${jInitials(issue.assignee)}</span>
+                        ${esc(issue.assignee||"Unassigned")}
+                    </div>
+                </td>
+                <td><span style="display:inline-block;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:700;background:${sCol}22;color:${sCol};">${esc(issue.status||"—")}</span></td>
+                <td><span style="display:inline-block;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:700;background:${catCol}22;color:${catCol};">${cats[cat]||"Other"}</span></td>
+                <td style="font-size:11px;color:var(--muted);">${esc(issue.sprint||"—")}</td>
+                <td style="font-family:'DM Mono',monospace;font-weight:700;font-size:12px;">${esc(issue.story_points||"—")}</td>
+            </tr>`;
+        }).join("");
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       SPRINT VIEW TAB
+    ═══════════════════════════════════════════════════════════ */
+    function jPopulateSprintSelector() {
+        const sel     = document.getElementById("sprint-selector");
+        const sprints = jGetSprints();
+        sel.innerHTML = sprints.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
+        // Default to most recent sprint
+        if (sprints.length) sel.value = sprints[sprints.length - 1];
+    }
+
+    function jRenderSprintView() {
+        const sprint  = (document.getElementById("sprint-selector") || {}).value || "";
+        const issues  = jFilterIssues(sprint);
+        const cfg     = globalData.jiraConfig || {};
+
+        // Sprint dates label
+        const datesEl = document.getElementById("sv-sprint-dates");
+        if (datesEl && cfg.sprint_start && cfg.sprint_end) {
+            datesEl.textContent = `${formatDateForUI(cfg.sprint_start)} → ${formatDateForUI(cfg.sprint_end)}`;
+        }
+
+        jRenderSprintBar(issues, cfg);
+        jRenderSprintPts(issues);
+        jRenderSprintStatusBreakdown(issues);
+        jRenderSprintAgingBlocked(issues);
+        jRenderSprintIssuesTable(issues);
+        jRenderSprintCharts(issues, cfg);
+    }
+
+    function jRenderSprintBar(issues, cfg) {
+        const total = issues.length;
+        document.getElementById("jsb-total").textContent   = total;
+        document.getElementById("jsb-done").textContent    = issues.filter(i => jStatusCategory(i.status) === "done").length;
+        document.getElementById("jsb-dev").textContent     = issues.filter(i => jStatusCategory(i.status) === "development").length;
+        document.getElementById("jsb-uat").textContent     = issues.filter(i => jStatusCategory(i.status) === "uat").length;
+        document.getElementById("jsb-qual").textContent    = issues.filter(i => jStatusCategory(i.status) === "qualification").length;
+        document.getElementById("jsb-blocked").textContent = issues.filter(i => (i.labels||[]).includes("blocked")).length;
+
+        const sprintEnd = cfg.sprint_end ? new Date(cfg.sprint_end) : null;
+        const dl        = sprintEnd && !isNaN(sprintEnd) ? Math.max(0, Math.ceil((sprintEnd - new Date()) / 86400000)) : "—";
+        const daysEl    = document.getElementById("jsb-days");
+        daysEl.textContent  = dl;
+        daysEl.style.color  = (dl !== "—" && dl <= 2) ? "var(--danger)" : (dl !== "—" && dl <= 5) ? "var(--warning)" : "var(--primary)";
+    }
+
+    function jRenderSprintPts(issues) {
+        const total = issues.reduce((a,i) => a + (parseFloat(i.story_points)||0), 0);
+        const done  = issues.filter(i => jStatusCategory(i.status) === "done")
+                            .reduce((a,i) => a + (parseFloat(i.story_points)||0), 0);
+        const pct   = total ? Math.round(done / total * 100) : 0;
+        document.getElementById("jira-pts-label").textContent = `${Math.round(done)} / ${Math.round(total)} pts`;
+        document.getElementById("jira-pts-pct").textContent   = pct + "%";
+        document.getElementById("jira-pts-done").textContent  = `${Math.round(done)} pts done`;
+        document.getElementById("jira-pts-rem").textContent   = `${Math.round(total - done)} remaining`;
+        const bar = document.getElementById("jira-pts-bar");
+        bar.style.width = pct + "%";
+        bar.className   = "jira-bar-fill " + (pct >= 80 ? "jira-bar-green" : pct >= 60 ? "jira-bar-amber" : "jira-bar-red");
+    }
+
+    function jRenderSprintStatusBreakdown(issues) {
+        const counts = {};
+        issues.forEach(i => { counts[i.status]=(counts[i.status]||0)+1; });
+        const total  = issues.length || 1;
+        const el     = document.getElementById("sv-status-breakdown");
+
+        // Order statuses by workflow position
+        const ORDER = ["NEW","DISCOVERY_CH","STORY APPROVAL","READY FOR DEVELOPMENT",
+                       "IN PROGRESS","READY FOR REVIEW","CODE REVIEW","READY FOR QA",
+                       "QA","UAT RELEASE QUEUE","READY FOR UAT","UAT","RE-OPENED_CH",
+                       "RE-OPENED IN UAT","PROD RELEASE QUEUE","DONE"];
+        const allStatuses = Object.keys(counts).sort((a,b) => {
+            const ai = ORDER.indexOf(a.toUpperCase()); const bi = ORDER.indexOf(b.toUpperCase());
+            if (ai >= 0 && bi >= 0) return ai - bi;
+            if (ai >= 0) return -1; if (bi >= 0) return 1;
+            return a.localeCompare(b);
+        });
+
+        el.innerHTML = allStatuses.map(s => {
+            const n   = counts[s];
+            const pct = Math.round(n / total * 100);
+            const col = jStatusColor(s);
+            return `<div class="jira-status-row">
+                <span class="jira-status-dot" style="background:${col};"></span>
+                <span class="jira-status-lbl" style="font-size:11px;">${esc(s)}</span>
+                <div class="jira-bar-track" style="flex:1;margin:0;">
+                    <div class="jira-bar-fill" style="width:${pct}%;background:${col};"></div>
+                </div>
+                <span class="jira-status-cnt">${n}</span>
+            </div>`;
+        }).join("") || `<p class="jira-empty">No data</p>`;
+    }
+
+    function jRenderSprintAgingBlocked(issues) {
+        const now = Date.now();
+
+        // Aging — development issues not updated in >48h
+        const aging = issues.filter(i => {
+            if (jStatusCategory(i.status) !== "development") return false;
+            const d = new Date(i.updated);
+            return !isNaN(d) && (now - d) > 172800000; // 48h in ms
+        }).sort((a,b) => new Date(a.updated) - new Date(b.updated));
+
+        const agingBody = document.getElementById("sv-aging-body");
+        agingBody.innerHTML = aging.length ? aging.map(i => {
+            const days = Math.floor((now - new Date(i.updated)) / 86400000);
+            const col  = jStatusColor(i.status);
+            return `<tr>
+                <td><span class="jira-key">${esc(i.key)}</span></td>
+                <td style="font-size:12px;">${esc(i.summary||"—")}</td>
+                <td><span style="display:inline-block;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:700;background:${col}22;color:${col};">${esc(i.status)}</span></td>
+                <td class="jira-age-warn">${days}d</td>
+            </tr>`;
+        }).join("") : `<tr><td colspan="4" class="jira-empty">✅ No aging issues</td></tr>`;
+
+        // Blocked / flagged
+        const blocked = issues.filter(i => (i.labels||[]).some(l =>
+            ["blocked","needs-client-input","dependency"].includes(l)));
+
+        const blockedBody = document.getElementById("sv-blocked-body");
+        blockedBody.innerHTML = blocked.length ? blocked.map(i => {
+            const col    = jAvatarColor(i.assignee);
+            const labels = (i.labels||[]).map(l => `<span class="jira-lpill ${jLabelClass(l)}">${esc(l)}</span>`).join("");
+            return `<tr>
+                <td><span class="jira-key">${esc(i.key)}</span></td>
+                <td style="font-size:12px;">${esc(i.summary||"—")}</td>
+                <td><div style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);">
+                    <span class="jira-avatar" style="background:${col};">${jInitials(i.assignee)}</span>${esc(i.assignee||"Unassigned")}
+                </div></td>
+                <td>${labels}</td>
+            </tr>`;
+        }).join("") : `<tr><td colspan="4" class="jira-empty">✅ No flagged issues</td></tr>`;
+    }
+
+    function jRenderSprintIssuesTable(issues) {
+        const tbody = document.getElementById("jira-issues-body");
+        if (!issues.length) {
+            tbody.innerHTML = `<tr><td colspan="6" class="jira-empty">No issues in this sprint.</td></tr>`;
+            return;
+        }
+        const ORDER = ["NEW","DISCOVERY_CH","STORY APPROVAL","READY FOR DEVELOPMENT",
+                       "IN PROGRESS","READY FOR REVIEW","CODE REVIEW","READY FOR QA",
+                       "QA","UAT RELEASE QUEUE","READY FOR UAT","UAT","RE-OPENED_CH",
+                       "RE-OPENED IN UAT","PROD RELEASE QUEUE","DONE"];
+        const sorted = [...issues].sort((a,b) => {
+            const ai = ORDER.indexOf((a.status||"").toUpperCase());
+            const bi = ORDER.indexOf((b.status||"").toUpperCase());
+            return (ai < 0 ? 99 : ai) - (bi < 0 ? 99 : bi);
+        });
+        const now = Date.now();
+        tbody.innerHTML = sorted.map(issue => {
+            const labels  = (issue.labels||[]).map(l => `<span class="jira-lpill ${jLabelClass(l)}">${esc(l)}</span>`).join("");
+            const col     = jAvatarColor(issue.assignee);
+            const sCol    = jStatusColor(issue.status);
+            const d       = new Date(issue.updated);
+            const ageDays = isNaN(d) ? 0 : (now - d) / 86400000;
+            const ageCls  = ageDays > 2 && jStatusCategory(issue.status) === "development" ? "jira-age-warn" : "jira-age-ok";
+            return `<tr>
+                <td><span class="jira-key">${esc(issue.key||"—")}</span></td>
+                <td>
+                    <div style="font-size:12px;color:var(--text);line-height:1.4;">${esc(issue.summary||"—")}</div>
+                    ${labels ? `<div style="margin-top:4px;">${labels}</div>` : ""}
+                </td>
+                <td><div style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);">
+                    <span class="jira-avatar" style="background:${col};">${jInitials(issue.assignee)}</span>
+                    ${esc(issue.assignee||"Unassigned")}
+                </div></td>
+                <td><span style="display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;background:${sCol}22;color:${sCol};">${esc(issue.status||"—")}</span></td>
+                <td style="font-family:'DM Mono',monospace;font-weight:700;font-size:12px;">${esc(issue.story_points||"—")}</td>
+                <td class="${ageCls}">${jDaysSince(issue.updated)}</td>
+            </tr>`;
+        }).join("");
+    }
+
+    function jRenderSprintCharts(issues, cfg) {
+        // Burndown
+        const totalPts = issues.reduce((a,i) => a + (parseFloat(i.story_points)||0), 0);
+        const donePts  = issues.filter(i => jStatusCategory(i.status) === "done")
+                               .reduce((a,i) => a + (parseFloat(i.story_points)||0), 0);
+        const sprintEnd   = cfg.sprint_end   ? new Date(cfg.sprint_end)   : null;
+        const sprintStart = cfg.sprint_start ? new Date(cfg.sprint_start) : null;
+        const sprintDays  = (sprintStart && sprintEnd && !isNaN(sprintStart) && !isNaN(sprintEnd))
+            ? Math.max(1, Math.round((sprintEnd - sprintStart) / 86400000) + 1)
+            : JIRA_SPRINT_DAYS;
+        const daysElapsed = (sprintStart && !isNaN(sprintStart))
+            ? Math.min(sprintDays, Math.max(0, Math.floor((Date.now() - sprintStart) / 86400000)))
+            : 0;
+        const step    = totalPts / Math.max(sprintDays - 1, 1);
+        const ideal   = Array.from({length:sprintDays}, (_,i) => Math.max(0, Math.round(totalPts - i * step)));
+        const actual  = Array.from({length:sprintDays}, (_,i) => {
+            if (i === 0) return Math.round(totalPts);
+            if (i <= daysElapsed) return Math.max(0, Math.round(totalPts - (donePts / Math.max(daysElapsed,1)) * i));
+            return null;
+        });
+        const dayLabels = Array.from({length:sprintDays}, (_,i) => "D"+(i+1));
+
+        jDestroyChart("sv-burndown");
+        jiraChartRefs["sv-burndown"] = new Chart(document.getElementById("sv-chart-burndown"), {
+            type:"line",
+            data:{ labels:dayLabels, datasets:[
+                { label:"Ideal",  data:ideal,  borderColor:"#94a3b8", borderDash:[5,5], borderWidth:1.5, pointRadius:0, fill:false, tension:0 },
+                { label:"Actual", data:actual, borderColor:"#3b82f6", borderWidth:2.5,  pointRadius:3,  pointBackgroundColor:"#3b82f6", fill:false, tension:0.3, spanGaps:false }
+            ]},
+            options:{ responsive:true, maintainAspectRatio:false,
+                plugins:{ legend:{ display:true, labels:{color:tickColor,font:{family:"DM Sans",size:11},boxWidth:12,padding:12} }, datalabels:{display:false} },
+                scales: baseScale
+            }
+        });
+
+        // Label doughnut
+        const lCounts = { "blocked":0,"needs-client-input":0,"dependency":0,"needs-review":0,"none":0 };
+        issues.forEach(i => {
+            if (!(i.labels||[]).length) lCounts.none++;
+            else (i.labels||[]).forEach(l => { if (lCounts[l] !== undefined) lCounts[l]++; });
+        });
+        jDestroyChart("sv-labels");
+        jiraChartRefs["sv-labels"] = new Chart(document.getElementById("sv-chart-labels"), {
+            type:"doughnut",
+            data:{ labels:["Blocked","Needs client","Dependency","Needs review","No label"],
+                   datasets:[{ data:Object.values(lCounts), backgroundColor:["#ef4444","#f59e0b","#3b82f6","#94a3b8","#dcfce7"], borderWidth:0, hoverOffset:6 }]},
+            options:{ responsive:true, maintainAspectRatio:false,
+                plugins:{ legend:{ display:true, position:"right", labels:{color:tickColor,font:{family:"DM Sans",size:11},boxWidth:10,padding:10} }, datalabels:{display:false} }
+            }
+        });
+
+        // Assignee workload — story points per person
+        const aPts = {};
+        issues.forEach(i => {
+            const a = i.assignee||"Unassigned";
+            aPts[a] = (aPts[a]||0) + (parseFloat(i.story_points)||0);
+        });
+        const aNames = Object.keys(aPts).sort((a,b) => aPts[b]-aPts[a]);
+        jDestroyChart("sv-workload");
+        jiraChartRefs["sv-workload"] = new Chart(document.getElementById("sv-chart-workload"), {
+            type:"bar",
+            data:{ labels:aNames, datasets:[{ data:aNames.map(a=>Math.round(aPts[a])), backgroundColor:aNames.map(a=>jAvatarColor(a)), borderRadius:4 }]},
+            options:{ responsive:true, maintainAspectRatio:false, indexAxis:"y",
+                plugins:{ legend:{display:false}, datalabels:{display:false} },
+                scales:{ x:{...baseScale.x, ticks:{...baseScale.x.ticks, stepSize:1}}, y:baseScale.y }
+            }
+        });
+    }
+
+    /* ── Master Jira render — called after fetchData ─────── */
+    function renderJiraTab() {
+        const cfg         = globalData.jiraConfig || {};
+        JIRA_SPRINT_DAYS  = cfg.sprint_days || 10;
+        jPopulateSprintSelector();
+        jRenderHighLevel();
+        jRenderSprintView();
     }
 
     fetchData();
