@@ -172,6 +172,7 @@
         .error-box  { background: #fee2e2; border: 1px solid #fca5a5; padding: 20px 24px; border-radius: 12px; color: #991b1b; }
 
         @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes bgPulse { 0%,100% { opacity:0.4; transform:scale(1); } 50% { opacity:1; transform:scale(1.3); } }
 
         /* ── RESPONSIVE DESIGN (Mobile & Tablet) ───────────── */
         @media (max-width: 1200px) {
@@ -282,11 +283,14 @@
             </div>
         </div>
         <div class="header-controls no-print">
-            <span id="last-synced" style="font-size:11px; color:rgba(255,255,255,0.7); display:none;">
-                Last synced: <span id="sync-time">—</span>
+            <span id="last-synced" style="font-size:11px; color:rgba(255,255,255,0.7); display:none; flex-direction:column; align-items:flex-end; gap:2px;">
+                <span>Last synced: <span id="sync-time">—</span>
+                    <span id="bg-fetch-dot" style="display:none;margin-left:6px;width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.5);display:inline-block;vertical-align:middle;animation:bgPulse 1s ease-in-out infinite;"></span>
+                </span>
+                <span id="next-sync-label" style="font-size:10px;opacity:0.6;">Next sync in 15:00</span>
             </span>
             <button id="btn-export" class="btn btn-primary" onclick="exportPDF()">📄 Export PDF</button>
-            <button class="btn" onclick="fetchData()">🔄 Sync Data</button>
+            <button class="btn" id="btn-sync" onclick="fetchData()">🔄 Sync Data</button>
         </div>
     </div>
 
@@ -655,6 +659,35 @@
                 </div>
             </div>
 
+            <!-- Dev SLA Breach Panel -->
+            <div class="card" style="margin-bottom:16px;">
+                <div class="card-title">
+                    ⚠️ Dev SLA breaches
+                    <span id="sla-breach-count" style="display:none;font-size:11px;font-weight:700;
+                        padding:3px 10px;border-radius:20px;background:#fee2e2;color:#991b1b;"></span>
+                    <span style="font-size:11px;font-weight:400;color:var(--muted);">
+                        tickets IN PROGRESS beyond story-point SLA
+                    </span>
+                </div>
+                <div class="table-responsive" style="max-height:300px;overflow-y:auto;">
+                    <table class="jira-table">
+                        <thead><tr>
+                            <th style="width:90px;">Key</th>
+                            <th>Summary</th>
+                            <th style="width:130px;">Assignee</th>
+                            <th style="width:40px;">Pts</th>
+                            <th style="width:60px;">SLA</th>
+                            <th style="width:130px;">In dev since</th>
+                            <th style="width:70px;">Elapsed</th>
+                            <th style="width:110px;">Status</th>
+                        </tr></thead>
+                        <tbody id="sla-breach-body">
+                            <tr><td colspan="8" class="jira-empty">Loading…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <!-- Full sprint issues table -->
             <div class="card">
                 <h3 class="card-title">📋 Sprint issues</h3>
@@ -683,7 +716,7 @@
 <script>
     Chart.register(ChartDataLabels);
 
-    const API_URL        = "https://script.google.com/macros/s/AKfycbwYPUVgcoxmz9muTTsfGksw3J8xlj_yvjN9WIrHUD5MxtbMp4ACONv5fICYmJIgfNet/exec";
+    const API_URL        = "https://script.google.com/macros/s/AKfycbznzVqjlbnHNMsrI8FrkgdRRWUjb9w-Iejqg3LneodAzAoBYr9y6rP1fJITLnB2b3SV/exec";
     const RATE_FALLBACK  = 100;
     const THRESH_OVER    = 40;
     const THRESH_GOOD    = 30;
@@ -691,6 +724,19 @@
     const VARIANCE_UNDER = 0.8;
     const ACTIVE_DAYS    = 14;
     const CHART_COLORS   = ['#004a99','#3b82f6','#10b981','#f59e0b','#8b5cf6','#ec4899','#14b8a6'];
+
+    // ── Dev SLA thresholds — hours allowed per story point band ──────────────
+    // Grace window: flag when within 1hr of SLA expiry, not just after breach
+    // For ranges (3pt, 5pt, 8pt) the lower bound triggers AT RISK, upper = OVERDUE
+    const DEV_SLA = {
+        1: { warn: 2,   over: 3   },   // 1pt  → flag at 2h
+        2: { warn: 4,   over: 5   },   // 2pt  → flag at 4h
+        3: { warn: 8,   over: 12  },   // 3pt  → AT RISK at 8h (1 day), OVERDUE at 12h (1.5 days)
+        5: { warn: 16,  over: 24  },   // 5pt  → AT RISK at 16h (2 days), OVERDUE at 24h (3 days)
+        8: { warn: 32,  over: 40  },   // 8pt  → flag at 24h (>3 days = always flag)
+        default: { warn: 16, over: 24 }
+    };
+    const SLA_GRACE_HOURS = 1;
 
     let globalData = { actuals:[], plan:[], rawPhases:[], milestones:[], unknownTasks:[] };
     let chartRefs  = {};
@@ -770,13 +816,15 @@
         return toLocalISO(mon);
     }
 
-    /* ── FETCH ─────────────────────────────────────────────── */
+    /* ── FETCH — full load (first load + manual Sync button) ──────────────── */
     async function fetchData() {
-        const debug = document.getElementById('debug-info');
-        const loader= document.getElementById('loader');
+        const debug  = document.getElementById('debug-info');
+        const loader = document.getElementById('loader');
+        const btnSync = document.getElementById('btn-sync');
         debug.style.display = 'none';
-        loader.style.display= 'flex';
+        loader.style.display = 'flex';
         document.getElementById('dashboard').style.display = 'none';
+        if (btnSync) { btnSync.disabled = true; btnSync.textContent = '⏳ Syncing…'; }
         try {
             const res  = await fetch(API_URL);
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -792,16 +840,82 @@
                 jiraIssues:   Array.isArray(data.jiraIssues)   ? data.jiraIssues   : [],
                 jiraConfig:   (data.jiraConfig && typeof data.jiraConfig === 'object') ? data.jiraConfig : {},
             };
-            const now = new Date();
-            document.getElementById('sync-time').textContent = now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-            document.getElementById('last-synced').style.display = 'inline-flex';
+            _lastSyncedAt = Date.now();
+            updateSyncTimestamp_();
+            resetCountdown_();
             processData();
             renderJiraTab();
         } catch(e) {
             loader.style.display = 'none';
             debug.style.display  = 'block';
             debug.innerHTML = `<div class="error-box"><h3>⚠️ Connection Error</h3><p>${esc(e.message)}</p><button class="btn btn-primary" onclick="fetchData()" style="margin-top:10px;">🔄 Retry</button></div>`;
+        } finally {
+            if (btnSync) { btnSync.disabled = false; btnSync.textContent = '🔄 Sync Data'; }
         }
+    }
+
+    /* ── SILENT FETCH — background refresh every 15 min ──────────────────── 
+       No spinner, no loader, no dashboard hide. Updates data and re-renders
+       in place. User sees a brief pulse dot and the timestamp update only.   */
+    async function silentFetch() {
+        const dot = document.getElementById('bg-fetch-dot');
+        if (dot) dot.style.display = 'inline-block';
+        try {
+            const res  = await fetch(API_URL);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            if (data.error) throw new Error(data.error);
+            globalData = {
+                actuals:      Array.isArray(data.actuals)      ? data.actuals      : [],
+                plan:         Array.isArray(data.plan)         ? data.plan         : [],
+                rawPhases:    Array.isArray(data.rawPhases)    ? data.rawPhases    : [],
+                milestones:   Array.isArray(data.milestones)   ? data.milestones   : [],
+                unknownTasks: Array.isArray(data.unknownTasks) ? data.unknownTasks : [],
+                jiraSummary:  Array.isArray(data.jiraSummary)  ? data.jiraSummary  : [],
+                jiraIssues:   Array.isArray(data.jiraIssues)   ? data.jiraIssues   : [],
+                jiraConfig:   (data.jiraConfig && typeof data.jiraConfig === 'object') ? data.jiraConfig : {},
+            };
+            _lastSyncedAt = Date.now();
+            updateSyncTimestamp_();
+            resetCountdown_();
+            processData();
+            renderJiraTab();
+        } catch(e) {
+            // Silent failure — don't disrupt the UI, just log it
+            // The user can always hit Sync Data manually if data looks stale
+            console.warn('Background sync failed:', e.message);
+        } finally {
+            if (dot) dot.style.display = 'none';
+        }
+    }
+
+    /* ── SYNC TIMESTAMP + COUNTDOWN HELPERS ─────────────────────────────── */
+    let _lastSyncedAt     = null;
+    let _countdownSecs    = 15 * 60;   // 15 minutes in seconds
+    let _countdownHandle  = null;
+
+    function updateSyncTimestamp_() {
+        const now = new Date();
+        const timeEl = document.getElementById('sync-time');
+        const syncEl = document.getElementById('last-synced');
+        if (timeEl) timeEl.textContent = now.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+        if (syncEl) syncEl.style.display = 'inline-flex';
+    }
+
+    function resetCountdown_() {
+        _countdownSecs = 15 * 60;
+        if (_countdownHandle) clearInterval(_countdownHandle);
+        _countdownHandle = setInterval(function() {
+            _countdownSecs = Math.max(0, _countdownSecs - 1);
+            const m = Math.floor(_countdownSecs / 60);
+            const s = _countdownSecs % 60;
+            const label = document.getElementById('next-sync-label');
+            if (label) {
+                label.textContent = _countdownSecs > 0
+                    ? 'Next sync in ' + m + ':' + String(s).padStart(2, '0')
+                    : 'Syncing…';
+            }
+        }, 1000);
     }
 
     /* ── PROCESS ───────────────────────────────────────────── */
@@ -1952,8 +2066,137 @@
         jRenderSprintPts(issues);
         jRenderSprintStatusBreakdown(issues);
         jRenderSprintAgingBlocked(issues);
+        jRenderSlaBreaches(issues);
         jRenderSprintIssuesTable(issues);
         jRenderSprintCharts(issues, cfg);
+    }
+
+    /* ── SLA BREACH DETECTION ──────────────────────────────────────────────
+       Uses Status Category Changed column (set by Jira Cloud for Sheets)
+       as the precise timestamp when a ticket entered a dev status category.
+       Format arriving from doGet(): "2026-03-11 06:54:36" or "3/11/2026 6:54:36"
+    ─────────────────────────────────────────────────────────────────────── */
+    function parseSheetDate_(val) {
+        if (!val || val === '') return null;
+        // Try native parse first — handles "2026-03-11 06:54:36" and ISO formats
+        var d = new Date(val);
+        if (!isNaN(d.getTime())) return d;
+        // Fallback: MM/DD/YYYY H:MM:SS (Jira Cloud for Sheets raw format)
+        var m = String(val).trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2}):(\d{2})$/);
+        if (m) return new Date(+m[3], +m[1]-1, +m[2], +m[4], +m[5], +m[6]);
+        // Fallback: MM/DD/YYYY H:MM (no seconds)
+        m = String(val).trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})$/);
+        if (m) return new Date(+m[3], +m[1]-1, +m[2], +m[4], +m[5], 0);
+        return null;
+    }
+
+    function jGetSlaThreshold_(pts) {
+        const p = parseFloat(pts) || 0;
+        const band = [1,2,3,5,8].find(b => b === p) || 'default';
+        return DEV_SLA[band] || DEV_SLA.default;
+    }
+
+    function jGetSlaBreaches(issues) {
+        const now = Date.now();
+        return issues
+            .filter(i => {
+                const s = (i.status || '').toUpperCase();
+                if (!['IN PROGRESS', 'CODE REVIEW'].includes(s)) return false;
+                if (!i.status_category_changed) return false;
+                const changedAt = parseSheetDate_(i.status_category_changed);
+                if (!changedAt) return false;
+                const elapsed = (now - changedAt) / 3600000;
+                const thr = jGetSlaThreshold_(i.story_points);
+                return elapsed >= (thr.warn - SLA_GRACE_HOURS);
+            })
+            .map(i => {
+                const changedAt = parseSheetDate_(i.status_category_changed);
+                const elapsed   = (now - changedAt) / 3600000;
+                const thr       = jGetSlaThreshold_(i.story_points);
+                const isOver    = elapsed >= thr.over;
+                const isAtRisk  = !isOver && elapsed >= (thr.warn - SLA_GRACE_HOURS);
+                return Object.assign({}, i, {
+                    _changedAt:  changedAt,
+                    _elapsedHrs: elapsed,
+                    _thr:        thr,
+                    _isOver:     isOver,
+                    _isAtRisk:   isAtRisk
+                });
+            })
+            .sort((a, b) => b._elapsedHrs - a._elapsedHrs);
+    }
+
+    function jRenderSlaBreaches(issues) {
+        const breaches = jGetSlaBreaches(issues);
+        const tbody    = document.getElementById('sla-breach-body');
+        const countEl  = document.getElementById('sla-breach-count');
+
+        if (countEl) {
+            if (breaches.length) {
+                countEl.textContent   = breaches.length + ' ticket' + (breaches.length > 1 ? 's' : '');
+                countEl.style.display = 'inline';
+            } else {
+                countEl.style.display = 'none';
+            }
+        }
+
+        if (!tbody) return;
+
+        if (!breaches.length) {
+            tbody.innerHTML = `<tr><td colspan="8" class="jira-empty">✅ All dev tickets within SLA thresholds</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = breaches.map(i => {
+            const col       = jAvatarColor(i.assignee);
+            const sCol      = jStatusColor(i.status);
+            const elapsedH  = Math.round(i._elapsedHrs);
+            const thr       = i._thr;
+
+            // SLA label — show range for multi-day thresholds
+            const slaLabel  = thr.warn === thr.over
+                ? thr.warn + 'h'
+                : thr.warn + '–' + thr.over + 'h';
+
+            // Badge
+            let badgeBg, badgeTxt, badgeLabel;
+            if (i._isOver) {
+                badgeBg    = '#fee2e2';
+                badgeTxt   = '#991b1b';
+                badgeLabel = 'OVERDUE +' + (elapsedH - thr.over) + 'h';
+            } else {
+                badgeBg    = '#fffbeb';
+                badgeTxt   = '#92400e';
+                badgeLabel = 'AT RISK — ' + Math.round(thr.warn - i._elapsedHrs) + 'h left';
+            }
+
+            // "In dev since" formatted date+time
+            const sinceLabel = i._changedAt
+                ? i._changedAt.toLocaleDateString('en-US', { month:'short', day:'numeric' })
+                  + ' ' + i._changedAt.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' })
+                : '—';
+
+            return `<tr>
+                <td><span class="jira-key">${esc(i.key||'—')}</span></td>
+                <td style="font-size:12px;">${esc(i.summary||'—')}</td>
+                <td>
+                    <div style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);">
+                        <span class="jira-avatar" style="background:${col};">${jInitials(i.assignee)}</span>
+                        ${esc(i.assignee||'Unassigned')}
+                    </div>
+                </td>
+                <td style="font-family:'DM Mono',monospace;font-weight:700;text-align:center;">${esc(i.story_points||'—')}</td>
+                <td style="font-family:'DM Mono',monospace;color:var(--muted);text-align:center;">${slaLabel}</td>
+                <td style="font-size:11px;color:var(--muted);">${sinceLabel}</td>
+                <td style="font-family:'DM Mono',monospace;font-weight:700;text-align:center;
+                    color:${i._isOver ? '#ef4444' : '#f59e0b'};">${elapsedH}h</td>
+                <td>
+                    <span style="display:inline-block;padding:3px 8px;border-radius:20px;
+                        font-size:10px;font-weight:700;white-space:nowrap;
+                        background:${badgeBg};color:${badgeTxt};">${badgeLabel}</span>
+                </td>
+            </tr>`;
+        }).join('');
     }
 
     function jRenderSprintBar(issues, cfg) {
@@ -2179,6 +2422,11 @@
     }
 
     fetchData();
+
+    // Background silent refresh every 15 minutes.
+    // Uses silentFetch() — no spinner, no loader, no UI disruption.
+    // Manual "Sync Data" button still calls fetchData() for a full reload.
+    setInterval(silentFetch, 15 * 60 * 1000);
 </script>
 </body>
 </html>
