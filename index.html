@@ -17,10 +17,12 @@
             --accent:        #3b82f6;
             --bg:            #eef2f7;
             --surface:       #ffffff;
+            --surface-2:     #f8fafc;
             --success:       #10b981;
             --danger:        #ef4444;
             --warning:       #f59e0b;
             --border:        #dde3ed;
+            --border-subtle: #f1f5f9;
             --text:          #1a2535;
             --muted:         #64748b;
 
@@ -29,8 +31,100 @@
             --thresh-good: 30;   
             --rate-fallback: 100; 
             --variance-pct: 1.2;  
-            --variance-under: 0.8; 
+            --variance-under: 0.8;
+
+            /* Dark mode toggle */
+            --toggle-track:  #cbd5e1;
+            --toggle-thumb:  #ffffff;
         }
+
+        /* ── Dark Mode Tokens ──────────────────────────────── */
+        [data-theme="dark"] {
+            --primary:       #4d9fff;
+            --primary-light: #6ab4ff;
+            --accent:        #60a5fa;
+            --bg:            #0f1117;
+            --surface:       #1a1d27;
+            --surface-2:     #22263a;
+            --success:       #34d399;
+            --danger:        #f87171;
+            --warning:       #fbbf24;
+            --border:        #2e3348;
+            --border-subtle: #252839;
+            --text:          #e2e8f0;
+            --muted:         #8b9ab8;
+            --toggle-track:  #4d9fff;
+            --toggle-thumb:  #ffffff;
+        }
+
+        /* ── Dark mode hardcoded-colour overrides ──────────── */
+        /* These target elements whose colours are hardcoded in CSS classes */
+        [data-theme="dark"] body { color: var(--text); }
+        [data-theme="dark"] .card-title { border-bottom-color: var(--border); }
+        [data-theme="dark"] .phase-table th { background: var(--surface-2); }
+        [data-theme="dark"] .phase-table td { border-bottom-color: var(--border-subtle); }
+        [data-theme="dark"] .phase-bar-wrap { background: var(--border); }
+        [data-theme="dark"] .spender-row { border-bottom-color: var(--border-subtle); }
+        [data-theme="dark"] .spender-bar-wrap { background: var(--border); }
+        [data-theme="dark"] .alert-item { border-bottom-color: var(--border-subtle); }
+        [data-theme="dark"] .heatmap-table th { background: var(--surface-2); }
+        [data-theme="dark"] .heatmap-table td:first-child { background: var(--surface); }
+        [data-theme="dark"] .spot-table th { background: var(--surface-2); }
+        [data-theme="dark"] .spot-table td { border-bottom-color: var(--border-subtle); }
+        [data-theme="dark"] .spot-table tr:hover td { background: var(--surface-2); }
+        [data-theme="dark"] .rolloff-table th { border-bottom-color: var(--border); }
+        [data-theme="dark"] .rolloff-table td { border-bottom-color: var(--border-subtle); }
+        [data-theme="dark"] .tab-btn:hover { background: var(--surface-2); color: var(--text); }
+        [data-theme="dark"] .jira-table th { background: var(--surface-2); border-bottom-color: var(--border); }
+        [data-theme="dark"] .jira-table td { border-bottom-color: var(--border-subtle); }
+        [data-theme="dark"] .jira-table tr:hover td { background: var(--surface-2); }
+        [data-theme="dark"] .jira-bar-track { background: var(--border); }
+        [data-theme="dark"] .jira-status-cnt { color: var(--text); }
+        [data-theme="dark"] .ms-complete { background: var(--surface-2); color: var(--muted); }
+        [data-theme="dark"] .badge-neutral { background: var(--surface-2); color: var(--muted); }
+        [data-theme="dark"] .trend-ok   { background: #064e3b; color: #6ee7b7; }
+        [data-theme="dark"] .trend-warn { background: #451a03; color: #fcd34d; }
+        [data-theme="dark"] .trend-bad  { background: #450a0a; color: #fca5a5; }
+        [data-theme="dark"] .rag-green  { background: #064e3b; color: #6ee7b7; }
+        [data-theme="dark"] .rag-amber  { background: #451a03; color: #fcd34d; }
+        [data-theme="dark"] .rag-red    { background: #450a0a; color: #fca5a5; }
+        [data-theme="dark"] .jira-rag-g { background: #064e3b; color: #6ee7b7; }
+        [data-theme="dark"] .jira-rag-a { background: #451a03; color: #fcd34d; }
+        [data-theme="dark"] .jira-rag-r { background: #450a0a; color: #fca5a5; }
+        [data-theme="dark"] .jl-blocked { background: #450a0a; color: #fca5a5; }
+        [data-theme="dark"] .jl-nci     { background: #451a03; color: #fcd34d; }
+        [data-theme="dark"] .jl-dep     { background: #1e3a5f; color: #93c5fd; }
+        [data-theme="dark"] .jl-nr      { background: var(--surface-2); color: var(--muted); }
+        [data-theme="dark"] .h-over     { background-color: #450a0a !important; color: #fca5a5 !important; }
+        [data-theme="dark"] .h-good     { background-color: #064e3b !important; color: #6ee7b7 !important; }
+        [data-theme="dark"] .h-bench    { background-color: #451a03 !important; color: #fcd34d !important; }
+        [data-theme="dark"] .badge-danger  { background: #450a0a; color: #fca5a5; }
+        [data-theme="dark"] .badge-warning { background: #451a03; color: #fcd34d; }
+        [data-theme="dark"] .badge-success { background: #064e3b; color: #6ee7b7; }
+        [data-theme="dark"] .badge-purple  { background: #2e1065; color: #c4b5fd; }
+        [data-theme="dark"] .ms-on-track   { background: #064e3b; color: #6ee7b7; }
+        [data-theme="dark"] .ms-at-risk    { background: #451a03; color: #fcd34d; }
+        [data-theme="dark"] .ms-delayed    { background: #450a0a; color: #fca5a5; }
+        [data-theme="dark"] .status-bill   { background: #1e3a5f; color: #93c5fd; }
+        [data-theme="dark"] .status-nb     { background: #451a03; color: #fcd34d; }
+        [data-theme="dark"] .spinner { border-color: var(--border); border-top-color: var(--primary); }
+        [data-theme="dark"] .error-box { background: #450a0a; border-color: #f87171; color: #fca5a5; }
+        [data-theme="dark"] .btn-select { background: var(--surface-2); border-color: var(--border); color: var(--text); }
+        [data-theme="dark"] .budget-box input { background: var(--surface-2); color: var(--primary); }
+        [data-theme="dark"] #rolloff-container::-webkit-scrollbar-thumb { background: var(--border); }
+
+        /* Dark mode toggle button */
+        .dark-toggle { display: inline-flex; align-items: center; gap: 7px; cursor: pointer;
+            background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 8px; padding: 7px 12px; font-size: 12px; font-weight: 600;
+            color: white; transition: background 0.2s; user-select: none; white-space: nowrap; }
+        .dark-toggle:hover { background: rgba(255,255,255,0.22); }
+        .dark-toggle-track { width: 28px; height: 16px; border-radius: 8px;
+            background: var(--toggle-track); position: relative; transition: background 0.2s;
+            flex-shrink: 0; }
+        .dark-toggle-thumb { position: absolute; top: 2px; left: 2px; width: 12px; height: 12px;
+            border-radius: 50%; background: var(--toggle-thumb);
+            transition: transform 0.2s; }
 
         /* ── Reset & Base ──────────────────────────────────── */
         *, *::before, *::after { box-sizing: border-box; }
@@ -289,6 +383,11 @@
                 </span>
                 <span id="next-sync-label" style="font-size:10px;opacity:0.6;">Next sync in 15:00</span>
             </span>
+            <button id="btn-darkmode" class="dark-toggle" onclick="toggleDarkMode()" title="Toggle dark mode">
+                <span id="dm-icon">🌙</span>
+                <span class="dark-toggle-track"><span class="dark-toggle-thumb" id="dm-thumb"></span></span>
+                <span id="dm-label">Dark</span>
+            </button>
             <button id="btn-export" class="btn btn-primary" onclick="exportPDF()">📄 Export PDF</button>
             <button class="btn" id="btn-sync" onclick="fetchData()">🔄 Sync Data</button>
         </div>
@@ -742,7 +841,7 @@
 <script>
     Chart.register(ChartDataLabels);
 
-    const API_URL        = "https://script.google.com/macros/s/AKfycbznzVqjlbnHNMsrI8FrkgdRRWUjb9w-Iejqg3LneodAzAoBYr9y6rP1fJITLnB2b3SV/exec";
+    const API_URL        = "https://script.google.com/macros/s/AKfycbyygEvawqxx-M7x3hBRWNWYsLYWAJQz3d8MjYi1je1juk7UiEfjOfg7LE6Hl5Wa6A4/exec";
     const RATE_FALLBACK  = 100;
     const THRESH_OVER    = 40;
     const THRESH_GOOD    = 30;
@@ -884,6 +983,48 @@
     let sparkRefs  = {};
     let _escEl     = null;
     let _debounce  = null;
+
+    /* ── DARK MODE ─────────────────────────────────────────── */
+    function applyDarkMode(dark) {
+        document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+        const thumb  = document.getElementById('dm-thumb');
+        const icon   = document.getElementById('dm-icon');
+        const label  = document.getElementById('dm-label');
+        if (thumb) thumb.style.transform = dark ? 'translateX(12px)' : 'translateX(0)';
+        if (icon)  icon.textContent  = dark ? '☀️' : '🌙';
+        if (label) label.textContent = dark ? 'Light' : 'Dark';
+        // Update Chart.js default colours to match mode
+        const tickCol  = dark ? '#8b9ab8' : '#64748b';
+        const gridCol  = dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+        Chart.defaults.color        = tickCol;
+        Chart.defaults.borderColor  = gridCol;
+        // Re-render all charts so their axes/labels pick up new colours
+        // Only if data is already loaded
+        if (globalData.actuals && globalData.actuals.length) {
+            try { processData(); } catch(e) {}
+        }
+        if (globalData.jiraIssues && globalData.jiraIssues.length) {
+            try { renderJiraTab(); } catch(e) {}
+        }
+    }
+
+    function toggleDarkMode() {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const next   = !isDark;
+        applyDarkMode(next);
+        try { localStorage.setItem('pct_dark_mode', next ? '1' : '0'); } catch(e) {}
+    }
+
+    // Apply saved preference on load — before first render
+    (function initDarkMode() {
+        let saved = '0';
+        try { saved = localStorage.getItem('pct_dark_mode') || '0'; } catch(e) {}
+        // Also respect OS preference if no saved choice
+        if (saved === '0' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            saved = '1';
+        }
+        applyDarkMode(saved === '1');
+    })();
 
     function debouncedProcess() { clearTimeout(_debounce); _debounce = setTimeout(processData, 350); }
 
@@ -2002,11 +2143,11 @@
         return issues.filter(i => (i.sprint||"").trim() === sprint);
     }
 
-    const tickColor  = "#64748b";
-    const gridColor  = "rgba(0,0,0,0.05)";
+    const tickColor  = () => document.documentElement.getAttribute('data-theme') === 'dark' ? '#8b9ab8' : '#64748b';
+    const gridColor  = () => document.documentElement.getAttribute('data-theme') === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
     const baseScale  = {
-        x: { grid:{color:gridColor}, ticks:{color:tickColor, font:{family:"DM Sans",size:11}} },
-        y: { grid:{color:gridColor}, ticks:{color:tickColor, font:{family:"DM Sans",size:11}}, beginAtZero:true }
+        x: { grid:{color:gridColor()}, ticks:{color:tickColor(), font:{family:"DM Sans",size:11}} },
+        y: { grid:{color:gridColor()}, ticks:{color:tickColor(), font:{family:"DM Sans",size:11}}, beginAtZero:true }
     };
 
     /* ══════════════════════════════════════════════════════════
@@ -2072,11 +2213,11 @@
             options:{
                 responsive:true, maintainAspectRatio:false, indexAxis:"y",
                 scales:{
-                    x:{ stacked:true, grid:{color:gridColor}, ticks:{color:tickColor,font:{family:"DM Sans",size:11}} },
+                    x:{ stacked:true, grid:{color:gridColor()}, ticks:{color:tickColor(),font:{family:"DM Sans",size:11}} },
                     y:{ stacked:true, display:false }
                 },
                 plugins:{
-                    legend:{ display:true, position:"bottom", labels:{color:tickColor,font:{family:"DM Sans",size:11},boxWidth:12,padding:12} },
+                    legend:{ display:true, position:"bottom", labels:{color:tickColor(),font:{family:"DM Sans",size:11},boxWidth:12,padding:12} },
                     datalabels:{ display:true, color:"#fff", font:{family:"DM Sans",size:11,weight:"bold"},
                         formatter:(v) => v > 0 ? v : "" }
                 }
@@ -2110,7 +2251,7 @@
                 responsive:true, maintainAspectRatio:false,
                 scales: baseScale,
                 plugins:{
-                    legend:{ display:true, labels:{color:tickColor,font:{family:"DM Sans",size:11},boxWidth:12,padding:12} },
+                    legend:{ display:true, labels:{color:tickColor(),font:{family:"DM Sans",size:11},boxWidth:12,padding:12} },
                     datalabels:{ display:false }
                 }
             }
@@ -2143,7 +2284,7 @@
                     y:{ stacked:true, ...baseScale.y }
                 },
                 plugins:{
-                    legend:{ display:true, labels:{color:tickColor,font:{family:"DM Sans",size:11},boxWidth:12,padding:12} },
+                    legend:{ display:true, labels:{color:tickColor(),font:{family:"DM Sans",size:11},boxWidth:12,padding:12} },
                     datalabels:{ display:false }
                 }
             }
@@ -2577,7 +2718,7 @@
 
         // Blocked / flagged — unchanged
         const blocked = issues.filter(i => (i.labels||[]).some(l =>
-            ["blocked","needs-client-input","dependency"].includes(l)));
+            ["blocked","needs-client-input","dependency","needs-review"].includes(l)));
 
         const blockedBody = document.getElementById("sv-blocked-body");
         blockedBody.innerHTML = blocked.length ? blocked.map(i => {
@@ -2669,7 +2810,7 @@
                 { label:"Actual", data:actual, borderColor:"#3b82f6", borderWidth:2.5,  pointRadius:3,  pointBackgroundColor:"#3b82f6", fill:false, tension:0.3, spanGaps:false }
             ]},
             options:{ responsive:true, maintainAspectRatio:false,
-                plugins:{ legend:{ display:true, labels:{color:tickColor,font:{family:"DM Sans",size:11},boxWidth:12,padding:12} }, datalabels:{display:false} },
+                plugins:{ legend:{ display:true, labels:{color:tickColor(),font:{family:"DM Sans",size:11},boxWidth:12,padding:12} }, datalabels:{display:false} },
                 scales: baseScale
             }
         });
@@ -2686,7 +2827,7 @@
             data:{ labels:["Blocked","Needs client","Dependency","Needs review","No label"],
                    datasets:[{ data:Object.values(lCounts), backgroundColor:["#ef4444","#f59e0b","#3b82f6","#94a3b8","#dcfce7"], borderWidth:0, hoverOffset:6 }]},
             options:{ responsive:true, maintainAspectRatio:false,
-                plugins:{ legend:{ display:true, position:"right", labels:{color:tickColor,font:{family:"DM Sans",size:11},boxWidth:10,padding:10} }, datalabels:{display:false} }
+                plugins:{ legend:{ display:true, position:"right", labels:{color:tickColor(),font:{family:"DM Sans",size:11},boxWidth:10,padding:10} }, datalabels:{display:false} }
             }
         });
 
