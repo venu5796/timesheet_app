@@ -630,7 +630,7 @@
             <!-- Aging + Blocked issues -->
             <div class="jira-two-col" style="margin-bottom:16px;">
                 <div class="card">
-                    <div class="card-title">⏱️ Aging issues <span style="font-size:11px;font-weight:500;color:var(--muted);">stuck in development &gt;48h</span></div>
+                    <div class="card-title">⏱️ Aging issues <span style="font-size:11px;font-weight:500;color:var(--muted);">dev tickets with no update &gt;2 working days</span></div>
                     <div class="table-responsive" style="max-height:240px;overflow-y:auto;">
                         <table class="jira-table">
                             <thead><tr>
@@ -656,6 +656,32 @@
                             <tbody id="sv-blocked-body"></tbody>
                         </table>
                     </div>
+                </div>
+            </div>
+
+            <!-- Code Review aging panel -->
+            <div class="card" style="margin-bottom:16px;">
+                <div class="card-title">
+                    🔍 Code Review — awaiting reviewer
+                    <span id="sv-code-review-count" style="display:none;font-size:11px;font-weight:700;
+                        padding:3px 10px;border-radius:20px;background:#fffbeb;color:#92400e;"></span>
+                    <span style="font-size:11px;font-weight:400;color:var(--muted);">
+                        tickets in CODE REVIEW beyond threshold (set via <code>code_review_max_hrs</code> in Jira_Summary)
+                    </span>
+                </div>
+                <div class="table-responsive" style="max-height:240px;overflow-y:auto;">
+                    <table class="jira-table">
+                        <thead><tr>
+                            <th style="width:90px;">Key</th>
+                            <th>Summary</th>
+                            <th style="width:150px;">Assignee</th>
+                            <th style="width:80px;">Waiting</th>
+                            <th style="width:110px;">Flag</th>
+                        </tr></thead>
+                        <tbody id="sv-code-review-body">
+                            <tr><td colspan="5" class="jira-empty">Loading…</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
@@ -725,18 +751,133 @@
     const ACTIVE_DAYS    = 14;
     const CHART_COLORS   = ['#004a99','#3b82f6','#10b981','#f59e0b','#8b5cf6','#ec4899','#14b8a6'];
 
-    // ── Dev SLA thresholds — hours allowed per story point band ──────────────
-    // Grace window: flag when within 1hr of SLA expiry, not just after breach
-    // For ranges (3pt, 5pt, 8pt) the lower bound triggers AT RISK, upper = OVERDUE
+    // ── Dev SLA thresholds — WORKING hours allowed per story point band ──────
+    // All elapsed time is now calculated in working hours (Mon–Fri, 9am–6pm)
+    // skipping weekends and public holidays defined in WORK_HOURS.holidays.
+    // Grace window: flag when within 1 working hour of SLA expiry.
     const DEV_SLA = {
-        1: { warn: 2,   over: 3   },   // 1pt  → flag at 2h
-        2: { warn: 4,   over: 5   },   // 2pt  → flag at 4h
+        1: { warn: 2,   over: 2   },   // 1pt  → flag at 2 working hrs
+        2: { warn: 4,   over: 4   },   // 2pt  → flag at 4 working hrs
         3: { warn: 8,   over: 12  },   // 3pt  → AT RISK at 8h (1 day), OVERDUE at 12h (1.5 days)
         5: { warn: 16,  over: 24  },   // 5pt  → AT RISK at 16h (2 days), OVERDUE at 24h (3 days)
-        8: { warn: 32,  over: 40  },   // 8pt  → flag at 24h (>3 days = always flag)
+        8: { warn: 24,  over: 24  },   // 8pt  → flag at 24h (>3 working days)
         default: { warn: 16, over: 24 }
     };
     const SLA_GRACE_HOURS = 1;
+
+    // ── Working hours configuration ───────────────────────────────────────────
+    const WORK_HOURS = {
+        startHour: 9,    // 9am
+        endHour:   18,   // 6pm
+        // 2026 India public holidays — update yearly as needed
+        // Format: 'YYYY-MM-DD'
+        holidays: new Set([
+            '2026-01-01',  // New Year's Day
+            '2026-01-26',  // Republic Day
+            '2026-03-03',  // Holi (corrected date)
+            '2026-03-20',  // Eid-ul-Fitr
+            '2026-05-01',  // Maharashtra Day
+            '2026-05-27',  // Eid-al-Adha
+            '2026-08-15',  // Independence Day
+            '2026-08-28',  // Raksha Bandhan
+            '2026-09-04',  // Janmashtami
+            '2026-09-14',  // Ganesh Chaturthi
+            '2026-10-02',  // Mahatma Gandhi Jayanti
+            '2026-11-09',  // Diwali (Observed)
+            '2026-11-10',  // Govardhan Puja
+            '2026-11-24',  // Gurunanak Jayanti
+            '2026-12-25',  // Christmas
+            '2027-01-01'   // New Year's Day 2027
+        ])
+    };
+
+    // ── workingHoursElapsed_(start, end) ──────────────────────────────────────
+    // Returns the number of working hours between two Date objects.
+    // Skips: weekends (Sat/Sun), public holidays in WORK_HOURS.holidays,
+    //        and hours outside WORK_HOURS.startHour–endHour.
+    // Used by both Aging Issues and Dev SLA Breaches panels.
+    function workingHoursElapsed_(start, end) {
+        if (!start || !end || isNaN(start) || isNaN(end)) return 0;
+        if (end <= start) return 0;
+
+        const WORK_START = WORK_HOURS.startHour;   // 9
+        const WORK_END   = WORK_HOURS.endHour;      // 18
+        const WORK_DAY_H = WORK_END - WORK_START;   // 9 hrs/day
+
+        function toDateKey(d) {
+            // 'YYYY-MM-DD' in local time for holiday lookup
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return y + '-' + m + '-' + day;
+        }
+
+        function isWorkingDay(d) {
+            const dow = d.getDay(); // 0=Sun, 6=Sat
+            if (dow === 0 || dow === 6) return false;
+            return !WORK_HOURS.holidays.has(toDateKey(d));
+        }
+
+        // Clamp a datetime to within working hours on the same day.
+        // Returns null if the day itself is non-working.
+        function clampToWorkDay(d) {
+            if (!isWorkingDay(d)) return null;
+            const clamped = new Date(d);
+            if (clamped.getHours() < WORK_START) {
+                clamped.setHours(WORK_START, 0, 0, 0);
+            } else if (clamped.getHours() >= WORK_END) {
+                clamped.setHours(WORK_END, 0, 0, 0);
+            }
+            return clamped;
+        }
+
+        // Advance a date to the next working day's start
+        function nextWorkDayStart(d) {
+            const next = new Date(d);
+            next.setHours(WORK_START, 0, 0, 0);
+            next.setDate(next.getDate() + 1);
+            while (!isWorkingDay(next)) {
+                next.setDate(next.getDate() + 1);
+            }
+            return next;
+        }
+
+        let totalMs  = 0;
+        let cursor   = new Date(start);
+
+        // If start is outside working hours, advance to next working period
+        if (!isWorkingDay(cursor) || cursor.getHours() >= WORK_END) {
+            cursor = nextWorkDayStart(cursor);
+        } else if (cursor.getHours() < WORK_START) {
+            cursor.setHours(WORK_START, 0, 0, 0);
+        }
+
+        // Walk day by day accumulating working milliseconds
+        const MAX_DAYS = 365; // safety cap
+        let safety = 0;
+        while (cursor < end && safety < MAX_DAYS) {
+            safety++;
+            if (!isWorkingDay(cursor)) { cursor = nextWorkDayStart(cursor); continue; }
+
+            // Working window for this day
+            const dayStart = new Date(cursor);
+            dayStart.setHours(WORK_START, 0, 0, 0);
+            const dayEnd = new Date(cursor);
+            dayEnd.setHours(WORK_END, 0, 0, 0);
+
+            const periodStart = cursor < dayStart ? dayStart : cursor;
+            const periodEnd   = end   < dayEnd   ? end      : dayEnd;
+
+            if (periodEnd > periodStart) {
+                totalMs += periodEnd - periodStart;
+            }
+
+            // Move to next working day start
+            cursor = nextWorkDayStart(cursor);
+        }
+
+        return totalMs / 3600000; // convert ms → hours
+    }
 
     let globalData = { actuals:[], plan:[], rawPhases:[], milestones:[], unknownTasks:[] };
     let chartRefs  = {};
@@ -1943,10 +2084,14 @@
         });
 
         // Sprint completion rate — committed vs done story points per sprint
+        const SPRINT_COMPLETE_HL = new Set([
+            'UAT RELEASE QUEUE', 'READY FOR UAT', 'UAT',
+            'RE-OPENED IN UAT', 'PROD RELEASE QUEUE', 'DONE'
+        ]);
         const sprintPts = sprints.map(sp => {
             const si = issues.filter(i => (i.sprint||"").trim() === sp);
             const committed = si.reduce((a,i) => a + (parseFloat(i.story_points)||0), 0);
-            const done      = si.filter(i => jStatusCategory(i.status) === "done")
+            const done      = si.filter(i => SPRINT_COMPLETE_HL.has((i.status||"").toUpperCase()))
                                 .reduce((a,i) => a + (parseFloat(i.story_points)||0), 0);
             return { sprint:sp, committed:Math.round(committed), done:Math.round(done) };
         });
@@ -2066,6 +2211,7 @@
         jRenderSprintPts(issues);
         jRenderSprintStatusBreakdown(issues);
         jRenderSprintAgingBlocked(issues);
+        jRenderCodeReviewAging(issues);
         jRenderSlaBreaches(issues);
         jRenderSprintIssuesTable(issues);
         jRenderSprintCharts(issues, cfg);
@@ -2091,30 +2237,45 @@
     }
 
     function jGetSlaThreshold_(pts) {
+        // Read SLA thresholds from Jira_Summary if available — fall back to DEV_SLA constants.
+        // This allows PMs to adjust thresholds in the sheet without touching code.
+        function gs(key, fallback) {
+            const v = parseFloat(jGetSummary(key));
+            return isNaN(v) ? fallback : v;
+        }
         const p = parseFloat(pts) || 0;
-        const band = [1,2,3,5,8].find(b => b === p) || 'default';
-        return DEV_SLA[band] || DEV_SLA.default;
+        if (p === 1) return { warn: gs('sla_1pt_warn', DEV_SLA[1].warn),   over: gs('sla_1pt_over', DEV_SLA[1].over)   };
+        if (p === 2) return { warn: gs('sla_2pt_warn', DEV_SLA[2].warn),   over: gs('sla_2pt_over', DEV_SLA[2].over)   };
+        if (p === 3) return { warn: gs('sla_3pt_warn', DEV_SLA[3].warn),   over: gs('sla_3pt_over', DEV_SLA[3].over)   };
+        if (p === 5) return { warn: gs('sla_5pt_warn', DEV_SLA[5].warn),   over: gs('sla_5pt_over', DEV_SLA[5].over)   };
+        if (p === 8) return { warn: gs('sla_8pt_warn', DEV_SLA[8].warn),   over: gs('sla_8pt_over', DEV_SLA[8].over)   };
+        return { warn: gs('sla_default_warn', DEV_SLA.default.warn), over: gs('sla_default_over', DEV_SLA.default.over) };
     }
 
     function jGetSlaBreaches(issues) {
-        const now = Date.now();
+        // Only flags IN PROGRESS tickets — developer's active responsibility.
+        // Ready for Review: developer done, not their fault if it waits.
+        // Code Review: handled separately by jRenderCodeReviewAging().
+        const now = new Date();
+        const grace = parseFloat(jGetSummary('sla_grace_hrs')) || SLA_GRACE_HOURS;
         return issues
             .filter(i => {
                 const s = (i.status || '').toUpperCase();
-                if (!['IN PROGRESS', 'CODE REVIEW'].includes(s)) return false;
+                if (s !== 'IN PROGRESS') return false;
                 if (!i.status_category_changed) return false;
                 const changedAt = parseSheetDate_(i.status_category_changed);
                 if (!changedAt) return false;
-                const elapsed = (now - changedAt) / 3600000;
+                const elapsed = workingHoursElapsed_(changedAt, now);
                 const thr = jGetSlaThreshold_(i.story_points);
-                return elapsed >= (thr.warn - SLA_GRACE_HOURS);
+                return elapsed >= (thr.warn - grace);
             })
             .map(i => {
                 const changedAt = parseSheetDate_(i.status_category_changed);
-                const elapsed   = (now - changedAt) / 3600000;
+                const elapsed   = workingHoursElapsed_(changedAt, now);
                 const thr       = jGetSlaThreshold_(i.story_points);
+                const grace_    = parseFloat(jGetSummary('sla_grace_hrs')) || SLA_GRACE_HOURS;
                 const isOver    = elapsed >= thr.over;
-                const isAtRisk  = !isOver && elapsed >= (thr.warn - SLA_GRACE_HOURS);
+                const isAtRisk  = !isOver && elapsed >= (thr.warn - grace_);
                 return Object.assign({}, i, {
                     _changedAt:  changedAt,
                     _elapsedHrs: elapsed,
@@ -2124,6 +2285,76 @@
                 });
             })
             .sort((a, b) => b._elapsedHrs - a._elapsedHrs);
+    }
+
+    // ── Code Review aging ─────────────────────────────────────────────────────
+    // Flags tickets stuck in CODE REVIEW beyond the threshold in Jira_Summary
+    // (metric: code_review_max_hrs). Separate from developer SLA — this flags
+    // the reviewer, not the developer.
+    function jRenderCodeReviewAging(issues) {
+        const tbody   = document.getElementById('sv-code-review-body');
+        const countEl = document.getElementById('sv-code-review-count');
+        if (!tbody) return;
+
+        const maxHrs = parseFloat(jGetSummary('code_review_max_hrs')) || 8;
+        const now    = new Date();
+
+        const stale = issues
+            .filter(i => {
+                const s = (i.status || '').toUpperCase();
+                if (s !== 'CODE REVIEW') return false;
+                const d = new Date(i.updated);
+                if (isNaN(d)) return false;
+                return workingHoursElapsed_(d, now) > maxHrs;
+            })
+            .map(i => {
+                const d       = new Date(i.updated);
+                const elapsed = workingHoursElapsed_(d, now);
+                return Object.assign({}, i, { _elapsedHrs: elapsed });
+            })
+            .sort((a, b) => b._elapsedHrs - a._elapsedHrs);
+
+        if (countEl) {
+            if (stale.length) {
+                countEl.textContent   = stale.length + ' ticket' + (stale.length > 1 ? 's' : '');
+                countEl.style.display = 'inline';
+            } else {
+                countEl.style.display = 'none';
+            }
+        }
+
+        if (!stale.length) {
+            tbody.innerHTML = `<tr><td colspan="5" class="jira-empty">✅ No tickets stuck in Code Review</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = stale.map(i => {
+            const col      = jAvatarColor(i.assignee);
+            const elapsed  = Math.round(i._elapsedHrs);
+            const isOver   = elapsed >= maxHrs * 2;
+            const badgeBg  = isOver ? '#fee2e2' : '#fffbeb';
+            const badgeTxt = isOver ? '#991b1b' : '#92400e';
+            const badge    = isOver
+                ? 'OVERDUE +' + (elapsed - maxHrs) + 'wh'
+                : 'WAITING ' + elapsed + 'wh';
+            return `<tr>
+                <td><span class="jira-key">${esc(i.key||'—')}</span></td>
+                <td style="font-size:12px;">${esc(i.summary||'—')}</td>
+                <td>
+                    <div style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);">
+                        <span class="jira-avatar" style="background:${col};">${jInitials(i.assignee)}</span>
+                        ${esc(i.assignee||'Unassigned')}
+                    </div>
+                </td>
+                <td style="font-family:'DM Mono',monospace;font-weight:700;
+                    color:${isOver ? '#ef4444' : '#f59e0b'};text-align:center;">${elapsed}wh</td>
+                <td>
+                    <span style="display:inline-block;padding:3px 8px;border-radius:20px;
+                        font-size:10px;font-weight:700;white-space:nowrap;
+                        background:${badgeBg};color:${badgeTxt};">${badge}</span>
+                </td>
+            </tr>`;
+        }).join('');
     }
 
     function jRenderSlaBreaches(issues) {
@@ -2208,18 +2439,62 @@
         document.getElementById("jsb-qual").textContent    = issues.filter(i => jStatusCategory(i.status) === "qualification").length;
         document.getElementById("jsb-blocked").textContent = issues.filter(i => (i.labels||[]).includes("blocked")).length;
 
+        // Working days left — skips weekends and holidays.
+        // Today counts as 1 day only if we're still within working hours (before 6pm).
+        // If we're past end of work today, today is not counted.
         const sprintEnd = cfg.sprint_end ? new Date(cfg.sprint_end) : null;
-        const dl        = sprintEnd && !isNaN(sprintEnd) ? Math.max(0, Math.ceil((sprintEnd - new Date()) / 86400000)) : "—";
-        const daysEl    = document.getElementById("jsb-days");
-        daysEl.textContent  = dl;
-        daysEl.style.color  = (dl !== "—" && dl <= 2) ? "var(--danger)" : (dl !== "—" && dl <= 5) ? "var(--warning)" : "var(--primary)";
+        let dl = "—";
+        if (sprintEnd && !isNaN(sprintEnd)) {
+            const now = new Date();
+            // Sprint end date from GS is date-only — treat as end of working day
+            const endOfSprint = new Date(sprintEnd);
+            endOfSprint.setHours(WORK_HOURS.endHour, 0, 0, 0);
+
+            if (endOfSprint <= now) {
+                dl = 0;
+            } else {
+                let count  = 0;
+                const cursor = new Date(now);
+                // Start from tomorrow if we're past today's working hours,
+                // or from today's date if still within working hours
+                if (now.getHours() >= WORK_HOURS.endHour) {
+                    cursor.setDate(cursor.getDate() + 1);
+                }
+                cursor.setHours(0, 0, 0, 0);
+
+                const endCursor = new Date(endOfSprint);
+                endCursor.setHours(0, 0, 0, 0);
+
+                while (cursor <= endCursor) {
+                    const dow = cursor.getDay();
+                    const key = cursor.getFullYear() + '-'
+                        + String(cursor.getMonth()+1).padStart(2,'0') + '-'
+                        + String(cursor.getDate()).padStart(2,'0');
+                    if (dow !== 0 && dow !== 6 && !WORK_HOURS.holidays.has(key)) count++;
+                    cursor.setDate(cursor.getDate() + 1);
+                }
+                dl = Math.max(0, count);
+            }
+        }
+        const daysEl = document.getElementById("jsb-days");
+        daysEl.textContent = dl;
+        daysEl.style.color = (dl !== "—" && dl <= 2) ? "var(--danger)" : (dl !== "—" && dl <= 5) ? "var(--warning)" : "var(--primary)";
     }
 
     function jRenderSprintPts(issues) {
         const total = issues.reduce((a,i) => a + (parseFloat(i.story_points)||0), 0);
-        const done  = issues.filter(i => jStatusCategory(i.status) === "done")
-                            .reduce((a,i) => a + (parseFloat(i.story_points)||0), 0);
-        const pct   = total ? Math.round(done / total * 100) : 0;
+
+        // Sprint-complete statuses — UAT RELEASE QUEUE is the dev team's
+        // definition of "done for this sprint". DONE is also counted.
+        const SPRINT_COMPLETE = new Set([
+            'UAT RELEASE QUEUE', 'READY FOR UAT', 'UAT',
+            'RE-OPENED IN UAT', 'PROD RELEASE QUEUE', 'DONE'
+        ]);
+        const done = issues
+            .filter(i => SPRINT_COMPLETE.has((i.status || '').toUpperCase()))
+            .reduce((a,i) => a + (parseFloat(i.story_points)||0), 0);
+
+        const pct = total ? Math.round(done / total * 100) : 0;
         document.getElementById("jira-pts-label").textContent = `${Math.round(done)} / ${Math.round(total)} pts`;
         document.getElementById("jira-pts-pct").textContent   = pct + "%";
         document.getElementById("jira-pts-done").textContent  = `${Math.round(done)} pts done`;
@@ -2263,28 +2538,44 @@
     }
 
     function jRenderSprintAgingBlocked(issues) {
-        const now = Date.now();
+        const now = new Date();
 
-        // Aging — development issues not updated in >48h
+        // Aging — development issues with >16 working hours since last update
+        // (equivalent to 2 full working days at 9hrs/day, rounded down)
+        // Skips weekends and public holidays — a Friday update won't flag Monday morning.
+        const AGING_THRESHOLD_WORK_HRS = 16;
+
         const aging = issues.filter(i => {
             if (jStatusCategory(i.status) !== "development") return false;
             const d = new Date(i.updated);
-            return !isNaN(d) && (now - d) > 172800000; // 48h in ms
-        }).sort((a,b) => new Date(a.updated) - new Date(b.updated));
+            if (isNaN(d)) return false;
+            return workingHoursElapsed_(d, now) > AGING_THRESHOLD_WORK_HRS;
+        }).sort((a, b) => {
+            // Sort by most working hours elapsed first
+            return workingHoursElapsed_(new Date(a.updated), now) <
+                   workingHoursElapsed_(new Date(b.updated), now) ? 1 : -1;
+        });
 
         const agingBody = document.getElementById("sv-aging-body");
         agingBody.innerHTML = aging.length ? aging.map(i => {
-            const days = Math.floor((now - new Date(i.updated)) / 86400000);
-            const col  = jStatusColor(i.status);
+            const workHrs = workingHoursElapsed_(new Date(i.updated), now);
+            const workDays = (workHrs / WORK_HOURS.endHour - WORK_HOURS.startHour).toFixed(1);
+            const col = jStatusColor(i.status);
+            // Display as working days if >=9h, else working hours
+            const ageLabel = workHrs >= 9
+                ? (workHrs / 9).toFixed(1) + 'wd'   // working days
+                : Math.round(workHrs) + 'wh';         // working hours
             return `<tr>
                 <td><span class="jira-key">${esc(i.key)}</span></td>
                 <td style="font-size:12px;">${esc(i.summary||"—")}</td>
-                <td><span style="display:inline-block;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:700;background:${col}22;color:${col};">${esc(i.status)}</span></td>
-                <td class="jira-age-warn">${days}d</td>
+                <td><span style="display:inline-block;padding:2px 7px;border-radius:20px;
+                    font-size:10px;font-weight:700;background:${col}22;color:${col};">
+                    ${esc(i.status)}</span></td>
+                <td class="jira-age-warn" title="${Math.round(workHrs)} working hrs">${ageLabel}</td>
             </tr>`;
         }).join("") : `<tr><td colspan="4" class="jira-empty">✅ No aging issues</td></tr>`;
 
-        // Blocked / flagged
+        // Blocked / flagged — unchanged
         const blocked = issues.filter(i => (i.labels||[]).some(l =>
             ["blocked","needs-client-input","dependency"].includes(l)));
 
@@ -2344,10 +2635,15 @@
     }
 
     function jRenderSprintCharts(issues, cfg) {
-        // Burndown
+        // Burndown — use same sprint-complete definition as the pts progress bar
+        const SPRINT_COMPLETE = new Set([
+            'UAT RELEASE QUEUE', 'READY FOR UAT', 'UAT',
+            'RE-OPENED IN UAT', 'PROD RELEASE QUEUE', 'DONE'
+        ]);
         const totalPts = issues.reduce((a,i) => a + (parseFloat(i.story_points)||0), 0);
-        const donePts  = issues.filter(i => jStatusCategory(i.status) === "done")
-                               .reduce((a,i) => a + (parseFloat(i.story_points)||0), 0);
+        const donePts  = issues
+            .filter(i => SPRINT_COMPLETE.has((i.status || '').toUpperCase()))
+            .reduce((a,i) => a + (parseFloat(i.story_points)||0), 0);
         const sprintEnd   = cfg.sprint_end   ? new Date(cfg.sprint_end)   : null;
         const sprintStart = cfg.sprint_start ? new Date(cfg.sprint_start) : null;
         const sprintDays  = (sprintStart && sprintEnd && !isNaN(sprintStart) && !isNaN(sprintEnd))
