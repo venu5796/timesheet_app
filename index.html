@@ -761,7 +761,32 @@
             <!-- Code Review aging panel -->
             <div class="card" style="margin-bottom:16px;">
                 <div class="card-title">
-                    🔍 Code Review — awaiting reviewer
+                    ⏱️ Ready for Review aging
+                    <span id="sv-ready-review-count" style="display:none;font-size:11px;font-weight:700;
+                        padding:3px 10px;border-radius:20px;background:#e0f2fe;color:#0369a1;"></span>
+                    <span style="font-size:11px;font-weight:400;color:var(--muted);">
+                        tickets in READY FOR REVIEW beyond threshold (set via <code>ready_for_review_max_hrs</code> in Jira_Summary)
+                    </span>
+                </div>
+                <div class="table-responsive" style="max-height:240px;overflow-y:auto;">
+                    <table class="jira-table">
+                        <thead><tr>
+                            <th style="width:90px;">Key</th>
+                            <th>Summary</th>
+                            <th style="width:150px;">Assignee</th>
+                            <th style="width:80px;">Waiting</th>
+                            <th style="width:110px;">Flag</th>
+                        </tr></thead>
+                        <tbody id="sv-ready-review-body">
+                            <tr><td colspan="5" class="jira-empty">Loading…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card" style="margin-bottom:16px;">
+                <div class="card-title">
+                    🔍 Code Review aging
                     <span id="sv-code-review-count" style="display:none;font-size:11px;font-weight:700;
                         padding:3px 10px;border-radius:20px;background:#fffbeb;color:#92400e;"></span>
                     <span style="font-size:11px;font-weight:400;color:var(--muted);">
@@ -841,7 +866,7 @@
 <script>
     Chart.register(ChartDataLabels);
 
-    const API_URL        = "https://script.google.com/macros/s/AKfycbyygEvawqxx-M7x3hBRWNWYsLYWAJQz3d8MjYi1je1juk7UiEfjOfg7LE6Hl5Wa6A4/exec";
+    const API_URL        = "https://script.google.com/macros/s/AKfycbwk25w2yuMNZ4t8yR1zS1DEBf6yV1aSwVdftblKhRGAgjwNX65NKbYaqL01BL4h-ejH/exec";
     const RATE_FALLBACK  = 100;
     const THRESH_OVER    = 40;
     const THRESH_GOOD    = 30;
@@ -2342,20 +2367,31 @@
         const issues  = jFilterIssues(sprint);
         const cfg     = globalData.jiraConfig || {};
 
+        // Resolve sprint dates for the *selected* sprint from the per-sprint map.
+        // Falls back to top-level cfg fields for back-compat with older API responses.
+        const sprintDates = (cfg.sprint_dates && cfg.sprint_dates[sprint]) || {};
+        const sprintCfg   = {
+            ...cfg,
+            sprint_start: sprintDates.start || cfg.sprint_start || '',
+            sprint_end:   sprintDates.end   || cfg.sprint_end   || '',
+            sprint_days:  sprintDates.days  || cfg.sprint_days  || 10,
+        };
+
         // Sprint dates label
         const datesEl = document.getElementById("sv-sprint-dates");
-        if (datesEl && cfg.sprint_start && cfg.sprint_end) {
-            datesEl.textContent = `${formatDateForUI(cfg.sprint_start)} → ${formatDateForUI(cfg.sprint_end)}`;
+        if (datesEl && sprintCfg.sprint_start && sprintCfg.sprint_end) {
+            datesEl.textContent = `${formatDateForUI(sprintCfg.sprint_start)} → ${formatDateForUI(sprintCfg.sprint_end)}`;
         }
 
-        jRenderSprintBar(issues, cfg);
+        jRenderSprintBar(issues, sprintCfg);
         jRenderSprintPts(issues);
         jRenderSprintStatusBreakdown(issues);
         jRenderSprintAgingBlocked(issues);
+        jRenderReadyForReviewAging(issues);
         jRenderCodeReviewAging(issues);
         jRenderSlaBreaches(issues);
         jRenderSprintIssuesTable(issues);
-        jRenderSprintCharts(issues, cfg);
+        jRenderSprintCharts(issues, sprintCfg);
     }
 
     /* ── SLA BREACH DETECTION ──────────────────────────────────────────────
@@ -2426,6 +2462,74 @@
                 });
             })
             .sort((a, b) => b._elapsedHrs - a._elapsedHrs);
+    }
+
+    // ── Ready for Review aging ───────────────────────────────────────────────
+    // Flags tickets stuck in READY FOR REVIEW beyond threshold in Jira_Summary
+    function jRenderReadyForReviewAging(issues) {
+        const tbody   = document.getElementById('sv-ready-review-body');
+        const countEl = document.getElementById('sv-ready-review-count');
+        if (!tbody) return;
+
+        const maxHrs = parseFloat(jGetSummary('ready_for_review_max_hrs')) || 4;
+        const now    = new Date();
+
+        const stale = issues
+            .filter(i => {
+                const s = (i.status || '').toUpperCase();
+                if (s !== 'READY FOR REVIEW') return false;
+                const d = new Date(i.updated);
+                if (isNaN(d)) return false;
+                return workingHoursElapsed_(d, now) > maxHrs;
+            })
+            .map(i => {
+                const d       = new Date(i.updated);
+                const elapsed = workingHoursElapsed_(d, now);
+                return Object.assign({}, i, { _elapsedHrs: elapsed });
+            })
+            .sort((a, b) => b._elapsedHrs - a._elapsedHrs);
+
+        if (countEl) {
+            if (stale.length) {
+                countEl.textContent   = stale.length + ' ticket' + (stale.length > 1 ? 's' : '');
+                countEl.style.display = 'inline';
+            } else {
+                countEl.style.display = 'none';
+            }
+        }
+
+        if (!stale.length) {
+            tbody.innerHTML = `<tr><td colspan="5" class="jira-empty">✅ No tickets stuck in Ready for Review</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = stale.map(i => {
+            const col      = jAvatarColor(i.assignee);
+            const elapsed  = Math.round(i._elapsedHrs);
+            const isOver   = elapsed >= maxHrs * 2;
+            const badgeBg  = isOver ? '#fee2e2' : '#f0f9ff';
+            const badgeTxt = isOver ? '#991b1b' : '#0369a1';
+            const badge    = isOver
+                ? 'OVERDUE +' + (elapsed - maxHrs) + 'wh'
+                : 'WAITING ' + elapsed + 'wh';
+            return `<tr>
+                <td><span class="jira-key">${esc(i.key||'—')}</span></td>
+                <td style="font-size:12px;">${esc(i.summary||'—')}</td>
+                <td>
+                    <div style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);">
+                        <span class="jira-avatar" style="background:${col};">${jInitials(i.assignee)}</span>
+                        ${esc(i.assignee||'Unassigned')}
+                    </div>
+                </td>
+                <td style="font-family:'DM Mono',monospace;font-weight:700;
+                    color:${isOver ? '#ef4444' : '#0ea5e9'};text-align:center;">${elapsed}wh</td>
+                <td>
+                    <span style="display:inline-block;padding:3px 8px;border-radius:20px;
+                        font-size:10px;font-weight:700;white-space:nowrap;
+                        background:${badgeBg};color:${badgeTxt};">${badge}</span>
+                </td>
+            </tr>`;
+        }).join('');
     }
 
     // ── Code Review aging ─────────────────────────────────────────────────────
