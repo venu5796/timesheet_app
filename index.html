@@ -337,6 +337,38 @@
         .jira-age-ok   { color: var(--muted); font-size: 12px; }
         .jira-empty    { color: var(--muted); font-size: 12px; text-align: center; padding: 20px 0; }
 
+        /* ── SLA Over-spend table ──────────────────────────── */
+        .sla-badge { display:inline-block; padding:2px 8px; border-radius:20px; font-size:10px; font-weight:700; white-space:nowrap; }
+        .sla-over   { background:#fee2e2; color:#991b1b; }
+        .sla-warn   { background:#fffbeb; color:#92400e; }
+        .sla-grace  { background:#fff7ed; color:#c2410c; }
+        .sla-ok     { background:#f0fdf4; color:#166534; }
+
+        /* ── Capacity Panel ────────────────────────────────── */
+        .cap-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:20px; }
+        @media(max-width:900px){ .cap-grid { grid-template-columns:1fr; } }
+        .cap-sprint-bar { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--border-subtle); }
+        .cap-sprint-bar:last-child { border-bottom:none; }
+        .cap-sprint-lbl { font-size:12px; font-weight:600; min-width:110px; }
+        .cap-bar-wrap   { flex:1; background:var(--border); border-radius:4px; height:10px; position:relative; overflow:visible; }
+        .cap-bar-plan   { height:10px; border-radius:4px; background:rgba(148,163,184,0.5); position:absolute; top:0; left:0; }
+        .cap-bar-actual { height:10px; border-radius:4px; background:var(--accent); position:absolute; top:0; left:0; transition:width .6s ease; }
+        .cap-bar-over   { background:var(--danger) !important; }
+        .cap-val        { font-size:11px; font-family:'DM Mono',monospace; font-weight:700; color:var(--muted); white-space:nowrap; }
+        .cap-person-row { display:flex; align-items:center; gap:8px; padding:7px 0; border-bottom:1px solid var(--border-subtle); font-size:12px; }
+        .cap-person-row:last-child { border-bottom:none; }
+        .cap-person-name { flex:1; font-weight:600; }
+        .cap-role-tag   { font-size:10px; background:var(--surface-2); color:var(--muted); padding:2px 7px; border-radius:20px; }
+        .cap-hrs        { font-family:'DM Mono',monospace; font-weight:700; font-size:12px; min-width:44px; text-align:right; }
+        .planning-header { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:12px; }
+        .planning-sprint-sel { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+        .cap-summary-row { display:flex; gap:20px; flex-wrap:wrap; padding:12px 0 4px; }
+        .cap-summary-stat { text-align:center; }
+        .cap-summary-val { font-size:20px; font-weight:800; font-family:'DM Mono',monospace; color:var(--primary); }
+        .cap-summary-lbl { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; }
+        .velocity-note  { font-size:11px; color:var(--muted); display:flex; align-items:center; gap:6px; }
+        .velocity-input { width:52px; border:1px solid var(--border); border-radius:6px; padding:3px 6px; font-size:12px; font-family:'DM Mono',monospace; font-weight:700; background:var(--surface-2); color:var(--primary); text-align:center; }
+
         /* ── PDF EXPORT CSS (active only during export) ────── */
         body.pdf-export-mode { background: white !important; padding: 0 !important; }
         .pdf-export-mode .container { max-width: none !important; width: 100% !important; padding: 16px !important; }
@@ -407,6 +439,7 @@
             <button class="tab-btn active" onclick="switchTab('program')">📊 Program</button>
             <button class="tab-btn" onclick="switchTab('jira-high')">🔵 Jira — High Level</button>
             <button class="tab-btn" onclick="switchTab('jira-sprint')">🎯 Jira — Sprint View</button>
+            <button class="tab-btn" onclick="switchTab('capacity')">🧑‍💻 Capacity & Planning</button>
         </div>
 
         <!-- ══ PROGRAM TAB ══════════════════════════════════ -->
@@ -625,7 +658,34 @@
                 <div style="height:200px;width:100%;"><canvas id="hl-chart-trend"></canvas></div>
             </div>
 
+            <!-- SLA Over-spend tickets (from Spend_Analysis) -->
+            <div class="card" style="margin-bottom:20px;" id="hl-sla-card">
+                <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
+                    <span>⚠️ Hour-budget breaches — tickets over story-point SLA</span>
+                    <span id="hl-sla-count" style="font-size:11px;color:var(--muted);"></span>
+                </div>
+                <div class="table-responsive">
+                    <table class="jira-table">
+                        <thead><tr>
+                            <th style="width:90px;">Ticket</th>
+                            <th style="width:55px;">Pts</th>
+                            <th style="width:80px;">Hours Spent</th>
+                            <th style="width:80px;">Warn @ (h)</th>
+                            <th style="width:80px;">Over @ (h)</th>
+                            <th>Summary</th>
+                            <th style="width:120px;">Assignee</th>
+                            <th style="width:110px;">Status</th>
+                            <th style="width:100px;">SLA Status</th>
+                        </tr></thead>
+                        <tbody id="hl-sla-body">
+                            <tr><td colspan="9" class="jira-empty">Loading…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <!-- Full issues table — all sprints -->
+
             <div class="card">
                 <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
                     <span>📋 All issues</span>
@@ -860,13 +920,80 @@
 
         </div><!-- end #tab-jira-sprint -->
 
+        <!-- ══ CAPACITY & PLANNING TAB ══════════════════════ -->
+        <div id="tab-capacity" class="tab-panel">
+
+            <!-- Sprint Capacity Overview -->
+            <div class="cap-grid">
+                <div class="card">
+                    <h3 class="card-title">📦 Sprint capacity — planned hours per sprint</h3>
+                    <div style="height:220px;width:100%;"><canvas id="cap-chart-hours"></canvas></div>
+                </div>
+                <div class="card">
+                    <h3 class="card-title">🎯 Story points: capacity vs committed</h3>
+                    <div style="margin-bottom:8px;" id="cap-velocity-row">
+                        <span class="velocity-note">
+                            Hours → Story Points conversion:
+                            <input type="number" id="cap-velocity-input" class="velocity-input" value="8" min="1" max="40" onchange="renderCapacityTab()" title="Hours per story point">
+                            h / pt
+                        </span>
+                    </div>
+                    <div style="height:190px;width:100%;"><canvas id="cap-chart-points"></canvas></div>
+                </div>
+            </div>
+
+            <!-- Sprint selector + per-person breakdown -->
+            <div class="card" style="margin-bottom:20px;">
+                <div class="planning-header">
+                    <span class="card-title" style="margin:0;border:none;padding:0;">👥 Team availability — sprint breakdown</span>
+                    <div class="planning-sprint-sel">
+                        <label style="font-size:11px;color:var(--muted);font-weight:600;">Sprint:</label>
+                        <select id="cap-sprint-sel" class="btn-select no-print" style="font-size:11px;padding:4px 8px;" onchange="renderCapacityPeople()"></select>
+                    </div>
+                </div>
+                <div id="cap-summary-row" class="cap-summary-row"></div>
+                <div id="cap-people-list" style="margin-top:8px;"></div>
+            </div>
+
+            <!-- Sprint Planning Planner -->
+            <div class="card">
+                <div class="planning-header">
+                    <span class="card-title" style="margin:0;border:none;padding:0;">🗂️ Sprint planner — drag to assign story points</span>
+                    <div class="planning-sprint-sel">
+                        <label style="font-size:11px;color:var(--muted);font-weight:600;">Plan sprint:</label>
+                        <select id="plan-sprint-sel" class="btn-select no-print" style="font-size:11px;padding:4px 8px;" onchange="renderSprintPlanner()"></select>
+                    </div>
+                </div>
+                <div id="plan-capacity-bar" style="margin-bottom:16px;"></div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;" id="plan-grid">
+                    <div>
+                        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">
+                            📥 Backlog — unassigned to sprint
+                        </div>
+                        <div id="plan-backlog" style="min-height:80px;"></div>
+                    </div>
+                    <div>
+                        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">
+                            ✅ Planned for sprint
+                            <span id="plan-pts-count" style="margin-left:8px;font-family:'DM Mono',monospace;font-size:12px;color:var(--accent);font-weight:700;"></span>
+                        </div>
+                        <div id="plan-sprint-pool" style="min-height:80px;"></div>
+                    </div>
+                </div>
+                <div style="margin-top:12px;font-size:11px;color:var(--muted);">
+                    💡 Click a ticket to move it between backlog and sprint. Points load/remaining updates automatically.
+                </div>
+            </div>
+
+        </div><!-- end #tab-capacity -->
+
     </div><!-- end #dashboard -->
 </div><!-- end .container -->
 
 <script>
     Chart.register(ChartDataLabels);
 
-    const API_URL        = "https://script.google.com/macros/s/AKfycbwk25w2yuMNZ4t8yR1zS1DEBf6yV1aSwVdftblKhRGAgjwNX65NKbYaqL01BL4h-ejH/exec";
+    const API_URL        = "https://script.google.com/macros/s/AKfycbz5k5fzdCanmn6jaG12DeTH-Bblb_8V5bsiLzGJpGoPSSmQNopxtDib-nAWyj0tb37O/exec";
     const RATE_FALLBACK  = 100;
     const THRESH_OVER    = 40;
     const THRESH_GOOD    = 30;
@@ -1146,6 +1273,7 @@
                 jiraSummary:  Array.isArray(data.jiraSummary)  ? data.jiraSummary  : [],
                 jiraIssues:   Array.isArray(data.jiraIssues)   ? data.jiraIssues   : [],
                 jiraConfig:   (data.jiraConfig && typeof data.jiraConfig === 'object') ? data.jiraConfig : {},
+                spendAnalysis: Array.isArray(data.spendAnalysis) ? data.spendAnalysis : [],
             };
             _lastSyncedAt = Date.now();
             updateSyncTimestamp_();
@@ -1181,6 +1309,7 @@
                 jiraSummary:  Array.isArray(data.jiraSummary)  ? data.jiraSummary  : [],
                 jiraIssues:   Array.isArray(data.jiraIssues)   ? data.jiraIssues   : [],
                 jiraConfig:   (data.jiraConfig && typeof data.jiraConfig === 'object') ? data.jiraConfig : {},
+                spendAnalysis: Array.isArray(data.spendAnalysis) ? data.spendAnalysis : [],
             };
             _lastSyncedAt = Date.now();
             updateSyncTimestamp_();
@@ -2358,8 +2487,47 @@
         const sel     = document.getElementById("sprint-selector");
         const sprints = jGetSprints();
         sel.innerHTML = sprints.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
-        // Default to most recent sprint
-        if (sprints.length) sel.value = sprints[sprints.length - 1];
+        if (!sprints.length) return;
+
+        // Pick the active sprint — the one whose date range contains today.
+        // Falls back to the most recently started sprint if none match exactly
+        // (e.g. between sprints), or the first sprint if no dates are available.
+        const cfg        = globalData.jiraConfig || {};
+        const sprintDates = cfg.sprint_dates || {};
+        const today      = Date.now();
+
+        let activeSprint = null;
+
+        // 1. Find a sprint whose window contains today
+        for (const s of sprints) {
+            const d = sprintDates[s];
+            if (!d) continue;
+            const start = new Date(d.start).getTime();
+            const end   = new Date(d.end).getTime();
+            if (!isNaN(start) && !isNaN(end) && today >= start && today <= end) {
+                activeSprint = s;
+                break;
+            }
+        }
+
+        // 2. No exact match — pick the most recently started sprint that hasn't ended yet,
+        //    or the last sprint whose start is in the past (we're between sprints)
+        if (!activeSprint) {
+            let best = null, bestStart = -Infinity;
+            for (const s of sprints) {
+                const d = sprintDates[s];
+                if (!d) continue;
+                const start = new Date(d.start).getTime();
+                if (!isNaN(start) && start <= today && start > bestStart) {
+                    bestStart = start;
+                    best = s;
+                }
+            }
+            activeSprint = best;
+        }
+
+        // 3. Final fallback — first sprint in the list
+        sel.value = activeSprint || sprints[0];
     }
 
     function jRenderSprintView() {
@@ -2367,23 +2535,13 @@
         const issues  = jFilterIssues(sprint);
         const cfg     = globalData.jiraConfig || {};
 
-        // Resolve sprint dates for the *selected* sprint from the per-sprint map.
-        // Falls back to top-level cfg fields for back-compat with older API responses.
-        const sprintDates = (cfg.sprint_dates && cfg.sprint_dates[sprint]) || {};
-        const sprintCfg   = {
-            ...cfg,
-            sprint_start: sprintDates.start || cfg.sprint_start || '',
-            sprint_end:   sprintDates.end   || cfg.sprint_end   || '',
-            sprint_days:  sprintDates.days  || cfg.sprint_days  || 10,
-        };
-
         // Sprint dates label
         const datesEl = document.getElementById("sv-sprint-dates");
-        if (datesEl && sprintCfg.sprint_start && sprintCfg.sprint_end) {
-            datesEl.textContent = `${formatDateForUI(sprintCfg.sprint_start)} → ${formatDateForUI(sprintCfg.sprint_end)}`;
+        if (datesEl && cfg.sprint_start && cfg.sprint_end) {
+            datesEl.textContent = `${formatDateForUI(cfg.sprint_start)} → ${formatDateForUI(cfg.sprint_end)}`;
         }
 
-        jRenderSprintBar(issues, sprintCfg);
+        jRenderSprintBar(issues, cfg);
         jRenderSprintPts(issues);
         jRenderSprintStatusBreakdown(issues);
         jRenderSprintAgingBlocked(issues);
@@ -2391,7 +2549,7 @@
         jRenderCodeReviewAging(issues);
         jRenderSlaBreaches(issues);
         jRenderSprintIssuesTable(issues);
-        jRenderSprintCharts(issues, sprintCfg);
+        jRenderSprintCharts(issues, cfg);
     }
 
     /* ── SLA BREACH DETECTION ──────────────────────────────────────────────
@@ -2879,6 +3037,113 @@
         }).join("");
     }
 
+    /* ── SLA HOUR-BUDGET BREACHES (from Spend_Analysis sheet) ──────────────
+       Shows tickets that are Warning / Over / Over-within-grace in HL tab.
+       Data arrives via globalData.spendAnalysis (added to doGet output).
+       Falls back to deriving from jiraIssues + jiraSummary if not present.  */
+    function jRenderHLSpendBreaches() {
+        const tbody = document.getElementById("hl-sla-body");
+        const countEl = document.getElementById("hl-sla-count");
+        if (!tbody) return;
+
+        // Build spend map from jiraIssues — use Spend_Analysis data if available,
+        // otherwise reconstruct from issue hours + SLA thresholds in jiraSummary
+        const issues   = globalData.jiraIssues   || [];
+        const spend    = globalData.spendAnalysis || [];  // array from sheet if sent
+
+        // SLA thresholds from jiraSummary
+        function getSla(pts) {
+            function gs(key, fb) { const r=(globalData.jiraSummary||[]).find(r=>r.metric===key); return r?parseFloat(r.value)||fb:fb; }
+            const p = parseFloat(pts)||0;
+            if (p===1) return { warn:gs('sla_1pt_warn',2),  over:gs('sla_1pt_over',3)  };
+            if (p===2) return { warn:gs('sla_2pt_warn',4),  over:gs('sla_2pt_over',5)  };
+            if (p===3) return { warn:gs('sla_3pt_warn',8),  over:gs('sla_3pt_over',12) };
+            if (p===5) return { warn:gs('sla_5pt_warn',16), over:gs('sla_5pt_over',24) };
+            if (p===8) return { warn:gs('sla_8pt_warn',32), over:gs('sla_8pt_over',40) };
+            return { warn:gs('sla_default_warn',16), over:gs('sla_default_over',24) };
+        }
+        const grace = parseFloat((globalData.jiraSummary||[]).find(r=>r.metric==='sla_grace_hrs')?.value)||1;
+
+        // Build row data — use spend array if available, otherwise use issue data
+        let rows = [];
+        if (spend.length) {
+            spend.forEach(s => {
+                const hrs  = parseFloat(s['Total Hours'])||0;
+                const pts  = s['Story Points'];
+                const warn = parseFloat(s['Warn Threshold (hrs)'])||999;
+                const over = parseFloat(s['Over Threshold (hrs)'])||999;
+                const st   = (s['Status']||'').toString();
+                const isNotOk = st.includes('Over') || st.includes('Warning');
+                if (!isNotOk) return;
+                const issue = issues.find(i => (i.key||'').toUpperCase() === (s['Ticket']||'').toUpperCase()) || {};
+                rows.push({ key:s['Ticket'], pts, hrs, warn, over, status:st,
+                    summary: issue.summary||'—', assignee: issue.assignee||'—',
+                    issueStatus: issue.status||'—' });
+            });
+        } else {
+            // derive from issues using total_hours field if present
+            issues.forEach(i => {
+                const pts = parseFloat(i.story_points)||0;
+                const hrs = parseFloat(i.total_hours)||0;
+                if (!pts || !hrs) return;
+                const sla = getSla(pts);
+                if (hrs < sla.warn) return;
+                const st = hrs > sla.over + grace ? '🔴 Over SLA'
+                         : hrs > sla.over         ? '🟠 Over (within grace)'
+                         :                          '🟡 Warning';
+                rows.push({ key:i.key, pts, hrs, warn:sla.warn, over:sla.over,
+                    status:st, summary:i.summary||'—', assignee:i.assignee||'—',
+                    issueStatus:i.status||'—' });
+            });
+        }
+
+        // Sort: Over first, then Warning
+        const order = s => s.includes('Over SLA')?0:s.includes('grace')?1:2;
+        rows.sort((a,b) => order(a.status) - order(b.status));
+
+        if (countEl) countEl.textContent = rows.length
+            ? `${rows.length} ticket${rows.length>1?'s':''} flagged`
+            : 'All within budget';
+
+        if (!rows.length) {
+            tbody.innerHTML = `<tr><td colspan="9" class="jira-empty">✅ All tracked tickets are within their hour budgets.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = rows.map(r => {
+            const slaCls = r.status.includes('Over SLA')  ? 'sla-over'
+                         : r.status.includes('grace')      ? 'sla-grace'
+                         : r.status.includes('Warning')    ? 'sla-warn'
+                         : 'sla-ok';
+            const pct    = r.over > 0 ? Math.min(100, Math.round(r.hrs / r.over * 100)) : 0;
+            const barCol = r.status.includes('Over SLA') ? 'var(--danger)'
+                         : r.status.includes('grace')    ? '#f97316'
+                         : 'var(--warning)';
+            const sCol   = jStatusColor(r.issueStatus);
+            const col    = jAvatarColor(r.assignee);
+            return `<tr>
+                <td><span class="jira-key">${esc(r.key)}</span></td>
+                <td style="font-family:'DM Mono',monospace;font-weight:700;">${r.pts||'—'}</td>
+                <td>
+                    <div style="font-family:'DM Mono',monospace;font-weight:700;">${r.hrs.toFixed(1)}h</div>
+                    <div class="jira-bar-track" style="height:4px;margin-top:4px;margin-bottom:0;">
+                        <div class="jira-bar-fill" style="width:${pct}%;background:${barCol};height:4px;"></div>
+                    </div>
+                </td>
+                <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);">${r.warn}h</td>
+                <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);">${r.over}h</td>
+                <td style="font-size:12px;">${esc(r.summary)}</td>
+                <td><div style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);">
+                    <span class="jira-avatar" style="background:${col};">${jInitials(r.assignee)}</span>
+                    ${esc(r.assignee)}
+                </div></td>
+                <td><span style="display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;background:${sCol}22;color:${sCol};">${esc(r.issueStatus)}</span></td>
+                <td><span class="sla-badge ${slaCls}">${esc(r.status.replace(/^[🔴🟡🟠🟢]\s*/,''))}</span></td>
+            </tr>`;
+        }).join('');
+    }
+
+
     function jRenderSprintCharts(issues, cfg) {
         // Burndown — use same sprint-complete definition as the pts progress bar
         const SPRINT_COMPLETE = new Set([
@@ -2959,7 +3224,309 @@
         JIRA_SPRINT_DAYS  = cfg.sprint_days || 10;
         jPopulateSprintSelector();
         jRenderHighLevel();
+        jRenderHighLevelSpend();
         jRenderSprintView();
+        renderCapacityTab_init();
+    }
+
+    function jRenderHighLevelSpend() {
+        // Pull spendAnalysis from globalData if Apps Script sends it,
+        // otherwise call the renderer which will derive from issues
+        jRenderHLSpendBreaches();
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       CAPACITY & PLANNING TAB
+    ═══════════════════════════════════════════════════════════ */
+
+    // Hardcoded capacity from ResourcePlan sheet (hours per person per sprint)
+    // Sprint label mapping: Jira sprint name → ResourcePlan phase name
+    const CAP_SPRINT_MAP = {
+        'VCOM Sprint 1': 'Dev Sprint 1',
+        'VCOM Sprint 2': 'Dev Sprint 2',
+        'VCOM Sprint 3': 'Dev Sprint 3',
+        'VCOM Sprint 4': 'Dev Sprint 4',
+        'VCOM Sprint 5': 'Dev Sprint 5',
+    };
+    // Capacity data derived from ResourcePlan (hours per person per sprint-phase)
+    const CAP_DATA = {
+        'Dev Sprint 1': [
+            { person:'Yoann Lesouef',       role:'Program Manager',      hrs:4  },
+            { person:'Thibaud Guilpain',     role:'Tech Program Lead',    hrs:4  },
+            { person:'Venu Tallapragada',    role:'Offshore TPM',         hrs:74 },
+            { person:'Rohit Joshi',          role:'Offshore Tech Arch',   hrs:38 },
+            { person:'Udit Rawat',           role:'Offshore Tech Arch',   hrs:74 },
+            { person:'Ankit Jhakal',         role:'Offshore Dev',         hrs:80 },
+            { person:'Vighnesh Sadogopal',   role:'Offshore Dev',         hrs:80 },
+            { person:'Venkatesh Dematti',    role:'Offshore FE Dev',      hrs:80 },
+            { person:'Rakesh Regar',         role:'Offshore Dev',         hrs:80 },
+            { person:'Ahsan Nazir',          role:'Offshore FE Dev',      hrs:80 },
+            { person:'Disha Katariya',       role:'Offshore QA',          hrs:80 },
+            { person:'Roshani Bhangale',     role:'Offshore QA',          hrs:40 },
+        ],
+        'Dev Sprint 2': [
+            { person:'Yoann Lesouef',       role:'Program Manager',      hrs:4  },
+            { person:'Thibaud Guilpain',     role:'Tech Program Lead',    hrs:4  },
+            { person:'Venu Tallapragada',    role:'Offshore TPM',         hrs:74 },
+            { person:'Rohit Joshi',          role:'Offshore Tech Arch',   hrs:38 },
+            { person:'Udit Rawat',           role:'Offshore Tech Arch',   hrs:74 },
+            { person:'Ankit Jhakal',         role:'Offshore Dev',         hrs:80 },
+            { person:'Vighnesh Sadogopal',   role:'Offshore Dev',         hrs:80 },
+            { person:'Venkatesh Dematti',    role:'Offshore FE Dev',      hrs:80 },
+            { person:'Rakesh Regar',         role:'Offshore Dev',         hrs:80 },
+            { person:'Ahsan Nazir',          role:'Offshore FE Dev',      hrs:80 },
+            { person:'Disha Katariya',       role:'Offshore QA',          hrs:80 },
+            { person:'Roshani Bhangale',     role:'Offshore QA',          hrs:40 },
+        ],
+        'Dev Sprint 3': [
+            { person:'Yoann Lesouef',       role:'Program Manager',      hrs:4  },
+            { person:'Thibaud Guilpain',     role:'Tech Program Lead',    hrs:4  },
+            { person:'Venu Tallapragada',    role:'Offshore TPM',         hrs:74 },
+            { person:'Rohit Joshi',          role:'Offshore Tech Arch',   hrs:38 },
+            { person:'Udit Rawat',           role:'Offshore Tech Arch',   hrs:74 },
+            { person:'Ankit Jhakal',         role:'Offshore Dev',         hrs:80 },
+            { person:'Vighnesh Sadogopal',   role:'Offshore Dev',         hrs:80 },
+            { person:'Venkatesh Dematti',    role:'Offshore FE Dev',      hrs:80 },
+            { person:'Rakesh Regar',         role:'Offshore Dev',         hrs:80 },
+            { person:'Ahsan Nazir',          role:'Offshore FE Dev',      hrs:80 },
+            { person:'Disha Katariya',       role:'Offshore QA',          hrs:80 },
+            { person:'Roshani Bhangale',     role:'Offshore QA',          hrs:40 },
+        ],
+        'Dev Sprint 4': [
+            { person:'Yoann Lesouef',       role:'Program Manager',      hrs:4  },
+            { person:'Thibaud Guilpain',     role:'Tech Program Lead',    hrs:4  },
+            { person:'Venu Tallapragada',    role:'Offshore TPM',         hrs:74 },
+            { person:'Rohit Joshi',          role:'Offshore Tech Arch',   hrs:38 },
+            { person:'Udit Rawat',           role:'Offshore Tech Arch',   hrs:74 },
+            { person:'Jayakrishnan Jayabal', role:'Offshore Tech Arch',   hrs:40 },
+            { person:'Ankit Jhakal',         role:'Offshore Dev',         hrs:80 },
+            { person:'Vighnesh Sadogopal',   role:'Offshore Dev',         hrs:80 },
+            { person:'Venkatesh Dematti',    role:'Offshore FE Dev',      hrs:80 },
+            { person:'Rakesh Regar',         role:'Offshore Dev',         hrs:80 },
+            { person:'Ahsan Nazir',          role:'Offshore FE Dev',      hrs:80 },
+            { person:'Disha Katariya',       role:'Offshore QA',          hrs:80 },
+            { person:'Roshani Bhangale',     role:'Offshore QA',          hrs:40 },
+        ],
+        'Dev Sprint 5': [
+            { person:'Yoann Lesouef',       role:'Program Manager',      hrs:4  },
+            { person:'Thibaud Guilpain',     role:'Tech Program Lead',    hrs:4  },
+            { person:'Venu Tallapragada',    role:'Offshore TPM',         hrs:74 },
+            { person:'Rohit Joshi',          role:'Offshore Tech Arch',   hrs:38 },
+            { person:'Udit Rawat',           role:'Offshore Tech Arch',   hrs:74 },
+            { person:'Ankit Jhakal',         role:'Offshore Dev',         hrs:80 },
+            { person:'Vighnesh Sadogopal',   role:'Offshore Dev',         hrs:80 },
+            { person:'Venkatesh Dematti',    role:'Offshore FE Dev',      hrs:80 },
+            { person:'Rakesh Regar',         role:'Offshore Dev',         hrs:80 },
+            { person:'Ahsan Nazir',          role:'Offshore FE Dev',      hrs:80 },
+            { person:'Disha Katariya',       role:'Offshore QA',          hrs:80 },
+            { person:'Roshani Bhangale',     role:'Offshore QA',          hrs:40 },
+        ],
+    };
+    // Allow user to override individual availability (hours) — stored in-memory
+    const _capOverrides = {};  // key: `${sprint}__${person}` → adjusted hours
+
+    let _capChartHrs  = null;
+    let _capChartPts  = null;
+
+    function hrsPerPt() { return Math.max(1, parseFloat(document.getElementById('cap-velocity-input')?.value)||8); }
+
+    function getCapHrs(sprint, person) {
+        const key = `${sprint}__${person}`;
+        if (_capOverrides[key] !== undefined) return _capOverrides[key];
+        const phase = CAP_SPRINT_MAP[sprint] || sprint;
+        const entry = (CAP_DATA[phase]||[]).find(e => e.person === person);
+        return entry ? entry.hrs : 0;
+    }
+
+    function totalCapHrs(sprint) {
+        const phase = CAP_SPRINT_MAP[sprint] || sprint;
+        return (CAP_DATA[phase]||[]).reduce((s,e) => s + getCapHrs(sprint, e.person), 0);
+    }
+
+    function renderCapacityTab() {
+        const sprints  = Object.keys(CAP_SPRINT_MAP);
+        const issues   = globalData.jiraIssues || [];
+        const hPerPt   = hrsPerPt();
+        const DONE_SET = new Set(['UAT RELEASE QUEUE','READY FOR UAT','UAT','RE-OPENED IN UAT','PROD RELEASE QUEUE','DONE']);
+
+        // Populate sprint selectors
+        ['cap-sprint-sel','plan-sprint-sel'].forEach(id => {
+            const sel = document.getElementById(id);
+            if (!sel) return;
+            const cur = sel.value;
+            sel.innerHTML = sprints.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('');
+            if (cur && sprints.includes(cur)) sel.value = cur;
+        });
+
+        // ── Chart 1: capacity hours per sprint ────────────────────────────
+        const capHrs = sprints.map(s => totalCapHrs(s));
+        if (_capChartHrs) { _capChartHrs.destroy(); _capChartHrs = null; }
+        _capChartHrs = new Chart(document.getElementById('cap-chart-hours'), {
+            type:'bar',
+            data:{ labels: sprints.map(s=>s.replace('VCOM ','')),
+                   datasets:[{ label:'Available hours', data:capHrs,
+                       backgroundColor:sprints.map((_,i)=>`hsla(${215-i*8},70%,55%,0.75)`),
+                       borderRadius:5 }]},
+            options:{ responsive:true, maintainAspectRatio:false,
+                plugins:{ legend:{display:false}, datalabels:{display:true,color:'#fff',font:{family:'DM Sans',size:11,weight:'bold'},formatter:v=>v+'h'} },
+                scales: baseScale }
+        });
+
+        // ── Chart 2: capacity (pts) vs committed pts per sprint ───────────
+        const jiraSprints  = [...new Set(issues.map(i=>(i.sprint||'').trim()).filter(Boolean))].sort();
+        const allSprints   = [...new Set([...sprints,...jiraSprints])].sort();
+        const capPts       = allSprints.map(s => Math.round(totalCapHrs(s) / hPerPt));
+        const committedPts = allSprints.map(sp => {
+            const si = issues.filter(i=>(i.sprint||'').trim()===sp);
+            return Math.round(si.reduce((a,i)=>a+(parseFloat(i.story_points)||0),0));
+        });
+        const donePts = allSprints.map(sp => {
+            const si = issues.filter(i=>(i.sprint||'').trim()===sp);
+            return Math.round(si.filter(i=>DONE_SET.has((i.status||'').toUpperCase())).reduce((a,i)=>a+(parseFloat(i.story_points)||0),0));
+        });
+        if (_capChartPts) { _capChartPts.destroy(); _capChartPts = null; }
+        _capChartPts = new Chart(document.getElementById('cap-chart-points'), {
+            type:'bar',
+            data:{ labels: allSprints.map(s=>s.replace('VCOM ','')),
+                   datasets:[
+                       { label:'Capacity (pts)', data:capPts,       backgroundColor:'rgba(148,163,184,0.35)', borderRadius:5, borderWidth:1.5, borderColor:'#94a3b8' },
+                       { label:'Committed',      data:committedPts,  backgroundColor:'rgba(59,130,246,0.55)',  borderRadius:5 },
+                       { label:'Done',           data:donePts,       backgroundColor:'#10b981',                borderRadius:5 },
+                   ]},
+            options:{ responsive:true, maintainAspectRatio:false,
+                plugins:{ legend:{ display:true, labels:{color:tickColor(),font:{family:'DM Sans',size:11},boxWidth:12,padding:10} }, datalabels:{display:false} },
+                scales: baseScale }
+        });
+
+        renderCapacityPeople();
+        renderSprintPlanner();
+    }
+
+    function renderCapacityPeople() {
+        const sprint = (document.getElementById('cap-sprint-sel')||{}).value || Object.keys(CAP_SPRINT_MAP)[0];
+        const phase  = CAP_SPRINT_MAP[sprint] || sprint;
+        const people = CAP_DATA[phase] || [];
+        const hPerPt = hrsPerPt();
+        const total  = people.reduce((s,e)=>s+getCapHrs(sprint,e.person),0);
+        const totalPts = Math.round(total/hPerPt);
+
+        // Summary stats
+        const sumEl = document.getElementById('cap-summary-row');
+        if (sumEl) sumEl.innerHTML = `
+            <div class="cap-summary-stat"><div class="cap-summary-val">${people.filter(p=>getCapHrs(sprint,p.person)>0).length}</div><div class="cap-summary-lbl">People</div></div>
+            <div class="cap-summary-stat"><div class="cap-summary-val">${total}h</div><div class="cap-summary-lbl">Total Capacity</div></div>
+            <div class="cap-summary-stat"><div class="cap-summary-val">~${totalPts} pts</div><div class="cap-summary-lbl">Est. Story Points</div></div>
+            <div class="cap-summary-stat"><div class="cap-summary-val">${Math.round(total/Math.max(people.filter(p=>getCapHrs(sprint,p.person)>0).length,1))}h</div><div class="cap-summary-lbl">Avg per Person</div></div>
+        `;
+
+        const listEl = document.getElementById('cap-people-list');
+        if (!listEl) return;
+        const maxHrs = Math.max(...people.map(p=>getCapHrs(sprint,p.person)),1);
+        listEl.innerHTML = people.map(p => {
+            const hrs = getCapHrs(sprint, p.person);
+            const pct = Math.round(hrs/maxHrs*100);
+            const pts = Math.round(hrs/hPerPt);
+            const col = jAvatarColor(p.person);
+            return `<div class="cap-person-row">
+                <span class="jira-avatar" style="background:${col};width:26px;height:26px;font-size:9px;">${jInitials(p.person)}</span>
+                <span class="cap-person-name">${esc(p.person)}</span>
+                <span class="cap-role-tag">${esc(p.role)}</span>
+                <div style="flex:1;max-width:160px;margin:0 10px;">
+                    <div class="jira-bar-track" style="height:8px;margin:0;">
+                        <div class="jira-bar-fill" style="width:${pct}%;background:${col};opacity:0.7;height:8px;"></div>
+                    </div>
+                </div>
+                <span class="cap-hrs" style="color:${hrs===0?'var(--muted)':'var(--text)'};">${hrs}h</span>
+                <span style="font-size:10px;color:var(--muted);margin-left:4px;">~${pts}pt</span>
+                <input type="number" min="0" max="160" value="${hrs}" title="Override hours for ${p.person}"
+                    style="width:50px;border:1px solid var(--border);border-radius:6px;padding:2px 5px;font-size:11px;
+                           background:var(--surface-2);color:var(--text);margin-left:8px;text-align:center;"
+                    onchange="(function(el){ _capOverrides['${sprint}__${esc(p.person)}']=Math.max(0,parseFloat(el.value)||0); renderCapacityTab(); })(this)">
+            </div>`;
+        }).join('');
+    }
+
+    // Sprint planner state (in-memory)
+    const _plannerState = {};  // sprint → Set of issue keys assigned to sprint
+
+    function renderSprintPlanner() {
+        const sprint  = (document.getElementById('plan-sprint-sel')||{}).value || Object.keys(CAP_SPRINT_MAP)[0];
+        const issues  = globalData.jiraIssues || [];
+        const hPerPt  = hrsPerPt();
+        const capPts  = Math.round(totalCapHrs(sprint)/hPerPt);
+        if (!_plannerState[sprint]) _plannerState[sprint] = new Set(
+            issues.filter(i=>(i.sprint||'').trim()===sprint).map(i=>i.key)
+        );
+        const assigned = _plannerState[sprint];
+
+        // Capacity bar
+        const assignedPts = issues.filter(i=>assigned.has(i.key)).reduce((a,i)=>a+(parseFloat(i.story_points)||0),0);
+        const pct = capPts > 0 ? Math.min(100, Math.round(assignedPts/capPts*100)) : 0;
+        const barCol = pct > 100 ? 'var(--danger)' : pct > 85 ? 'var(--warning)' : 'var(--accent)';
+        const capEl = document.getElementById('plan-capacity-bar');
+        if (capEl) capEl.innerHTML = `
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px;">
+                <span style="font-size:12px;color:var(--muted);">Capacity: <strong style="color:var(--text);">${capPts} pts</strong></span>
+                <span style="font-size:12px;color:var(--muted);">Loaded: <strong style="color:${barCol};">${Math.round(assignedPts)} pts</strong> (${pct}%)</span>
+                <span style="font-size:12px;color:var(--muted);">Remaining: <strong style="color:var(--text);">${Math.max(0,capPts-Math.round(assignedPts))} pts</strong></span>
+            </div>
+            <div class="jira-bar-track" style="height:12px;">
+                <div class="jira-bar-fill" style="width:${pct}%;background:${barCol};height:12px;border-radius:4px;transition:width .4s ease;"></div>
+            </div>`;
+
+        const ptsCntEl = document.getElementById('plan-pts-count');
+        if (ptsCntEl) ptsCntEl.textContent = `${Math.round(assignedPts)} / ${capPts} pts`;
+
+        // Backlog = issues not assigned to this sprint, no sprint or different sprint
+        const backlog = issues.filter(i => !assigned.has(i.key) &&
+            (!(i.sprint||'').trim() || (i.sprint||'').trim() !== sprint));
+        const planned = issues.filter(i => assigned.has(i.key));
+
+        function issueCard(issue, inSprint) {
+            const pts   = parseFloat(issue.story_points)||0;
+            const sCol  = jStatusColor(issue.status);
+            const col   = jAvatarColor(issue.assignee);
+            const arrow = inSprint ? '← Remove' : '→ Add';
+            return `<div style="display:flex;align-items:flex-start;gap:8px;padding:8px;border:1px solid var(--border);
+                        border-radius:8px;margin-bottom:6px;background:var(--surface);cursor:pointer;transition:background .15s;"
+                    onmouseenter="this.style.background='var(--surface-2)'" onmouseleave="this.style.background='var(--surface)'"
+                    onclick="_plannerToggle('${esc(sprint)}','${esc(issue.key)}')">
+                <div style="flex:1;min-width:0;">
+                    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                        <span class="jira-key">${esc(issue.key)}</span>
+                        ${pts?`<span style="font-family:'DM Mono',monospace;font-size:10px;font-weight:700;background:var(--surface-2);padding:1px 6px;border-radius:10px;">${pts}pt</span>`:''}
+                        <span style="display:inline-block;padding:1px 7px;border-radius:20px;font-size:10px;font-weight:700;background:${sCol}22;color:${sCol};">${esc(issue.status||'—')}</span>
+                    </div>
+                    <div style="font-size:11px;color:var(--text);margin-top:3px;line-height:1.3;">${esc((issue.summary||'—').substring(0,70))}${(issue.summary||'').length>70?'…':''}</div>
+                    <div style="display:flex;align-items:center;gap:4px;margin-top:4px;">
+                        <span class="jira-avatar" style="background:${col};width:16px;height:16px;font-size:7px;">${jInitials(issue.assignee)}</span>
+                        <span style="font-size:10px;color:var(--muted);">${esc(issue.assignee||'Unassigned')}</span>
+                    </div>
+                </div>
+                <span style="font-size:10px;color:var(--accent);white-space:nowrap;padding-top:2px;font-weight:600;">${arrow}</span>
+            </div>`;
+        }
+
+        const backlogEl = document.getElementById('plan-backlog');
+        const poolEl    = document.getElementById('plan-sprint-pool');
+        if (backlogEl) backlogEl.innerHTML = backlog.length
+            ? backlog.map(i=>issueCard(i,false)).join('')
+            : `<div class="jira-empty" style="padding:16px 0;">All issues assigned to sprint.</div>`;
+        if (poolEl) poolEl.innerHTML = planned.length
+            ? planned.map(i=>issueCard(i,true)).join('')
+            : `<div class="jira-empty" style="padding:16px 0;">No issues assigned yet — add from backlog.</div>`;
+    }
+
+    function _plannerToggle(sprint, key) {
+        if (!_plannerState[sprint]) _plannerState[sprint] = new Set();
+        if (_plannerState[sprint].has(key)) _plannerState[sprint].delete(key);
+        else _plannerState[sprint].add(key);
+        renderSprintPlanner();
+    }
+
+    /* ── Master Capacity render — called after fetchData ─────── */
+    function renderCapacityTab_init() {
+        renderCapacityTab();
     }
 
     fetchData();
