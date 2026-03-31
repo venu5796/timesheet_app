@@ -1556,21 +1556,26 @@
         document.getElementById('kpi-conf').textContent=confLabel;
         setTrend('kpi-conf-trend',confType,`${futureWks} wks planned`);
 
+        const defaultW = sortedW.length > 1 ? sortedW[1] : (sortedW[0] || null);
         const weekOptHtml = sortedW.map(w=>`<option value="${w}">${w}</option>`).join('');
         ['weekSelect','alertWeekSelect','delinqWeekSelect','spenderWeekSelect'].forEach(id=>{
-            const el=document.getElementById(id); if(el) el.innerHTML=weekOptHtml;
+            const el=document.getElementById(id); 
+            if(el) {
+                el.innerHTML=weekOptHtml;
+                if(defaultW) el.value = defaultW;
+            }
         });
 
         renderRAGBanner(weeks, people, totals, budget, eac, sortedLabels);
         renderSparklines(weeks, sortedLabels);
         renderHeatmap(people, sortedLabels);
-        renderExceptions(weeks, people, sortedW[0]);
+        renderExceptions(weeks, people, defaultW);
         renderCharts(weeks, phasesActual, phasesPlanned, phaseOrder, phaseNameMap, budget, sortedLabels);
         renderPhaseBreakdown(phasesActual, phasesPlanned, phaseOrder, phaseNameMap);
-        renderTopSpenders(sortedW[0]);
+        renderTopSpenders(defaultW);
         renderMilestones();
         renderRolloff(people);
-        updateWeeklySpotlight(sortedW[0]);
+        updateWeeklySpotlight(defaultW);
     }
 
     function setTrend(id,type,label){
