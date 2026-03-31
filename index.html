@@ -1250,6 +1250,32 @@
         return toLocalISO(mon);
     }
 
+    /* ── SPRINT NORMALISATION ─────────────────────────────────────────────────
+       Jira can store a ticket's full sprint history as a semicolon-separated
+       string, e.g. "VCOM Sprint 1;VCOM Sprint 2" or "VCOM Sprint 1;VCOM Sprint 3".
+       We always want the LATEST (highest-numbered) sprint only.
+       This function mutates each issue's .sprint field in place so every
+       downstream reference (filters, selectors, charts, tables) gets the
+       resolved value automatically — no other code needs changing.            */
+    function resolveLatestSprint(issues) {
+        if (!Array.isArray(issues)) return issues;
+        issues.forEach(issue => {
+            const raw = (issue.sprint || '').trim();
+            if (!raw || !raw.includes(';')) return; // nothing to resolve
+            // Split on semicolons, trim each part
+            const parts = raw.split(';').map(s => s.trim()).filter(Boolean);
+            if (parts.length < 2) return;
+            // Extract the trailing number from each sprint name for comparison.
+            // Matches any digits at the end of the string, e.g. "VCOM Sprint 3" → 3.
+            // Falls back to 0 if no number is found (non-numeric sprint names).
+            const num = s => { const m = s.match(/(\d+)\s*$/); return m ? parseInt(m[1], 10) : 0; };
+            // Pick the part with the highest number
+            const latest = parts.reduce((best, cur) => num(cur) > num(best) ? cur : best, parts[0]);
+            issue.sprint = latest;
+        });
+        return issues;
+    }
+
     /* ── FETCH — full load (first load + manual Sync button) ──────────────── */
     async function fetchData() {
         const debug  = document.getElementById('debug-info');
@@ -1275,6 +1301,7 @@
                 jiraConfig:   (data.jiraConfig && typeof data.jiraConfig === 'object') ? data.jiraConfig : {},
                 spendAnalysis: Array.isArray(data.spendAnalysis) ? data.spendAnalysis : [],
             };
+            resolveLatestSprint(globalData.jiraIssues);
             _lastSyncedAt = Date.now();
             updateSyncTimestamp_();
             resetCountdown_();
@@ -1311,6 +1338,7 @@
                 jiraConfig:   (data.jiraConfig && typeof data.jiraConfig === 'object') ? data.jiraConfig : {},
                 spendAnalysis: Array.isArray(data.spendAnalysis) ? data.spendAnalysis : [],
             };
+            resolveLatestSprint(globalData.jiraIssues);
             _lastSyncedAt = Date.now();
             updateSyncTimestamp_();
             resetCountdown_();
