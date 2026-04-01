@@ -16,18 +16,20 @@ The **Acquia Program Control Tower** is a high-fidelity, interactive single-page
 
 - **7 KPI Cards:** Burned (€), Remaining Budget, Forecast (EAC), Velocity (h/wk), Non-Billable %, Billable Efficiency, EAC Confidence
 - **RAG Health Banner:** Instant Red/Amber/Green status for Budget, Schedule, Resources, and Delivery — each computed from thresholds in the data
-- **Variance Flags panel:** resources >20% over or under their planned hours for a selected week
+- **Variance Flags panel:** resources >20% over or under their planned hours for the selected week. **Note:** Only billable actual hours are compared against plan to avoid skewing flags with non-billable time.
 - **Delinquency & Missing panel:** resources scheduled but reporting 0 hours for the selected week
 - **Cumulative Burn vs. Budget Cap** chart (line chart with budget cap reference line)
 - **Non-Billable vs. Billable Time** chart (stacked bar)
 - **Planned vs. Actual Hours S-Curve** (line chart)
 - **Spend by Phase — Actual vs Planned** bar chart
-- **Phase Cost Breakdown** table
+- **Phase Cost Breakdown** table — includes an additional **Delta (€)** column showing `Planned - Actual` variance per phase.
 - **Top 5 Spenders** (selectable by week)
 - **Milestone Tracker** table (status badges: On Track, At Risk, Delayed, Complete)
 - **Resource Utilisation Heatmap:** colour-coded per resource per week — Over >40h (red), Optimal 30–40h (green), Low 1–29h (amber), No entry (grey)
 - **Weekly Performance Metrics** table: per-resource Planned, Actual, Variance, Spend for a selected week
 - **Predictive Roll-off Schedule:** lists each resource with their projected end date and status indicator
+
+**Note on Default Selection:** All weekly dropdowns and related panels (Variance, Delinquency, Top Spenders, Spotlight) default to the **previous week** (the second most recent week with data) on load. This ensures stakeholders see a complete data set immediately rather than a partial current week.
 
 ### 2.2 Jira — High Level
 
@@ -92,9 +94,9 @@ The **Acquia Program Control Tower** is a high-fidelity, interactive single-page
 
 ### 3.3 Data Flow
 
-1. On page load, `fetchData()` calls the Google Apps Script URL via `fetch()`.
+1. On page load, `fetchData()` calls the Google Apps Script URL via `fetch(CONFIG.API_URL)`.
 2. The JSON response is parsed and stored in the `globalData` object.
-3. `processData()` builds week/person aggregates from `actuals` and `plan`, computes cumulative burn, EAC, variances, and RAG thresholds.
+3. `processData()` builds week/person aggregates from `actuals` and `plan`, computes cumulative burn, EAC, variances, and RAG thresholds. **Resulting aggregates are cached in `globalData` prefixed with `_` to support ultra-fast re-rendering (e.g. for theme switching) without re-processing.**
 4. Phase matching uses a multi-stage algorithm: exact match → starts-with prefix → phase-name-starts-with-attempt. Intentionally does **not** use `includes()` to avoid false positives (e.g. `"Pre Kick Off"` matching `"Kick Off"`).
 5. `renderJiraTab()` populates all Jira and Capacity sub-sections from `jiraIssues` and `jiraSummary`.
 6. All Chart.js instances are stored in `chartRefs` / `jiraChartRefs` / `sparkRefs` for proper destroy-before-recreate on re-renders.
@@ -105,14 +107,15 @@ The **Acquia Program Control Tower** is a high-fidelity, interactive single-page
 All elapsed-time calculations (Aging Issues, Dev SLA Breaches) use `workingHoursElapsed_()`, which:
 
 - Counts only Monday–Friday hours between **09:00 and 18:00** (9 hours/day)
-- Skips all dates listed in `WORK_HOURS.holidays` (India public holidays for 2026)
+- Skips all dates listed in `CONFIG.WORK_HOURS.holidays` (India public holidays for 2026)
 - Returns a decimal number of working hours — displayed as working days (`wd`) if ≥9 hours or working hours (`wh`) if less
+- **Implementation:** Uses a mathematical/date-clamping approach for maximum efficiency over large date ranges.
 
-> The holiday list covers India 2026 only and requires a yearly update.
+> The holiday list covers India 2026 only and requires a yearly update in the `CONFIG.WORK_HOURS.holidays` Set.
 
 ### 3.5 Dev SLA Thresholds
 
-All thresholds are in **working hours**. Configured in the `DEV_SLA` constant; can also be overridden via `jiraSummary` metric rows.
+All thresholds are in **working hours**. Configured in the `CONFIG.DEV_SLA` constant; can also be overridden via `jiraSummary` metric rows.
 
 | Story Points | Warn (working hrs) | Over (working hrs) | Equivalent |
 |---|---|---|---|
@@ -182,17 +185,19 @@ Activated by the 🌙 toggle in the header. The toggle:
 
 ## 5. Configuration & Thresholds
 
+Most dashboard thresholds are consolidated in the `CONFIG` object for easier maintenance.
+
 | Constant | Default | Purpose |
 |---|---|---|
-| `THRESH_OVER` | `40` h | Heatmap: over-utilisation threshold |
-| `THRESH_GOOD` | `30` h | Heatmap: lower bound of optimal range |
-| `RATE_FALLBACK` | `€100/h` | Fallback hourly rate when none is specified |
-| `VARIANCE_FACTOR` | `1.2` | EAC upper-bound multiplier (120% of plan) |
-| `VARIANCE_UNDER` | `0.8` | EAC lower-bound multiplier (80% of plan) |
-| `ACTIVE_DAYS` | `14` | Days a resource is considered recently active |
-| `SLA_GRACE_HOURS` | `1` h | Grace window after SLA Over threshold |
-| `AGING_THRESHOLD_WORK_HRS` | `16` h | Working hours before a dev ticket is flagged as aging |
-| Silent fetch interval | `15 min` | Background refresh cadence (`setInterval(silentFetch, 15 * 60 * 1000)`) |
+| `CONFIG.THRESH_OVER` | `40` h | Heatmap: over-utilisation threshold |
+| `CONFIG.THRESH_GOOD` | `30` h | Heatmap: lower bound of optimal range |
+| `CONFIG.RATE_FALLBACK` | `€100/h` | Fallback hourly rate when none is specified |
+| `CONFIG.VARIANCE_FACTOR` | `1.2` | EAC upper-bound multiplier (120% of plan) |
+| `CONFIG.VARIANCE_UNDER` | `0.8` | EAC lower-bound multiplier (80% of plan) |
+| `CONFIG.ACTIVE_DAYS` | `14` | Days a resource is considered recently active |
+| `CONFIG.SLA_GRACE_HOURS` | `1` h | Grace window after SLA Over threshold |
+| `CONFIG.AGING_THRESHOLD_WORK_HRS` | `16` h | Working hours before a dev ticket is flagged as aging |
+| `CONFIG.SYNC_INTERVAL_MS` | `15 min` | Background refresh cadence |
 | `budgetLimit` default | `€251,392` | Pre-populated remaining budget cap in the header input |
 
 ---
@@ -217,10 +222,10 @@ Clicking **Export PDF** adds the class `pdf-export-mode` to `<body>`, which:
 |---|---|---|
 | Page load | `fetchData()` | Shows spinner, hides dashboard, full reload |
 | Manual "Sync Data" button | `fetchData()` | Same as page load |
-| Background timer (every 15 min) | `silentFetch()` | No spinner, no dashboard hide; shows only a brief pulse dot and updates the sync timestamp |
+| Background timer (every 15 min) | `silentFetch()` | No spinner, no dashboard hide; shows only a brief pulse dot and updates the sync timestamp. |
 | Budget cap input change | `debouncedProcess()` → `processData()` | Re-renders charts and KPIs only (no network call); debounced at 350 ms |
 
-On successful sync, `_lastSyncedAt` is updated and a 15-minute countdown is displayed under the header.
+On successful sync, `_lastSyncedAt` is updated and a countdown to the next sync (based on `CONFIG.SYNC_INTERVAL_MS`) is displayed. **If a background sync fails, the timestamp displays a red "Sync Failed" status.**
 
 ---
 
