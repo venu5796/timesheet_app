@@ -988,7 +988,7 @@
     Chart.register(ChartDataLabels);
 
     const CONFIG = {
-        API_URL: "https://script.google.com/macros/s/AKfycbz5k5fzdCanmn6jaG12DeTH-Bblb_8V5bsiLzGJpGoPSSmQNopxtDib-nAWyj0tb37O/exec",
+        API_URL: "https://script.google.com/macros/s/AKfycbx4OQ81fkE5LHkAG-yqAo2h37NC_9OoZrcIQ_MEAKx0uMjoeG6Ws8-E3VmEnc75Bo0l/exec",
         RATE_FALLBACK: 100,
         THRESH_OVER: 40,
         THRESH_GOOD: 30,
@@ -1027,15 +1027,17 @@
     let _debounce  = null;
     let _syncStatus = { lastSuccess: true, error: null };
 
-    // ── workingHoursElapsed_(start, end) ──────────────────────────────────────
+    // ── workingHoursElapsed_(start, end, person) ──────────────────────────────────────
     // Returns the number of working hours between two Date objects.
     // Uses CONFIG.WORK_HOURS settings for start/end times and holidays.
-    function workingHoursElapsed_(start, end) {
+    // Also checks globalData.leaves for person-specific days off.
+    function workingHoursElapsed_(start, end, person = null) {
         if (!start || !end || isNaN(start) || isNaN(end)) return 0;
         if (end <= start) return 0;
 
         const { startHour, endHour, holidays } = CONFIG.WORK_HOURS;
         const workDayHours = endHour - startHour;
+        const personLeaves = person ? (globalData._processedLeaves ? globalData._processedLeaves.get(person) : null) : null;
 
         function isWorkDay(d) {
             const dow = d.getDay();
@@ -1043,7 +1045,10 @@
             const y = d.getFullYear();
             const m = String(d.getMonth() + 1).padStart(2, '0');
             const day = String(d.getDate()).padStart(2, '0');
-            return !holidays.has(`${y}-${m}-${day}`);
+            const dateStr = `${y}-${m}-${day}`;
+            if (holidays.has(dateStr)) return false;
+            if (personLeaves && personLeaves.has(dateStr)) return false;
+            return true;
         }
 
         let totalHours = 0;
@@ -1256,6 +1261,7 @@
                 jiraIssues:   Array.isArray(data.jiraIssues)   ? data.jiraIssues   : [],
                 jiraConfig:   (data.jiraConfig && typeof data.jiraConfig === 'object') ? data.jiraConfig : {},
                 spendAnalysis: Array.isArray(data.spendAnalysis) ? data.spendAnalysis : [],
+                leaves:        (data.leaves && typeof data.leaves === 'object') ? data.leaves : {},
             };
             resolveLatestSprint(globalData.jiraIssues);
             _lastSyncedAt = Date.now();
@@ -1292,6 +1298,7 @@
                 jiraIssues:   Array.isArray(data.jiraIssues)   ? data.jiraIssues   : [],
                 jiraConfig:   (data.jiraConfig && typeof data.jiraConfig === 'object') ? data.jiraConfig : {},
                 spendAnalysis: Array.isArray(data.spendAnalysis) ? data.spendAnalysis : [],
+                leaves:        (data.leaves && typeof data.leaves === 'object') ? data.leaves : {},
             };
             resolveLatestSprint(globalData.jiraIssues);
             _lastSyncedAt = Date.now();
@@ -1348,6 +1355,17 @@
 
     /* ── PROCESS ───────────────────────────────────────────── */
     function processData() {
+        // Pre-process leave dates into a Map of Sets for O(1) lookups
+        globalData._processedLeaves = new Map();
+        if (globalData.leaves && typeof globalData.leaves === 'object') {
+            Object.keys(globalData.leaves).forEach(person => {
+                const dates = globalData.leaves[person];
+                if (Array.isArray(dates)) {
+                    globalData._processedLeaves.set(person, new Set(dates));
+                }
+            });
+        }
+
         const weeks={}, people={};
         const totals={ burn:0, hours:0, bill:0, nb:0 };
         const budget = parseFloat(document.getElementById('budgetLimit').value) || 0;
@@ -2604,13 +2622,13 @@
                 if (!i.status_category_changed) return false;
                 const changedAt = parseSheetDate_(i.status_category_changed);
                 if (!changedAt) return false;
-                const elapsed = workingHoursElapsed_(changedAt, now);
+                const elapsed = workingHoursElapsed_(changedAt, now, i.assignee);
                 const thr = jGetSlaThreshold_(i.story_points);
                 return elapsed >= (thr.warn - grace);
             })
             .map(i => {
                 const changedAt = parseSheetDate_(i.status_category_changed);
-                const elapsed   = workingHoursElapsed_(changedAt, now);
+                const elapsed   = workingHoursElapsed_(changedAt, now, i.assignee);
                 const thr       = jGetSlaThreshold_(i.story_points);
                 const grace_    = parseFloat(jGetSummary('sla_grace_hrs')) || CONFIG.SLA_GRACE_HOURS;
                 const isOver    = elapsed >= thr.over;
@@ -2642,11 +2660,11 @@
                 if (s !== 'READY FOR REVIEW') return false;
                 const d = new Date(i.updated);
                 if (isNaN(d)) return false;
-                return workingHoursElapsed_(d, now) > maxHrs;
+                return workingHoursElapsed_(d, now, i.assignee) > maxHrs;
             })
             .map(i => {
                 const d       = new Date(i.updated);
-                const elapsed = workingHoursElapsed_(d, now);
+                const elapsed = workingHoursElapsed_(d, now, i.assignee);
                 return Object.assign({}, i, { _elapsedHrs: elapsed });
             })
             .sort((a, b) => b._elapsedHrs - a._elapsedHrs);
@@ -2712,11 +2730,11 @@
                 if (s !== 'CODE REVIEW') return false;
                 const d = new Date(i.updated);
                 if (isNaN(d)) return false;
-                return workingHoursElapsed_(d, now) > maxHrs;
+                return workingHoursElapsed_(d, now, i.assignee) > maxHrs;
             })
             .map(i => {
                 const d       = new Date(i.updated);
-                const elapsed = workingHoursElapsed_(d, now);
+                const elapsed = workingHoursElapsed_(d, now, i.assignee);
                 return Object.assign({}, i, { _elapsedHrs: elapsed });
             })
             .sort((a, b) => b._elapsedHrs - a._elapsedHrs);
@@ -2955,16 +2973,16 @@
             if (jStatusCategory(i.status) !== "development") return false;
             const d = new Date(i.updated);
             if (isNaN(d)) return false;
-            return workingHoursElapsed_(d, now) > CONFIG.AGING_THRESHOLD_WORK_HRS;
+            return workingHoursElapsed_(d, now, i.assignee) > CONFIG.AGING_THRESHOLD_WORK_HRS;
         }).sort((a, b) => {
             // Sort by most working hours elapsed first
-            return workingHoursElapsed_(new Date(a.updated), now) <
-                   workingHoursElapsed_(new Date(b.updated), now) ? 1 : -1;
+            return workingHoursElapsed_(new Date(a.updated), now, a.assignee) <
+                   workingHoursElapsed_(new Date(b.updated), now, b.assignee) ? 1 : -1;
         });
 
         const agingBody = document.getElementById("sv-aging-body");
         agingBody.innerHTML = aging.length ? aging.map(i => {
-            const workHrs = workingHoursElapsed_(new Date(i.updated), now);
+            const workHrs = workingHoursElapsed_(new Date(i.updated), now, i.assignee);
             const workDays = (workHrs / (CONFIG.WORK_HOURS.endHour - CONFIG.WORK_HOURS.startHour)).toFixed(1);
             const col = jStatusColor(i.status);
             // Display as working days if >=9h, else working hours
