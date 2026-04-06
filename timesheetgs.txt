@@ -1,0 +1,461 @@
+// ═══════════════════════════════════════════════════════════════════════════════
+// ACQUIA PROGRAM CONTROL TOWER — Google Apps Script
+// Serves: actuals, plan, phases, milestones, unknownTasks, jiraSummary, jiraIssues
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function doGet(e) {
+  if (e && e.parameter && e.parameter.debug === '1') {
+    return debugInfo();
+  }
+
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+
+    // ── 1. TimeEntries ────────────────────────────────────────────────────────
+    var actualSheet   = ss.getSheetByName("TimeEntries") || ss.getSheets()[0];
+    var actualData    = actualSheet.getDataRange().getValues();
+    var actualHeaders = actualData[0].map(function(h){ return h.toString().trim(); });
+
+    var actuals = actualData.slice(1).map(function(row) {
+      var obj = {};
+      actualHeaders.forEach(function(h, i){ obj[h] = row[i]; });
+      obj['Date'] = normaliseDate(obj['Date']);
+      return obj;
+    }).filter(function(r){ return r['Date']; });
+
+    // ── 2. Phases tab ─────────────────────────────────────────────────────────
+    var weekToPhase = {};
+    var phaseOrder  = [];
+    var phaseSheet  = ss.getSheetByName("Phases");
+    if (phaseSheet) {
+      var phaseValues = phaseSheet.getDataRange().getValues();
+      for (var i = 1; i < phaseValues.length; i++) {
+        var prow      = phaseValues[i];
+        var phaseName = prow[0] ? prow[0].toString().trim() : '';
+        if (!phaseName) continue;
+        if (phaseOrder.indexOf(phaseName) === -1) phaseOrder.push(phaseName);
+        for (var j = 1; j < prow.length; j++) {
+          var iso = normaliseDate(prow[j]);
+          if (iso) weekToPhase[iso] = phaseName;
+        }
+      }
+    }
+
+    // ── 3. ResourcePlan ───────────────────────────────────────────────────────
+    var planSheet     = ss.getSheetByName("ResourcePlan");
+    var plan          = [];
+    var dateList      = [];
+    var milestonesMap = {};
+
+    if (planSheet) {
+      var planValues = planSheet.getDataRange().getValues();
+      var phasesRow  = planValues[1];
+      var datesRow   = planValues[2];
+
+      dateList = datesRow.slice(3).map(function(d){ return normaliseDate(d); });
+
+      for (var j = 3; j < phasesRow.length; j++) {
+        var pName = phasesRow[j] ? phasesRow[j].toString().trim() : '';
+        var pDate = dateList[j - 3];
+        if (pName && pDate) milestonesMap[pName] = pDate;
+      }
+
+      var dataRows = planValues.slice(3);
+      dataRows.forEach(function(row) {
+        var role        = row[0] ? row[0].toString().trim() : '';
+        var person      = row[1] ? row[1].toString().trim() : '';
+        var plannedRate = parseFloat(row[2]);
+        if (!role || !person) return;
+
+        for (var j = 3; j < row.length; j++) {
+          var val = parseFloat(row[j]);
+          var iso = dateList[j - 3];
+          if (isNaN(val) || val <= 0 || !iso) continue;
+          plan.push({
+            role:        role,
+            person:      person,
+            plannedRate: isNaN(plannedRate) ? null : plannedRate,
+            dateStr:     iso,
+            planH:       val,
+            phase:       weekToPhase[iso] || ''
+          });
+        }
+      });
+    }
+
+    var milestones = Object.keys(milestonesMap).map(function(key) {
+      return { name: key, due: milestonesMap[key], notes: 'Auto-generated from plan' };
+    });
+
+    // ── 4. Jira_Summary ───────────────────────────────────────────────────────
+    var jiraSummary      = [];
+    var jiraSummarySheet = ss.getSheetByName("Jira_Summary");
+    if (jiraSummarySheet) {
+      var jsData    = jiraSummarySheet.getDataRange().getValues();
+      var jsHeaders = jsData[0].map(function(h){ return h.toString().trim().toLowerCase(); });
+      jiraSummary   = jsData.slice(1)
+        .filter(function(r){ return r[0] !== '' && r[0] !== null; })
+        .map(function(r){
+          var obj = {};
+          jsHeaders.forEach(function(h, i){
+            var val = r[i];
+            if (val instanceof Date) val = normaliseDate(val);
+            obj[h] = (val !== null && val !== undefined) ? String(val).trim() : '';
+          });
+          return obj;
+        });
+    }
+
+    // ── 5. Jira_CT ────────────────────────────────────────────────────────────
+    var jiraIssues  = [];
+    var jiraConfig  = {};
+    var jiraCTSheet = ss.getSheetByName("Jira_CT");
+    if (jiraCTSheet) {
+      var jcData    = jiraCTSheet.getDataRange().getValues();
+      var jcHeaders = jcData[0].map(function(h){
+        return h.toString().trim().toLowerCase().replace(/\s+/g, '_');
+      });
+
+      var sccIdx = jcHeaders.indexOf('status_category_changed');
+
+      jiraIssues = jcData.slice(1)
+        .filter(function(r){ return r[0] !== '' && r[0] !== null; })
+        .map(function(r){
+          var obj = {};
+          jcHeaders.forEach(function(h, i){
+            var val = r[i];
+            if (i === sccIdx) {
+              obj[h] = normaliseDatetime_(val);
+            } else {
+              if (val instanceof Date) val = normaliseDate(val);
+              obj[h] = (val !== null && val !== undefined) ? String(val).trim() : '';
+            }
+          });
+          obj['labels'] = obj['labels']
+            ? obj['labels'].split(';').map(function(l){ return l.trim().toLowerCase(); }).filter(Boolean)
+            : [];
+          return obj;
+        });
+
+      // ── Build sprint_dates map: { "Sprint Name": { start, end, days } } ───
+      // Keyed by sprint name so the frontend can look up whichever sprint
+      // is currently selected — fixes the bug where jiraConfig only held
+      // the first sprint's dates regardless of which sprint was being viewed.
+      var sprintDatesMap = {};
+      jiraIssues.forEach(function(issue) {
+        var name = (issue['sprint'] || '').trim();
+        if (!name || sprintDatesMap[name]) return;
+
+        var rawStart = issue['sprint.startdate'] || issue['sprint_startdate'] || '';
+        var rawEnd   = issue['sprint.enddate']   || issue['sprint_enddate']   || '';
+        if (!rawStart || !rawEnd) return;
+
+        var start = normaliseDate(rawStart) || rawStart.substring(0, 10);
+        var end   = normaliseDate(rawEnd)   || rawEnd.substring(0, 10);
+
+        var days = 10;
+        var startMs = new Date(start).getTime();
+        var endMs   = new Date(end).getTime();
+        if (!isNaN(startMs) && !isNaN(endMs) && endMs >= startMs) {
+          days = Math.round((endMs - startMs) / 86400000) + 1;
+        }
+
+        sprintDatesMap[name] = { start: start, end: end, days: days };
+      });
+
+      // ── jiraConfig: keep legacy top-level fields for back-compat,
+      //    and add sprint_dates map for the fixed burndown logic ─────────────
+      var firstSprintName = '';
+      for (var si = 0; si < jiraIssues.length; si++) {
+        if (jiraIssues[si]['sprint'] && jiraIssues[si]['sprint'].trim()) {
+          firstSprintName = jiraIssues[si]['sprint'].trim();
+          break;
+        }
+      }
+      var firstDates = sprintDatesMap[firstSprintName] || {};
+
+      var statusSet = {};
+      jiraIssues.forEach(function(issue){
+        var s = (issue['status'] || '').trim();
+        if (s) statusSet[s] = true;
+      });
+
+      jiraConfig = {
+        sprint_name:  firstSprintName,
+        sprint_start: firstDates.start || '',
+        sprint_end:   firstDates.end   || '',
+        sprint_days:  firstDates.days  || 10,
+        sprint_dates: sprintDatesMap,       // ← NEW: all sprints keyed by name
+        statuses:     Object.keys(statusSet).sort()
+      };
+    }
+
+    // ── 6. Spend_Analysis ─────────────────────────────────────────────────────
+    var spendAnalysis = [];
+    var saSheet = ss.getSheetByName("Spend_Analysis");
+    if (saSheet) {
+      var saData = saSheet.getDataRange().getValues();
+      var saHdrs = saData[0].map(function(h){ return h.toString().trim(); });
+      spendAnalysis = saData.slice(1)
+        .filter(function(r){ return r[0] !== '' && r[0] !== null; })
+        .map(function(r){
+          var obj = {};
+          saHdrs.forEach(function(h, i){
+            var val = r[i];
+            obj[h] = (val !== null && val !== undefined) ? val : '';
+          });
+          return obj;
+        });
+    }
+
+    // ── 7. Teamleaves ─────────────────────────────────────────────────────────
+    // Tab Name: "Teamleaves" or "Team Leaves"
+    // Format: Resource (Col A) | Leave Date (Col B) | PTO/SL (Col C)
+    // Used to exclude personal leave days from Jira SLA/Aging calculations.
+    var leaves = {};
+    var leavesSheet = ss.getSheetByName("Teamleaves") || ss.getSheetByName("Team Leaves");
+    if (leavesSheet) {
+      var leavesData = leavesSheet.getDataRange().getValues();
+      for (var i = 1; i < leavesData.length; i++) {
+        var person = (leavesData[i][0] || "").toString().trim();
+        var lDate  = normaliseDate(leavesData[i][1]);
+        if (person && lDate) {
+          if (!leaves[person]) leaves[person] = [];
+          leaves[person].push(lDate);
+        }
+      }
+    }
+
+    // ── Return everything ─────────────────────────────────────────────────────
+    return ContentService.createTextOutput(JSON.stringify({
+      actuals:      actuals,
+      plan:         plan,
+      rawPhases:    phaseOrder,
+      rawDates:     dateList,
+      milestones:   milestones,
+      unknownTasks: getUnknownTasks(actuals, weekToPhase),
+      jiraSummary:  jiraSummary,
+      jiraIssues:   jiraIssues,
+      jiraConfig:   jiraConfig,
+      spendAnalysis: spendAnalysis,
+      leaves:        leaves
+    })).setMimeType(ContentService.MimeType.JSON);
+
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({
+      error: err.message,
+      stack: err.stack
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// DATETIME NORMALISER
+// ═══════════════════════════════════════════════════════════════════════════════
+function normaliseDatetime_(val) {
+  if (!val) return '';
+
+  function pad(n) { return String(n).length < 2 ? '0' + n : String(n); }
+
+  if (val instanceof Date) {
+    if (isNaN(val.getTime())) return '';
+    return val.getFullYear()      + '-'
+      + pad(val.getMonth() + 1)   + '-'
+      + pad(val.getDate())         + ' '
+      + pad(val.getHours())        + ':'
+      + pad(val.getMinutes())      + ':'
+      + pad(val.getSeconds());
+  }
+
+  var s = String(val).trim();
+  if (!s) return '';
+
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
+    return s.replace('T', ' ').replace(/\.\d+Z?$/, '').substring(0, 19);
+  }
+
+  var m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2}):(\d{2})$/);
+  if (m) {
+    return m[3] + '-' + pad(m[1]) + '-' + pad(m[2])
+      + ' ' + pad(m[4]) + ':' + m[5] + ':' + m[6];
+  }
+
+  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})$/);
+  if (m) {
+    return m[3] + '-' + pad(m[1]) + '-' + pad(m[2])
+      + ' ' + pad(m[4]) + ':' + m[5] + ':00';
+  }
+
+  return s;
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// DEBUG — append ?debug=1 to your web app URL
+// ═══════════════════════════════════════════════════════════════════════════════
+function debugInfo() {
+  var ss  = SpreadsheetApp.getActiveSpreadsheet();
+  var out = {};
+
+  var te = ss.getSheetByName("TimeEntries");
+  if (te) {
+    var teVals = te.getDataRange().getValues();
+    out.te_date_raw      = teVals[1][2] ? teVals[1][2].toString() : null;
+    out.te_date_typeof   = typeof teVals[1][2];
+    out.te_date_isDate   = teVals[1][2] instanceof Date;
+    out.te_date_normed   = normaliseDate(teVals[1][2]);
+  }
+
+  var rp = ss.getSheetByName("ResourcePlan");
+  if (rp) {
+    var rpVals   = rp.getDataRange().getValues();
+    var datesRow = rpVals[2].slice(3);
+    out.rp_dates_raw    = datesRow.map(function(d){ return d ? d.toString() : null; });
+    out.rp_dates_isDate = datesRow.map(function(d){ return d instanceof Date; });
+    out.rp_dates_normed = datesRow.map(function(d){ return normaliseDate(d); });
+  }
+
+  var ph = ss.getSheetByName("Phases");
+  if (ph) {
+    var phVals = ph.getDataRange().getValues();
+    out.phases_row1_raw    = phVals[1] ? phVals[1].map(function(d){ return d ? d.toString() : null; }) : null;
+    out.phases_row1_normed = phVals[1] ? phVals[1].map(function(d){ return normaliseDate(d); }) : null;
+  }
+
+  var js = ss.getSheetByName("Jira_Summary");
+  if (js) {
+    var jsVals = js.getDataRange().getValues();
+    out.jira_summary_headers = jsVals[0] ? jsVals[0].map(function(h){ return h.toString(); }) : null;
+    out.jira_summary_row1    = jsVals[1] ? jsVals[1].map(function(v){ return v !== null ? v.toString() : null; }) : null;
+    out.jira_summary_row2    = jsVals[2] ? jsVals[2].map(function(v){ return v !== null ? v.toString() : null; }) : null;
+  }
+
+  var jc = ss.getSheetByName("Jira_CT");
+  if (jc) {
+    var jcVals = jc.getDataRange().getValues();
+    out.jira_ct_headers = jcVals[0] ? jcVals[0].map(function(h){ return h.toString(); }) : null;
+    out.jira_ct_row1    = jcVals[1] ? jcVals[1].map(function(v){ return v !== null ? v.toString() : null; }) : null;
+    out.jira_ct_row2    = jcVals[2] ? jcVals[2].map(function(v){ return v !== null ? v.toString() : null; }) : null;
+
+    var hdrs     = jcVals[0].map(function(h){ return h.toString().trim().toLowerCase().replace(/\s+/g,'_'); });
+    var startIdx = hdrs.indexOf('sprint.startdate'); if (startIdx < 0) startIdx = hdrs.indexOf('sprint_startdate');
+    var endIdx   = hdrs.indexOf('sprint.enddate');   if (endIdx   < 0) endIdx   = hdrs.indexOf('sprint_enddate');
+    var sccIdx   = hdrs.indexOf('status_category_changed');
+
+    if (jcVals[1]) {
+      out.jira_sprint_start_raw    = startIdx >= 0 ? String(jcVals[1][startIdx]) : 'col not found';
+      out.jira_sprint_end_raw      = endIdx   >= 0 ? String(jcVals[1][endIdx])   : 'col not found';
+      out.jira_sprint_start_normed = startIdx >= 0 ? normaliseDate(jcVals[1][startIdx]) : null;
+      out.jira_sprint_end_normed   = endIdx   >= 0 ? normaliseDate(jcVals[1][endIdx])   : null;
+      out.jira_scc_col_found       = sccIdx   >= 0 ? 'YES (col ' + sccIdx + ')' : 'NOT FOUND — check column name';
+      out.jira_scc_raw             = sccIdx   >= 0 ? String(jcVals[1][sccIdx])  : null;
+      out.jira_scc_normed          = sccIdx   >= 0 ? normaliseDatetime_(jcVals[1][sccIdx]) : null;
+    }
+  }
+
+  return ContentService.createTextOutput(JSON.stringify(out, null, 2))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// DATE NORMALISER — YYYY-MM-DD only (no time component)
+// ═══════════════════════════════════════════════════════════════════════════════
+function normaliseDate(val) {
+  if (!val) return null;
+
+  var months = {
+    jan:0, feb:1, mar:2, apr:3, may:4, jun:5,
+    jul:6, aug:7, sep:8, oct:9, nov:10, dec:11
+  };
+
+  function pad(n) { var s = String(n); return s.length < 2 ? '0' + s : s; }
+
+  if (val instanceof Date) {
+    if (isNaN(val.getTime())) return null;
+    return val.getFullYear() + '-' + pad(val.getMonth() + 1) + '-' + pad(val.getDate());
+  }
+
+  var s = val.toString().trim();
+
+  var m = s.match(/^[A-Za-z]{3}\s+([A-Za-z]{3})\s+(\d{1,2})\s+(\d{4})/);
+  if (m) {
+    var mon = months[m[1].toLowerCase()];
+    if (mon !== undefined) return m[3] + '-' + pad(mon + 1) + '-' + pad(parseInt(m[2], 10));
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}T/.test(s)) {
+    var parts = s.substring(0, 10).split('-');
+    return parts[0] + '-' + parts[1] + '-' + parts[2];
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+
+  m = s.match(/^(\d{1,2})-([A-Za-z]{3})-(\d{2})$/);
+  if (m) {
+    var mon = months[m[2].toLowerCase()];
+    if (mon !== undefined) return (2000 + parseInt(m[3], 10)) + '-' + pad(mon + 1) + '-' + pad(parseInt(m[1], 10));
+  }
+
+  m = s.match(/^(\d{1,2})-([A-Za-z]{3})-(\d{4})$/);
+  if (m) {
+    var mon = months[m[2].toLowerCase()];
+    if (mon !== undefined) return m[3] + '-' + pad(mon + 1) + '-' + pad(parseInt(m[1], 10));
+  }
+
+  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2})$/);
+  if (m) return (2000 + parseInt(m[3], 10)) + '-' + pad(parseInt(m[1], 10)) + '-' + pad(parseInt(m[2], 10));
+
+  return null;
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// UNKNOWN TASKS
+// ═══════════════════════════════════════════════════════════════════════════════
+function getUnknownTasks(actuals, weekToPhase) {
+  var knownPhases = Object.values(weekToPhase).map(function(p){ return p.toLowerCase().trim(); });
+
+  function norm(s) { return s.toLowerCase().replace(/[\s\-_\/]+/g, ' ').trim(); }
+
+  var unknownSet = {};
+  actuals.forEach(function(r) {
+    var task = (r['Task/Deliverable'] || '').toString().trim();
+    if (!task) return;
+    var sepMatch = task.search(/\s*-\s+/);
+    var toTry = sepMatch > 0 ? [task.substring(0, sepMatch).trim(), task] : [task];
+    var matched = false;
+    for (var t = 0; t < toTry.length && !matched; t++) {
+      var a = norm(toTry[t]);
+      for (var i = 0; i < knownPhases.length && !matched; i++) {
+        var ph = norm(knownPhases[i]);
+        if (ph === a || a.indexOf(ph) === 0 || ph.indexOf(a) === 0) matched = true;
+      }
+    }
+    if (!matched) unknownSet[task] = true;
+  });
+  return Object.keys(unknownSet).sort();
+}
+
+
+function refreshJiraCT() {
+  var ss    = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName('Jira_CT');
+  if (!sheet) { SpreadsheetApp.getUi().alert('Jira_CT sheet not found.'); return; }
+
+  SpreadsheetApp.getActiveSpreadsheet().toast(
+    'Refreshing Jira data…', 'Jira Sync', 5
+  );
+
+  var helper = sheet.getRange('M1');
+  helper.setValue('=NOW()');
+  SpreadsheetApp.flush();
+  helper.clearContent();
+  SpreadsheetApp.flush();
+
+  SpreadsheetApp.getActiveSpreadsheet().toast(
+    'Done — Jira_CT updated at ' + new Date().toLocaleTimeString(),
+    'Jira Sync', 4
+  );
+}
