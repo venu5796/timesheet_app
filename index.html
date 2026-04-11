@@ -281,6 +281,21 @@
         .insight-text strong { font-weight: 500; }
         .insight-tag { display: inline-block; margin-bottom: 4px; font-size: 11px; font-weight: 500; color: var(--color-text-warning); background: var(--color-background-warning); padding: 2px 8px; border-radius: var(--border-radius-md); }
 
+        /* Fix #9: Added missing .topbar-right layout class */
+        .topbar-right { display: flex; align-items: center; gap: 8px; }
+
+        /* Fix #10: Added missing --border-subtle variable (used in phase EAC progress bars) */
+        /* Fix #11: Added missing legacy --st-* status variables used in Jira badge elements */
+        :root {
+            --border-subtle:    rgba(0, 0, 0, 0.08);
+            --st-ok-bg:         var(--color-background-success);
+            --st-ok-text:       var(--color-text-success);
+            --st-warn-bg:       var(--color-background-warning);
+            --st-warn-text:     var(--color-text-warning);
+            --st-bad-bg:        var(--color-background-danger);
+            --st-bad-text:      var(--color-text-danger);
+            --accent-soft:      var(--color-accent-soft);
+        }
         .spinner { width: 24px; height: 24px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes bgPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
@@ -300,7 +315,7 @@
                 <button class="nav-tab active" onclick="switchTab('program')">Program</button>
                 <button class="nav-tab" onclick="switchTab('jira-high')">Jira — High Level</button>
                 <button class="nav-tab" onclick="switchTab('jira-sprint')">Jira — Sprint View</button>
-                <button class="nav-tab" id="nav-capacity" onclick="switchTab('capacity')" style="display: none;">Capacity</button>
+                <button class="nav-tab" id="nav-capacity" onclick="switchTab('capacity')">Capacity</button>
             </nav>
         </div>
         <div class="topbar-right">
@@ -401,6 +416,8 @@
                             <h4>Velocity</h4>
                             <div class="val" id="kpi-velo">0h/wk</div>
                             <div id="kpi-velo-trend" style="margin-top:4px;"></div>
+                            <!-- Fix #13: Added missing canvas that drawSparkline('spark-velo') targets -->
+                            <canvas id="spark-velo" style="display:block; margin-top:6px; width:100%; height:28px;"></canvas>
                         </div>
                         <div class="kpi-card">
                             <h4>Non-Billable</h4>
@@ -530,7 +547,7 @@
                         <div class="card-title">
                             🔥 Resource Heatmap
                             <div style="display:flex; align-items:center; gap:16px; font-weight:400;">
-                                <input type="text" id="heatmap-search" placeholder="Search resource…" oninput="renderHeatmap(globalData._people, Object.keys(globalData._weeks).sort())" style="padding:4px 10px; border-radius:6px; border:1px solid var(--border); font-size:11px;">
+                                <input type="text" id="heatmap-search" placeholder="Search resource…" oninput="if(globalData._people && globalData._weeks) renderHeatmap(globalData._people, Object.keys(globalData._weeks).sort())" style="padding:4px 10px; border-radius:6px; border:1px solid var(--border); font-size:11px;">
                                 <div style="display:flex; gap:8px; font-size:10px; color:var(--muted);">
                                     <span><span class="rag-dot" style="background:var(--danger)"></span> >40h</span>
                                     <span><span class="rag-dot" style="background:var(--success)"></span> 30-40h</span>
@@ -706,53 +723,52 @@
 <script>
     Chart.register(ChartDataLabels);
 
-    const API_URL        = "https://script.google.com/macros/s/AKfycbx4OQ81fkE5LHkAG-yqAo2h37NC_9OoZrcIQ_MEAKx0uMjoeG6Ws8-E3VmEnc75Bo0l/exec";
-    const RATE_FALLBACK  = 100;
-    const THRESH_OVER    = 40;
-    const THRESH_GOOD    = 30;
-    const VARIANCE_FACTOR= 1.2;
-    const VARIANCE_UNDER = 0.8;
-    const ACTIVE_DAYS    = 14;
-    const CHART_COLORS   = ['#004a99','#3b82f6','#10b981','#f59e0b','#8b5cf6','#ec4899','#14b8a6'];
-
-    // ── Dev SLA thresholds — WORKING hours allowed per story point band ──────
-    // All elapsed time is now calculated in working hours (Mon–Fri, 9am–6pm)
-    // skipping weekends and public holidays defined in WORK_HOURS.holidays.
-    // Grace window: flag when within 1 working hour of SLA expiry.
-    const DEV_SLA = {
-        1: { warn: 2,   over: 2   },   // 1pt  → flag at 2 working hrs
-        2: { warn: 4,   over: 4   },   // 2pt  → flag at 4 working hrs
-        3: { warn: 8,   over: 12  },   // 3pt  → AT RISK at 8h (1 day), OVERDUE at 12h (1.5 days)
-        5: { warn: 16,  over: 24  },   // 5pt  → AT RISK at 16h (2 days), OVERDUE at 24h (3 days)
-        8: { warn: 24,  over: 24  },   // 8pt  → flag at 24h (>3 working days)
-        default: { warn: 16, over: 24 }
-    };
-    const SLA_GRACE_HOURS = 1;
-
-    // ── Working hours configuration ───────────────────────────────────────────
-    const WORK_HOURS = {
-        startHour: 9,    // 9am
-        endHour:   18,   // 6pm
-        // 2026 India public holidays — update yearly as needed
-        // Format: 'YYYY-MM-DD'
-        holidays: new Set([
-            '2026-01-01',  // New Year's Day
-            '2026-01-26',  // Republic Day
-            '2026-03-03',  // Holi (corrected date)
-            '2026-03-20',  // Eid-ul-Fitr
-            '2026-05-01',  // Maharashtra Day
-            '2026-05-27',  // Eid-al-Adha
-            '2026-08-15',  // Independence Day
-            '2026-08-28',  // Raksha Bandhan
-            '2026-09-04',  // Janmashtami
-            '2026-09-14',  // Ganesh Chaturthi
-            '2026-10-02',  // Mahatma Gandhi Jayanti
-            '2026-11-09',  // Diwali (Observed)
-            '2026-11-10',  // Govardhan Puja
-            '2026-11-24',  // Gurunanak Jayanti
-            '2026-12-25',  // Christmas
-            '2027-01-01'   // New Year's Day 2027
-        ])
+    // ── CONFIG — single source of truth for all constants ────────────────────
+    const CONFIG = {
+        API_URL:        "https://script.google.com/macros/s/AKfycbx4OQ81fkE5LHkAG-yqAo2h37NC_9OoZrcIQ_MEAKx0uMjoeG6Ws8-E3VmEnc75Bo0l/exec",
+        RATE_FALLBACK:  100,
+        THRESH_OVER:    40,
+        THRESH_GOOD:    30,
+        VARIANCE_FACTOR:1.2,
+        VARIANCE_UNDER: 0.8,
+        ACTIVE_DAYS:    14,
+        CHART_COLORS:   ['#004a99','#3b82f6','#10b981','#f59e0b','#8b5cf6','#ec4899','#14b8a6'],
+        SYNC_INTERVAL_MS: 15 * 60 * 1000,
+        // Fix #2: Added missing constant used by aging table badge threshold
+        AGING_THRESHOLD_WORK_HRS: 16,
+        SLA_GRACE_HOURS: 1,
+        // ── Dev SLA thresholds — WORKING hours allowed per story point band ──
+        DEV_SLA: {
+            1: { warn: 2,   over: 2   },
+            2: { warn: 4,   over: 4   },
+            3: { warn: 8,   over: 12  },
+            5: { warn: 16,  over: 24  },
+            8: { warn: 24,  over: 24  },
+            default: { warn: 16, over: 24 }
+        },
+        // ── Working hours configuration ───────────────────────────────────────
+        WORK_HOURS: {
+            startHour: 9,
+            endHour:   18,
+            holidays: new Set([
+                '2026-01-01',  // New Year's Day
+                '2026-01-26',  // Republic Day
+                '2026-03-03',  // Holi
+                '2026-03-20',  // Eid-ul-Fitr
+                '2026-05-01',  // Maharashtra Day
+                '2026-05-27',  // Eid-al-Adha
+                '2026-08-15',  // Independence Day
+                '2026-08-28',  // Raksha Bandhan
+                '2026-09-04',  // Janmashtami
+                '2026-09-14',  // Ganesh Chaturthi
+                '2026-10-02',  // Mahatma Gandhi Jayanti
+                '2026-11-09',  // Diwali (Observed)
+                '2026-11-10',  // Govardhan Puja
+                '2026-11-24',  // Gurunanak Jayanti
+                '2026-12-25',  // Christmas
+                '2027-01-01'   // New Year's Day 2027
+            ])
+        }
     };
 
     let globalData = { actuals:[], plan:[], rawPhases:[], milestones:[], unknownTasks:[] };
@@ -789,10 +805,11 @@
 
         if (isWorkDay(s)) {
             const dayStart = new Date(s); dayStart.setHours(startHour, 0, 0, 0);
-            const dayEnd = new Date(s); dayEnd.setHours(endHour, 0, 0, 0);
-            const effectiveStart = Math.max(s, dayStart);
-            const effectiveEnd = Math.min(e, dayEnd);
-            if (effectiveEnd > effectiveStart) totalHours += (effectiveEnd - effectiveStart) / 3600000;
+            const dayEnd   = new Date(s); dayEnd.setHours(endHour, 0, 0, 0);
+            // Fix #3: use explicit getTime() instead of fragile Math.max/min on Date objects
+            const effStartMs = Math.max(s.getTime(), dayStart.getTime());
+            const effEndMs   = Math.min(e.getTime(), dayEnd.getTime());
+            if (effEndMs > effStartMs) totalHours += (effEndMs - effStartMs) / 3600000;
         }
 
         if (s.toDateString() === e.toDateString()) return totalHours;
@@ -809,10 +826,10 @@
 
         if (isWorkDay(e)) {
             const dayStart = new Date(e); dayStart.setHours(startHour, 0, 0, 0);
-            const dayEnd = new Date(e); dayEnd.setHours(endHour, 0, 0, 0);
-            const effectiveStart = Math.max(eStartOfDay, dayStart);
-            const effectiveEnd = Math.min(e, dayEnd);
-            if (effectiveEnd > effectiveStart) totalHours += (effectiveEnd - effectiveStart) / 3600000;
+            const dayEnd   = new Date(e); dayEnd.setHours(endHour, 0, 0, 0);
+            const effStartMs = Math.max(eStartOfDay.getTime(), dayStart.getTime());
+            const effEndMs   = Math.min(e.getTime(), dayEnd.getTime());
+            if (effEndMs > effStartMs) totalHours += (effEndMs - effStartMs) / 3600000;
         }
 
         return totalHours;
@@ -943,10 +960,11 @@
         issues.forEach(issue => {
             const raw = (issue.sprint || '').trim();
             if (!raw || !raw.includes(';')) return; 
-            const parts = raw.split(';').map(s => s.trim()).filter(Boolean);
+            const parts = raw.split(';').map(p => p.trim()).filter(Boolean);
             if (parts.length < 2) return;
-            const num = s => { 
-                const m = s.match(/(\d+)/g); 
+            // Fix #4: renamed inner arrow param from 's' to 'sp' to avoid shadowing
+            const num = sp => { 
+                const m = sp.match(/(\d+)/g); 
                 return m ? parseInt(m[m.length - 1], 10) : 0; 
             };
             const latest = parts.reduce((best, cur) => num(cur) >= num(best) ? cur : best, parts[0]);
@@ -959,9 +977,16 @@
         const debug  = document.getElementById('debug-info');
         const loader = document.getElementById('loader');
         const btnSync = document.getElementById('btn-sync');
+        const bgDot   = document.getElementById('bg-fetch-dot');
+        const isBackground = document.getElementById('dashboard')?.style.display !== 'none';
         debug.style.display = 'none';
-        loader.style.display = 'flex';
-        document.getElementById('dashboard').style.display = 'none';
+        // Fix #12b: show pulsing dot on background refreshes, full loader only on first load
+        if (isBackground) {
+            if (bgDot) bgDot.style.display = 'block';
+        } else {
+            loader.style.display = 'flex';
+            document.getElementById('dashboard').style.display = 'none';
+        }
         if (btnSync) { btnSync.disabled = true; btnSync.textContent = '⏳ Syncing…'; }
         try {
             const res  = await fetch(CONFIG.API_URL);
@@ -985,6 +1010,10 @@
             _syncStatus = { lastSuccess: true, error: null };
             updateSyncTimestamp_();
             resetCountdown_();
+            // Fix #12: register background auto-sync interval (was referenced in docs but never wired up)
+            if (!window._autoSyncHandle) {
+                window._autoSyncHandle = setInterval(fetchData, CONFIG.SYNC_INTERVAL_MS);
+            }
             processData();
             renderJiraTab();
         } catch(e) {
@@ -994,6 +1023,8 @@
             debug.innerHTML = `<div class="error-box"><h3>⚠️ Connection Error</h3><p>${esc(e.message)}</p><button class="btn btn-primary" onclick="fetchData()" style="margin-top:10px;">🔄 Retry</button></div>`;
         } finally {
             if (btnSync) { btnSync.disabled = false; btnSync.textContent = '🔄 Sync'; }
+            const bgDotEl = document.getElementById('bg-fetch-dot');
+            if (bgDotEl) bgDotEl.style.display = 'none';
         }
     }
 
@@ -1434,7 +1465,8 @@
         if (!flags || !missing) return;
         flags.innerHTML=missing.innerHTML='';
         const actuallyBilled=new Set();
-        globalData.actuals.forEach(r=>{ if(getMonday(r.Date)===latest && (parseFloat(r['Time in Hours'])||0)>0) actuallyBilled.add((r.Person||'').trim().toLowerCase()); });
+        // Fix #8: wrap r.Date through parseDateSafe() for consistency with rest of codebase
+        globalData.actuals.forEach(r=>{ if(getMonday(parseDateSafe(r.Date))===latest && (parseFloat(r['Time in Hours'])||0)>0) actuallyBilled.add((r.Person||'').trim().toLowerCase()); });
         globalData.plan.forEach(p=>{
             if(getMonday(p.dateStr)!==latest || !(p.planH>0)) return;
             const key=(p.person||'').trim().toLowerCase();
@@ -1580,9 +1612,14 @@
     function switchTab(name) {
         document.querySelectorAll('.tab-panel').forEach(p => { p.classList.toggle('active', p.id === 'tab-' + name); });
         document.querySelectorAll('.nav-tab').forEach(b => { b.classList.toggle('active', b.getAttribute('onclick')?.includes(`'${name}'`)); });
-        if (name === 'program') processData();
+        // Fix #6: only re-render charts on tab switch, not full processData() re-aggregation
+        if (name === 'program' && globalData._weeks) {
+            const budget = parseFloat(document.getElementById('budgetLimit').value) || 0;
+            renderCharts(globalData._weeks, globalData._phasesActual, globalData._phasesPlanned, globalData._phaseOrder, globalData._phaseNameMap, budget, Object.keys(globalData._weeks).sort());
+        }
         else if (name === 'jira-high') jRenderHighLevel();
         else if (name === 'jira-sprint') jRenderSprintView();
+        else if (name === 'capacity') renderCapacity();
     }
 
     let JIRA_SPRINT_DAYS = 10;
@@ -1884,6 +1921,53 @@
             <td>${esc(i.assignee)}</td>
             <td class="mono">${esc(i.story_points) || '—'}</td>
         </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--color-text-tertiary);padding:16px;">No issues in this sprint</td></tr>';
+    }
+
+    // Fix #7: Added missing renderCapacity() function — was never defined, tab was permanently hidden
+    function renderCapacity() {
+        const people  = globalData._people  || {};
+        const plan    = globalData.plan     || [];
+        const today   = toLocalISO(new Date());
+        const body    = document.getElementById('capacity-body');
+        const summary = document.getElementById('capacity-summary');
+        if (!body) return;
+
+        // Gather next sprint / upcoming week planned hours per person
+        const upcoming = {};
+        plan.forEach(p => {
+            const d = parseDateSafe(p.dateStr);
+            if (!d || d < today) return;
+            if (!upcoming[p.person]) upcoming[p.person] = { role: p.role, planned: 0 };
+            upcoming[p.person].planned += (p.planH || 0);
+        });
+
+        const rows = Object.keys(upcoming).sort().map(name => {
+            const available = 40; // standard weekly capacity
+            const planned   = upcoming[name].planned;
+            const loadPct   = available > 0 ? Math.round((planned / available) * 100) : 0;
+            const cls       = loadPct > 100 ? 'color:var(--color-text-danger)' : loadPct >= 80 ? 'color:var(--color-text-warning)' : 'color:var(--color-text-success)';
+            return `<tr>
+                <td><strong>${esc(name)}</strong></td>
+                <td>${esc(upcoming[name].role)}</td>
+                <td class="mono">${available}h</td>
+                <td class="mono">${planned.toFixed(1)}h</td>
+                <td class="mono" style="${cls}">${loadPct}%</td>
+            </tr>`;
+        });
+
+        body.innerHTML = rows.length
+            ? rows.join('')
+            : '<tr><td colspan="5" style="text-align:center;color:var(--color-text-tertiary);padding:16px;">No upcoming planned hours found</td></tr>';
+
+        if (summary) {
+            const over = Object.values(upcoming).filter(p => p.planned > 40).length;
+            summary.innerHTML = `<span style="font-size:11px;color:var(--color-text-secondary);">${Object.keys(upcoming).length} resources with upcoming plan · <span style="color:var(--color-text-danger);">${over} over 40h</span></span>`;
+        }
+
+        // update what-if slider default
+        const weeks = globalData._weeks || {};
+        const totals = globalData._totals || { hours: 0 };
+        initVelocitySimulation(weeks, totals, globalData._eacRem || 0);
     }
 
     window.onload = fetchData;
