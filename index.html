@@ -413,10 +413,9 @@
 
                     <div class="kpi-strip">
                         <div class="kpi-card">
-                            <h4>Velocity</h4>
+                            <h4>Velocity (Alloc vs Spend)</h4>
                             <div class="val" id="kpi-velo">0h/wk</div>
                             <div id="kpi-velo-trend" style="margin-top:4px;"></div>
-                            <!-- Fix #13: Added missing canvas that drawSparkline('spark-velo') targets -->
                             <canvas id="spark-velo" style="display:block; margin-top:6px; width:100%; height:28px;"></canvas>
                         </div>
                         <div class="kpi-card">
@@ -425,8 +424,8 @@
                             <div id="kpi-bench-trend" style="margin-top:4px;"></div>
                         </div>
                         <div class="kpi-card">
-                            <h4>Billable Eff.</h4>
-                            <div class="val" id="kpi-eff">0%</div>
+                            <h4>Budget Burn Rate</h4>
+                            <div class="val" id="kpi-eff">—</div>
                             <div id="kpi-eff-trend" style="margin-top:4px;"></div>
                         </div>
                         <div class="kpi-card">
@@ -451,7 +450,7 @@
                     </div>
 
                     <div class="card">
-                        <div class="card-title">📉 Phase Performance & Forecasting</div>
+                        <div class="card-title">📉 Phase Performance & Cost Breakdown</div>
                         <div class="table-responsive">
                             <table>
                                 <thead>
@@ -459,12 +458,14 @@
                                         <th>Phase</th>
                                         <th style="text-align:right;">Actual (€)</th>
                                         <th style="text-align:right;">Planned (€)</th>
+                                        <th style="text-align:right;">Delta (€)</th>
+                                        <th style="text-align:right;">% of Planned</th>
                                         <th style="text-align:right;">Phase EAC (€)</th>
                                         <th style="text-align:right;">Completion</th>
                                         <th style="text-align:right;">Status</th>
                                     </tr>
                                 </thead>
-                                <tbody id="phase-eac-body"></tbody>
+                                <tbody id="phase-merged-body"></tbody>
                             </table>
                         </div>
                     </div>
@@ -480,15 +481,9 @@
                         </div>
                     </div>
 
-                    <div class="equal-grid">
-                        <div class="card">
-                            <div class="card-title">🚨 Variance Flags</div>
-                            <div id="red-flags"></div>
-                        </div>
-                        <div class="card">
-                            <div class="card-title">📋 Delinquency</div>
-                            <div id="missing-timesheets"></div>
-                        </div>
+                    <div class="card">
+                        <div class="card-title">🚨 Variance Flags</div>
+                        <div id="red-flags"></div>
                     </div>
 
                     <div class="card">
@@ -497,30 +492,13 @@
                     </div>
 
                     <div class="card">
-                        <div class="card-title">👥 Resource Load by Role (h/wk)</div>
-                        <div style="height:260px;width:100%;"><canvas id="chart-role-load"></canvas></div>
+                        <div class="card-title">👤 Resource Load by Name (h/wk)</div>
+                        <div style="height:260px;width:100%;"><canvas id="chart-resource-load"></canvas></div>
                     </div>
 
-                    <div class="equal-grid">
-                        <div class="card">
-                            <div class="card-title">🗂️ Spend by Phase — Actual vs Planned (€)</div>
-                            <div style="height:320px;width:100%;"><canvas id="chart-phase"></canvas></div>
-                        </div>
-                        <div class="card">
-                            <div class="card-title">📋 Phase Cost Breakdown</div>
-                            <div class="table-responsive">
-                                <table>
-                                    <thead><tr>
-                                        <th>Phase</th>
-                                        <th style="text-align:right;">Actual (€)</th>
-                                        <th style="text-align:right;">Planned (€)</th>
-                                        <th style="text-align:right;">Delta (€)</th>
-                                        <th style="text-align:right;">% of Planned</th>
-                                    </tr></thead>
-                                    <tbody id="phase-breakdown-body"></tbody>
-                                </table>
-                            </div>
-                        </div>
+                    <div class="card">
+                        <div class="card-title">🗂️ Spend by Phase — Actual vs Planned (€)</div>
+                        <div style="height:320px;width:100%;"><canvas id="chart-phase"></canvas></div>
                     </div>
 
                     <div class="equal-grid">
@@ -543,15 +521,29 @@
                         </div>
                     </div>
 
+                    <div class="card" id="card-data-integrity" style="display:none;">
+                        <div class="card-title">🔍 Data Integrity & Mapping Alerts</div>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+                            <div>
+                                <div class="sb-label" style="margin-bottom:8px;">Unmapped Tasks (TimeEntries)</div>
+                                <div id="unmapped-tasks-list" style="max-height:150px; overflow-y:auto; font-size:11px; color:var(--muted);"></div>
+                            </div>
+                            <div>
+                                <div class="sb-label" style="margin-bottom:8px;">Jira Hygiene</div>
+                                <div id="jira-hygiene-alerts" style="font-size:11px; color:var(--muted);"></div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="card">
                         <div class="card-title">
                             🔥 Resource Heatmap
                             <div style="display:flex; align-items:center; gap:16px; font-weight:400;">
                                 <input type="text" id="heatmap-search" placeholder="Search resource…" oninput="if(globalData._people && globalData._weeks) renderHeatmap(globalData._people, Object.keys(globalData._weeks).sort())" style="padding:4px 10px; border-radius:6px; border:1px solid var(--border); font-size:11px;">
                                 <div style="display:flex; gap:8px; font-size:10px; color:var(--muted);">
-                                    <span><span class="rag-dot" style="background:var(--danger)"></span> >40h</span>
-                                    <span><span class="rag-dot" style="background:var(--success)"></span> 30-40h</span>
-                                    <span><span class="rag-dot" style="background:var(--warning)"></span> 1-29h</span>
+                                    <span><span class="rag-dot" style="background:var(--danger)"></span> Spend > Alloc</span>
+                                    <span><span class="rag-dot" style="background:var(--success)"></span> Match (±10%)</span>
+                                    <span><span class="rag-dot" style="background:var(--warning)"></span> Under Alloc</span>
                                 </div>
                             </div>
                         </div>
@@ -603,12 +595,16 @@
                     </div>
 
                     <div class="card">
-                        <div class="jira-sprint-bar" style="display:flex; gap:24px; padding:16px; border:1px solid var(--border); border-radius:12px;">
+                        <div class="jira-sprint-bar" style="display:flex; gap:24px; padding:16px; border:1px solid var(--border); border-radius:12px; flex-wrap:wrap;">
                             <div class="jsb-stat"><div class="jsb-val" id="jsb-total" style="font-size:18px; font-weight:700;">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--muted); text-transform:uppercase;">Total</div></div>
                             <div class="jsb-stat"><div class="jsb-val" id="jsb-done" style="font-size:18px; font-weight:700;">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--muted); text-transform:uppercase;">Done</div></div>
-                            <div class="jsb-stat"><div class="jsb-val" id="jsb-dev" style="font-size:18px; font-weight:700;">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--muted); text-transform:uppercase;">Dev</div></div>
-                            <div class="jsb-stat"><div class="jsb-val" id="jsb-uat" style="font-size:18px; font-weight:700;">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--muted); text-transform:uppercase;">UAT</div></div>
-                            <div class="jsb-stat"><div class="jsb-val" id="jsb-qual" style="font-size:18px; font-weight:700;">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--muted); text-transform:uppercase;">Qual</div></div>
+                            <div class="jsb-stat"><div class="jsb-val" id="jsb-readydev" style="font-size:18px; font-weight:700;">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--muted); text-transform:uppercase;">Ready for Dev</div></div>
+                            <div class="jsb-stat"><div class="jsb-val" id="jsb-dev" style="font-size:18px; font-weight:700;">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--muted); text-transform:uppercase;">In Progress</div></div>
+                            <div class="jsb-stat"><div class="jsb-val" id="jsb-readyreview" style="font-size:18px; font-weight:700;">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--muted); text-transform:uppercase;">Ready for Review</div></div>
+                            <div class="jsb-stat"><div class="jsb-val" id="jsb-codereview" style="font-size:18px; font-weight:700;">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--muted); text-transform:uppercase;">Code Review</div></div>
+                            <div class="jsb-stat"><div class="jsb-val" id="jsb-readyqa" style="font-size:18px; font-weight:700;">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--muted); text-transform:uppercase;">Ready for QA</div></div>
+                            <div class="jsb-stat"><div class="jsb-val" id="jsb-uat" style="font-size:18px; font-weight:700;">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--muted); text-transform:uppercase;">QA</div></div>
+                            <div class="jsb-stat"><div class="jsb-val" id="jsb-reopened" style="font-size:18px; font-weight:700; color:var(--warning);">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--muted); text-transform:uppercase;">Re-opened</div></div>
                             <div style="width:1px; background:var(--border); height:30px;"></div>
                             <div class="jsb-stat"><div class="jsb-val" id="jsb-creep" style="font-size:18px; font-weight:700; color:var(--danger);">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--muted); text-transform:uppercase;">Creep</div></div>
                             <div class="jsb-stat"><div class="jsb-val" id="jsb-blocked" style="font-size:18px; font-weight:700; color:var(--danger);">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--muted); text-transform:uppercase;">Blocked</div></div>
@@ -722,6 +718,7 @@
 
 <script>
     Chart.register(ChartDataLabels);
+    ChartDataLabels.defaults.display = false;
 
     // ── CONFIG — single source of truth for all constants ────────────────────
     const CONFIG = {
@@ -1217,16 +1214,35 @@
 
         safeText('kpi-velo',  `${(totals.hours/weekCount).toFixed(1)}h/wk`);
         safeText('kpi-bench', `${benchPct.toFixed(0)}%`);
-        safeText('kpi-eff',   `${effPct.toFixed(0)}%`);
 
-        const wVals=sortedLabels.map(l=>weeks[l]?.act || 0);
-        const avgV =wVals.length>1?wVals.slice(0,-1).reduce((a,b)=>a+b,0)/(wVals.length-1):0;
-        const latV =wVals[wVals.length-1]||0;
-        const vT   =avgV===0?'ok':latV>=avgV*1.05?'ok':latV>=avgV*0.85?'warn':'bad';
-
-        setTrend('kpi-velo-trend',  vT, vT==='ok'?'▴ Up':vT==='warn'?'▾ Steady':'▾ Down');
+        // Velocity status: compare leave-adjusted allocated vs actual spend week-on-week
+        const todayStr = toLocalISO(new Date());
+        const thisMon  = getMonday(todayStr);
+        const recentWks = sortedLabels.filter(l => l < thisMon).slice(-4);
+        let veloStatus = 'ok', veloLabel = '▴ Optimum';
+        if (recentWks.length >= 2) {
+            const allocVsSpend = recentWks.map(w => {
+                const alloc = weeks[w]?.plan || 0;
+                const spend = weeks[w]?.act  || 0;
+                return alloc > 0 ? spend / alloc : 1;
+            });
+            const avgRatio = allocVsSpend.reduce((a,b)=>a+b,0) / allocVsSpend.length;
+            const lastRatio = allocVsSpend[allocVsSpend.length-1];
+            if (lastRatio > 1.1) { veloStatus = 'bad'; veloLabel = '▴ Up (Over)'; }
+            else if (lastRatio < 0.8) { veloStatus = 'warn'; veloLabel = '▾ Down (Under)'; }
+            else { veloStatus = 'ok'; veloLabel = '✓ Optimum'; }
+        }
+        setTrend('kpi-velo-trend', veloStatus, veloLabel);
         setTrend('kpi-bench-trend', benchPct<15?'ok':benchPct<25?'warn':'bad', benchPct<15?'✓ Low':benchPct<25?'▴ Moderate':'▴ High');
-        setTrend('kpi-eff-trend',   effPct>=75?'ok':effPct>=60?'warn':'bad', effPct>=75?'✓ Healthy':effPct>=60?'▾ Low':'▾ Critical');
+
+        // Budget Burn Rate: weekly burn vs weekly budget allocation
+        const weeklyBudgetAlloc = budget / Math.max(weekCount, 1);
+        const recentBurns = sortedLabels.filter(l => l < thisMon).slice(-4).map(l => weeks[l]?.burn || 0);
+        const avgBurn = recentBurns.length ? recentBurns.reduce((a,b)=>a+b,0)/recentBurns.length : 0;
+        const burnRateRatio = weeklyBudgetAlloc > 0 ? avgBurn / weeklyBudgetAlloc : 0;
+        safeText('kpi-eff', `€${fmt(avgBurn)}/wk`);
+        setTrend('kpi-eff-trend', burnRateRatio > 1.1 ? 'bad' : burnRateRatio > 0.9 ? 'warn' : 'ok',
+            burnRateRatio > 1.1 ? '▴ Accelerating' : burnRateRatio > 0.9 ? '▾ On Budget' : '▾ Decelerating');
 
         const futureWks=[...new Set(globalData.plan.filter(p=>new Date(parseDateSafe(p.dateStr))>new Date()).map(p=>getMonday(parseDateSafe(p.dateStr))).filter(Boolean))].length;
         const confLabel=futureWks===0?'No Data':futureWks<4?'Low':futureWks<8?'Medium':'High';
@@ -1234,8 +1250,6 @@
         safeText('kpi-conf', confLabel);
         setTrend('kpi-conf-trend', confType, `${futureWks} wks planned`);
 
-        const todayStr = toLocalISO(new Date());
-        const thisMon  = getMonday(todayStr);
         let defaultW   = null;
         const thisIdx = sortedLabels.indexOf(thisMon);
         if (thisIdx > 0) defaultW = sortedLabels[thisIdx - 1];
@@ -1255,25 +1269,26 @@
         generateSmartInsights(totals, budget, eac, weeks, sortedLabels);
         initVelocitySimulation(weeks, totals, eacRem);
         renderExceptions(weeks, people, defaultW);
-        renderPhaseEAC(phasesActual, phasesPlanned, phaseOrder, phaseNameMap);
+        renderPhaseMerged(phasesActual, phasesPlanned, phaseOrder, phaseNameMap);
         renderOperationalCharts(weeks, sortedLabels);
         renderCharts(weeks, phasesActual, phasesPlanned, phaseOrder, phaseNameMap, budget, sortedLabels);
-        renderPhaseBreakdown(phasesActual, phasesPlanned, phaseOrder, phaseNameMap);
         renderTopSpenders(defaultW);
         renderMilestones();
+        renderDataIntegrity();
         renderRolloff(people);
         renderSparklines(weeks, sortedLabels);
         renderHeatmap(people, sortedLabels);
     }
 
-    function renderPhaseEAC(actuals, planned, order, nameMap) {
-        const body = document.getElementById('phase-eac-body');
+    function renderPhaseMerged(actuals, planned, order, nameMap) {
+        const body = document.getElementById('phase-merged-body');
         if (!body) return;
         body.innerHTML = order.map(key => {
-            const act = actuals[key] || 0;
+            const act  = actuals[key] || 0;
             const plan = planned[key] || 0;
-            const eac = Math.max(act, plan);
-            const pct = plan > 0 ? (act / plan) * 100 : 0;
+            const eac  = Math.max(act, plan);
+            const delta = plan - act;
+            const pct  = plan > 0 ? (act / plan) * 100 : 0;
             let status = 'trend-ok', statusLbl = 'On Track';
             if (act > plan * 1.1) { status = 'trend-bad'; statusLbl = 'Overrun'; }
             else if (act > plan * 0.9) { status = 'trend-warn'; statusLbl = 'Near Cap'; }
@@ -1281,6 +1296,8 @@
                 <td><strong>${nameMap[key] || key}</strong></td>
                 <td style="text-align:right;" class="mono">€${fmt(act)}</td>
                 <td style="text-align:right;" class="mono">€${fmt(plan)}</td>
+                <td style="text-align:right;" class="mono" style="color:${delta<0?'var(--color-text-danger)':'inherit'}">€${fmt(delta)}</td>
+                <td style="text-align:right;" class="mono">${plan>0?pct.toFixed(0):0}%</td>
                 <td style="text-align:right;" class="mono">€${fmt(eac)}</td>
                 <td style="text-align:right;">
                     <div style="font-size:10px; margin-bottom:2px;">${pct.toFixed(0)}%</div>
@@ -1293,28 +1310,37 @@
 
     function renderOperationalCharts(weeks, sortedLabels) {
         if (chartRefs['compliance']) { chartRefs['compliance'].destroy(); }
-        if (chartRefs['role-load']) { chartRefs['role-load'].destroy(); }
+        if (chartRefs['resource-load']) { chartRefs['resource-load'].destroy(); }
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const tc = isDark ? '#94a3b8' : '#64748b';
+        const gc = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)';
+
         const ctxComp = document.getElementById('chart-compliance')?.getContext('2d');
         if (ctxComp) {
             const data = sortedLabels.map(l => {
                 const plan = weeks[l]?.planPeople?.size || 0;
-                const act = weeks[l]?.actPeople?.size || 0;
-                return plan > 0 ? (act / plan) * 100 : 0;
+                const act  = weeks[l]?.actPeople?.size  || 0;
+                return plan > 0 ? Math.round((act / plan) * 100) : 0;
             });
+            const barColors = data.map(v => v >= 80 ? 'rgba(16,185,129,0.8)' : v >= 50 ? 'rgba(245,158,11,0.8)' : 'rgba(239,68,68,0.8)');
             chartRefs['compliance'] = new Chart(ctxComp, {
-                type: 'line',
-                data: { labels: sortedLabels.map(l => l.substring(5)), datasets: [{ label: 'Submission %', data, borderColor: '#4f46e5', tension: 0.3, fill: true, backgroundColor: 'rgba(79, 70, 229, 0.1)', pointRadius:0 }] },
-                options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 0, max: 100, ticks: { callback: v => v + '%' } } } }
+                type: 'bar',
+                data: { labels: sortedLabels.map(l => l.substring(5)), datasets: [{ label: 'Submission %', data, backgroundColor: barColors, borderRadius: 3 }] },
+                options: { maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: false } }, scales: { y: { min: 0, max: 100, grid: { color: gc }, ticks: { color: tc, callback: v => v + '%' } }, x: { grid: { display: false }, ticks: { color: tc } } } }
             });
         }
-        const ctxRole = document.getElementById('chart-role-load')?.getContext('2d');
-        if (ctxRole && globalData._roles) {
-            const roles = Object.keys(globalData._roles);
-            const datasets = roles.map((role, i) => ({ label: role, data: sortedLabels.map(l => globalData._roles[role].weeks[l] || 0), backgroundColor: `hsla(${i * 45}, 70%, 60%, 0.8)`, borderRadius:2 }));
-            chartRefs['role-load'] = new Chart(ctxRole, {
+
+        const ctxRes = document.getElementById('chart-resource-load')?.getContext('2d');
+        if (ctxRes && globalData._people) {
+            const people = globalData._people;
+            const recentWks = sortedLabels.slice(-6);
+            const names = Object.keys(people).sort();
+            const totHours = names.map(n => recentWks.reduce((s, w) => s + (people[n].weeks[w] || 0), 0));
+            const palette = names.map((_, i) => `hsla(${(i * 47) % 360}, 65%, 55%, 0.85)`);
+            chartRefs['resource-load'] = new Chart(ctxRes, {
                 type: 'bar',
-                data: { labels: sortedLabels.map(l => l.substring(5)), datasets },
-                options: { maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } } }
+                data: { labels: names, datasets: [{ label: 'Hours (last 6 wks)', data: totHours, backgroundColor: palette, borderRadius: 3 }] },
+                options: { maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false }, datalabels: { display: false } }, scales: { x: { grid: { color: gc }, ticks: { color: tc } }, y: { grid: { display: false }, ticks: { color: tc, font: { size: 10 } } } } }
             });
         }
     }
@@ -1443,16 +1469,34 @@
     }
 
     function renderHeatmap(people, allWeeks) {
-        const table=document.getElementById('heatmap-body'); if (!table) return;
+        const table = document.getElementById('heatmap-body'); if (!table) return;
         const search = (document.getElementById('heatmap-search')?.value || '').toLowerCase();
+        // Build per-person per-week allocated hours from plan
+        const planMap = {};
+        (globalData.plan || []).forEach(p => {
+            const w = getMonday(parseDateSafe(p.dateStr));
+            if (!w) return;
+            if (!planMap[p.person]) planMap[p.person] = {};
+            planMap[p.person][w] = (planMap[p.person][w] || 0) + (p.planH || 0);
+        });
         let html = `<thead><tr><th>Resource</th>${allWeeks.map(w=>`<th>${w.substring(5)}</th>`).join('')}</tr></thead><tbody>`;
         const sortedPeople = Object.keys(people).sort().filter(p => !search || p.toLowerCase().includes(search));
         for (const p of sortedPeople) {
             html += `<tr><td><strong>${esc(p)}</strong></td>`;
             for (const w of allWeeks) {
-                const h = people[p].weeks[w]||0;
-                const cls = h > CONFIG.THRESH_OVER ? 'h-over' : (h >= CONFIG.THRESH_GOOD ? 'h-good' : (h > 0 ? 'h-bench' : ''));
-                html += `<td class="${cls}">${h > 0 ? h.toFixed(1) : '–'}</td>`;
+                const spend = people[p].weeks[w] || 0;
+                const alloc = (planMap[p] && planMap[p][w]) || 0;
+                let cls = '', display = spend > 0 ? spend.toFixed(1) : '–';
+                if (alloc > 0) {
+                    const ratio = spend / alloc;
+                    if (ratio > 1.1) cls = 'h-over';
+                    else if (ratio >= 0.9) cls = 'h-good';
+                    else if (spend > 0) cls = 'h-bench';
+                    display = `${spend.toFixed(1)}/${alloc.toFixed(1)}`;
+                } else if (spend > 0) {
+                    cls = 'h-bench';
+                }
+                html += `<td class="${cls}" title="Spend: ${spend.toFixed(1)}h | Alloc: ${alloc.toFixed(1)}h">${display}</td>`;
             }
             html += `</tr>`;
         }
@@ -1460,25 +1504,22 @@
     }
 
     function renderExceptions(weeks, people, latest) {
-        const flags=document.getElementById('red-flags');
-        const missing=document.getElementById('missing-timesheets');
-        if (!flags || !missing) return;
-        flags.innerHTML=missing.innerHTML='';
-        const actuallyBilled=new Set();
-        // Fix #8: wrap r.Date through parseDateSafe() for consistency with rest of codebase
-        globalData.actuals.forEach(r=>{ if(getMonday(parseDateSafe(r.Date))===latest && (parseFloat(r['Time in Hours'])||0)>0) actuallyBilled.add((r.Person||'').trim().toLowerCase()); });
-        globalData.plan.forEach(p=>{
-            if(getMonday(p.dateStr)!==latest || !(p.planH>0)) return;
-            const key=(p.person||'').trim().toLowerCase();
-            const billAct=people[p.person]?.billableWeeks?.[latest]||0;
-            if(actuallyBilled.has(key)) {
+        const flags = document.getElementById('red-flags');
+        if (!flags) return;
+        flags.innerHTML = '';
+        const actuallyBilled = new Set();
+        globalData.actuals.forEach(r => { if (getMonday(parseDateSafe(r.Date)) === latest && (parseFloat(r['Time in Hours'])||0) > 0) actuallyBilled.add((r.Person||'').trim().toLowerCase()); });
+        globalData.plan.forEach(p => {
+            if (getMonday(p.dateStr) !== latest || !(p.planH > 0)) return;
+            const key = (p.person||'').trim().toLowerCase();
+            const billAct = people[p.person]?.billableWeeks?.[latest] || 0;
+            if (actuallyBilled.has(key)) {
                 if (billAct > p.planH * CONFIG.VARIANCE_FACTOR || billAct < p.planH * CONFIG.VARIANCE_UNDER) {
                     flags.innerHTML += `<div class="feed-item"><div class="feed-label">${esc(p.person)}</div><div class="feed-meta">${billAct}h vs ${p.planH}h planned</div></div>`;
                 }
-            } else {
-                missing.innerHTML += `<div class="feed-item"><div class="feed-label">${esc(p.person)}</div><div class="badge badge-danger">Missing</div></div>`;
             }
         });
+        if (!flags.innerHTML) flags.innerHTML = '<div style="padding:10px 0; font-size:11px; color:var(--color-text-tertiary);">✓ No variance flags this week</div>';
     }
 
     function renderCharts(weeks, phasesActual, phasesPlanned, phaseOrder, phaseNameMap, budget, sortedLabels) {
@@ -1490,11 +1531,17 @@
         
         if (chartRefs.burn) chartRefs.burn.destroy();
         let cum = 0;
+        const todayS = toLocalISO(new Date());
+        const thisM  = getMonday(todayS);
+        const prevM  = sortedLabels[Math.max(0, sortedLabels.indexOf(thisM) - 1)];
+        const burnData = sortedLabels.map(l => { cum += weeks[l].burn; return Math.round(cum); });
+        const pointRadius = sortedLabels.map(l => (l === thisM || l === prevM) ? 4 : 0);
+        const pointLabels = sortedLabels.map((l, i) => (l === thisM || l === prevM) ? uiLabels[i] : '');
         chartRefs.burn = new Chart(document.getElementById('chart-burn'), {
             type: 'line',
             data: { labels: uiLabels, datasets: [
-                { label: 'Spend', data: sortedLabels.map(l => { cum += weeks[l].burn; return Math.round(cum); }), borderColor: accentColor, borderWidth: 2, fill: true, backgroundColor: 'rgba(94, 106, 210, 0.05)', tension: 0.4, pointRadius: 0 },
-                { label: 'Budget', data: Array(sortedLabels.length).fill(Math.round(budget)), borderColor: textColor, borderDash: [4, 4], borderWidth: 1, fill: false, pointRadius: 0 }
+                { label: 'Spend', data: burnData, borderColor: accentColor, borderWidth: 2, fill: true, backgroundColor: 'rgba(94,106,210,0.05)', tension: 0.4, pointRadius, pointBackgroundColor: accentColor, datalabels: { display: (ctx) => pointRadius[ctx.dataIndex] > 0, formatter: (v) => '€'+fmt(v), anchor: 'top', align: 'top', font: { size: 10 } } },
+                { label: 'Budget', data: Array(sortedLabels.length).fill(Math.round(budget)), borderColor: textColor, borderDash: [4,4], borderWidth: 1, fill: false, pointRadius: 0, datalabels: { display: false } }
             ]},
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } }, scales: { x: { grid: { display: false }, ticks: { color: textColor, maxRotation: 0 } }, y: { grid: { color: gridColor }, ticks: { color: textColor, callback: v => '€' + (v/1000) + 'k' } } } }
         });
@@ -1546,13 +1593,7 @@
         }
     }
 
-    function renderPhaseBreakdown(phasesActual, phasesPlanned, phaseOrder, phaseNameMap) {
-        const body = document.getElementById('phase-breakdown-body'); if(!body) return;
-        body.innerHTML = phaseOrder.map(key => {
-            const act = Math.round(phasesActual[key]||0), plan = Math.round(phasesPlanned[key]||0);
-            return `<tr><td><strong>${esc(phaseNameMap[key]||key)}</strong></td><td style="text-align:right;">€${act.toLocaleString()}</td><td style="text-align:right;">€${plan.toLocaleString()}</td><td style="text-align:right;">€${(plan-act).toLocaleString()}</td><td style="text-align:right;">${plan>0?((act/plan)*100).toFixed(0):0}%</td></tr>`;
-        }).join('');
-    }
+    function renderPhaseBreakdown() { /* merged into renderPhaseMerged */ }
 
     function renderTopSpenders(latestWeek) {
         const container=document.getElementById('top-spenders'); if(!container) return;
@@ -1582,17 +1623,17 @@
             return;
         }
         const today = toLocalISO(new Date());
-        let done = 0, overdue = 0;
+        const in30   = toLocalISO(new Date(Date.now() + 30 * 86400000));
+        let doneCount = 0, inProgressCount = 0, upcomingCount = 0;
         body.innerHTML = milestones.map(ms => {
-            const due   = ms.due || '';
-            const isPast = due && due < today;
+            const due = ms.due || '';
             let statusBadge, statusClass;
-            if (!due) {
-                statusBadge = 'TBD'; statusClass = 'badge-neutral';
-            } else if (isPast) {
-                statusBadge = 'Overdue'; statusClass = 'badge-danger'; overdue++;
+            if (!due || due > in30) {
+                statusBadge = 'Upcoming'; statusClass = 'badge-neutral'; upcomingCount++;
+            } else if (due < today) {
+                statusBadge = 'Done'; statusClass = 'badge-success'; doneCount++;
             } else {
-                statusBadge = 'Upcoming'; statusClass = 'badge-success'; done++;
+                statusBadge = 'In Progress'; statusClass = 'badge-warning'; inProgressCount++;
             }
             return `<tr>
                 <td><strong>${esc(ms.name)}</strong></td>
@@ -1601,7 +1642,41 @@
                 <td style="color:var(--color-text-tertiary);">${esc(ms.notes || '')}</td>
             </tr>`;
         }).join('');
-        if (summary) summary.textContent = `${milestones.length} milestones · ${overdue} overdue · ${done} on track`;
+        if (summary) summary.textContent = `${milestones.length} milestones · ${doneCount} done · ${inProgressCount} in progress · ${upcomingCount} upcoming`;
+    }
+
+    function renderDataIntegrity() {
+        const unknown = globalData.unknownTasks || [];
+        const issues  = globalData.jiraIssues  || [];
+        const card    = document.getElementById('card-data-integrity');
+        const listEl  = document.getElementById('unmapped-tasks-list');
+        const jiraEl  = document.getElementById('jira-hygiene-alerts');
+        
+        let hasAlerts = false;
+        
+        if (unknown.length > 0) {
+            hasAlerts = true;
+            listEl.innerHTML = unknown.map(t => `<div class="feed-item" style="padding:4px 0;"><span class="badge badge-warning" style="margin-right:8px;">Unknown</span> ${esc(t)}</div>`).join('');
+        } else {
+            listEl.innerHTML = '<div style="padding:10px 0;">✓ All tasks mapped to phases</div>';
+        }
+
+        const missingPts = issues.filter(i => !i.story_points || isNaN(parseFloat(i.story_points))).length;
+        let jiraHtml = '';
+        if (missingPts > 0) {
+            hasAlerts = true;
+            jiraHtml += `<div class="feed-item" style="padding:4px 0;"><span class="badge badge-danger" style="margin-right:8px;">Alert</span> ${missingPts} issues missing estimates (points)</div>`;
+        }
+        
+        const noAssignee = issues.filter(i => !i.assignee || i.assignee.toLowerCase() === 'unassigned').length;
+        if (noAssignee > 0) {
+            hasAlerts = true;
+            jiraHtml += `<div class="feed-item" style="padding:4px 0;"><span class="badge badge-warning" style="margin-right:8px;">Audit</span> ${noAssignee} issues unassigned</div>`;
+        }
+
+        jiraEl.innerHTML = jiraHtml || '<div style="padding:10px 0;">✓ Jira data is clean</div>';
+        
+        if (card) card.style.display = hasAlerts ? 'block' : 'none';
     }
 
     async function exportPDF() {
@@ -1626,13 +1701,21 @@
     let jiraChartRefs = {};
     function jStatusCategory(s) {
         const sl = (s || "").trim().toUpperCase();
-        if (["NEW","TO DO"].includes(sl)) return "qualification";
-        if (["IN PROGRESS","READY FOR REVIEW"].includes(sl)) return "development";
-        if (["UAT"].includes(sl)) return "uat";
+        if (sl === "READY FOR DEV" || sl === "NEW" || sl === "TO DO") return "readydev";
+        if (sl === "IN PROGRESS") return "development";
+        if (sl === "READY FOR REVIEW") return "readyreview";
+        if (sl === "CODE REVIEW" || sl === "IN REVIEW") return "codereview";
+        if (sl === "READY FOR QA") return "readyqa";
+        if (sl === "QA" || sl === "UAT") return "uat";
+        if (sl === "RE-OPENED_CH" || sl === "RE-OPENED" || sl === "REOPENED") return "reopened";
         if (sl === "DONE") return "done";
         return "other";
     }
-    function jStatusColor(s) { const cat = jStatusCategory(s); return cat === "done" ? "#10b981" : (cat === "development" ? "#3b82f6" : "#f59e0b"); }
+    function jStatusColor(s) {
+        const cat = jStatusCategory(s);
+        const map = { done:'#10b981', development:'#3b82f6', readyreview:'#8b5cf6', codereview:'#6366f1', readyqa:'#14b8a6', uat:'#0ea5e9', readydev:'#f59e0b', reopened:'#ef4444' };
+        return map[cat] || '#94a3b8';
+    }
     function jAvatarColor(name) { return "#5e6ad2"; }
     function jInitials(name) { return name ? name.split(" ").map(p => p[0]).join("") : "?"; }
 
@@ -1646,30 +1729,35 @@
         const seen = new Set(); (globalData.jiraIssues || []).forEach(i => { if (i.sprint) seen.add(i.sprint.trim()); });
         const sprints = [...seen].sort();
         sel.innerHTML = sprints.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
-        if (sprints.length) sel.value = sprints[sprints.length-1];
+        // Default to current sprint (sprint whose dates contain today), else last alphabetically
+        const todayIso = toLocalISO(new Date());
+        const cfg = globalData.jiraConfig || {};
+        const sprintDates = cfg.sprint_dates || {};
+        let currentSprint = null;
+        for (const sp of sprints) {
+            const sd = sprintDates[sp] || {};
+            if (sd.start && sd.end && todayIso >= sd.start.substring(0,10) && todayIso <= sd.end.substring(0,10)) {
+                currentSprint = sp; break;
+            }
+        }
+        if (!currentSprint && sprints.length) currentSprint = sprints[sprints.length - 1];
+        if (currentSprint) sel.value = currentSprint;
     }
 
     function jRenderHighLevel() {
         const issues = globalData.jiraIssues || [];
-
-        // ── Phase KPI cards ───────────────────────────────────────────────────
-        const cats = { qualification: 0, development: 0, uat: 0, done: 0 };
-        issues.forEach(i => {
-            const c = jStatusCategory(i.status);
-            if (cats[c] !== undefined) cats[c]++;
-        });
+        const cats = { readydev:0, development:0, readyreview:0, codereview:0, readyqa:0, uat:0, reopened:0, done:0 };
+        issues.forEach(i => { const c = jStatusCategory(i.status); if (cats[c] !== undefined) cats[c]++; });
         const grid = document.getElementById("hl-phase-cards");
         if (grid) grid.innerHTML = `
-            <div class="kpi-card"><h4>Qualification</h4><div class="val">${cats.qualification}</div></div>
-            <div class="kpi-card"><h4>Development</h4><div class="val">${cats.development}</div></div>
-            <div class="kpi-card"><h4>UAT</h4><div class="val">${cats.uat}</div></div>
+            <div class="kpi-card"><h4>Ready for Dev</h4><div class="val">${cats.readydev}</div></div>
+            <div class="kpi-card"><h4>In Progress</h4><div class="val">${cats.development}</div></div>
+            <div class="kpi-card"><h4>Review / QA</h4><div class="val">${cats.readyreview + cats.codereview + cats.readyqa + cats.uat}</div></div>
             <div class="kpi-card"><h4>Done</h4><div class="val">${cats.done}</div></div>
             <div class="kpi-card"><h4>Total Issues</h4><div class="val">${issues.length}</div></div>`;
-
-        // ── Pipeline flow bar ─────────────────────────────────────────────────
-        safeText('hl-stat-qual',  cats.qualification);
+        safeText('hl-stat-qual',  cats.readydev);
         safeText('hl-stat-dev',   cats.development);
-        safeText('hl-stat-uat',   cats.uat);
+        safeText('hl-stat-uat',   cats.uat + cats.readyqa);
         safeText('hl-stat-done',  cats.done);
 
         // ── Velocity chart: points completed per month ────────────────────────
@@ -1707,8 +1795,8 @@
             jiraChartRefs['hl-categories'] = new Chart(ctxC, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Qualification', 'Development', 'UAT', 'Done', 'Other'],
-                    datasets: [{ data: [cats.qualification, cats.development, cats.uat, cats.done, issues.length - cats.qualification - cats.development - cats.uat - cats.done], backgroundColor: ['#f59e0b','#3b82f6','#8b5cf6','#10b981','#94a3b8'], borderWidth: 0 }]
+                    labels: ['Ready for Dev','In Progress','Ready for Review','Code Review','Ready for QA','QA','Re-opened','Done'],
+                    datasets: [{ data: [cats.readydev, cats.development, cats.readyreview, cats.codereview, cats.readyqa, cats.uat, cats.reopened, cats.done], backgroundColor: ['#f59e0b','#3b82f6','#8b5cf6','#6366f1','#14b8a6','#0ea5e9','#ef4444','#10b981'], borderWidth: 0 }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: tc, boxWidth: 10, font: { size: 10 } } }, datalabels: { display: false } } }
             });
@@ -1766,13 +1854,17 @@
         }).length : 0;
         const blocked    = issues.filter(i => (i.labels || []).includes('blocked')).length;
 
-        safeText('jsb-total',   issues.length);
-        safeText('jsb-done',    issues.filter(i => jStatusCategory(i.status) === 'done').length);
-        safeText('jsb-dev',     issues.filter(i => jStatusCategory(i.status) === 'development').length);
-        safeText('jsb-uat',     issues.filter(i => jStatusCategory(i.status) === 'uat').length);
-        safeText('jsb-qual',    issues.filter(i => jStatusCategory(i.status) === 'qualification').length);
-        safeText('jsb-creep',   scopeCreep);
-        safeText('jsb-blocked', blocked);
+        safeText('jsb-total',      issues.length);
+        safeText('jsb-done',       issues.filter(i => jStatusCategory(i.status) === 'done').length);
+        safeText('jsb-readydev',   issues.filter(i => jStatusCategory(i.status) === 'readydev').length);
+        safeText('jsb-dev',        issues.filter(i => jStatusCategory(i.status) === 'development').length);
+        safeText('jsb-readyreview',issues.filter(i => jStatusCategory(i.status) === 'readyreview').length);
+        safeText('jsb-codereview', issues.filter(i => jStatusCategory(i.status) === 'codereview').length);
+        safeText('jsb-readyqa',    issues.filter(i => jStatusCategory(i.status) === 'readyqa').length);
+        safeText('jsb-uat',        issues.filter(i => jStatusCategory(i.status) === 'uat').length);
+        safeText('jsb-reopened',   issues.filter(i => jStatusCategory(i.status) === 'reopened').length);
+        safeText('jsb-creep',      scopeCreep);
+        safeText('jsb-blocked',    blocked);
 
         const ptsBadge = document.getElementById('sv-sprint-points');
         if (ptsBadge) ptsBadge.innerHTML = `<span class="badge badge-success">${donePts.toFixed(0)} / ${totalPts.toFixed(0)} pts done</span>`;
@@ -1797,11 +1889,10 @@
             // Ideal burndown
             const ideal = days.map((_, idx) => Math.round(totalPts * (1 - idx / Math.max(days.length-1, 1))));
 
-            // Actual: count pts done by each day based on status_category_changed
+            // Actual remaining: based on 'done' status_category_changed
             const doneByDay = {};
             issues.forEach(i => {
-                const cat = jStatusCategory(i.status);
-                if (cat !== 'done') return;
+                if (jStatusCategory(i.status) !== 'done') return;
                 const scc = (i.status_category_changed || '').substring(0,10);
                 if (!scc) return;
                 doneByDay[scc] = (doneByDay[scc] || 0) + (parseFloat(i.story_points) || 0);
@@ -1814,11 +1905,28 @@
                 return Math.round(Math.max(0, totalPts - cumDone));
             });
 
+            // Ready for UAT pipeline: tickets/points in readyqa + uat per day (cumulative entered)
+            const uatByDay = {};
+            issues.forEach(i => {
+                const cat = jStatusCategory(i.status);
+                if (!['readyqa','uat'].includes(cat)) return;
+                const scc = (i.status_category_changed || '').substring(0,10);
+                if (!scc) return;
+                uatByDay[scc] = (uatByDay[scc] || 0) + (parseFloat(i.story_points) || 0);
+            });
+            let cumUAT = 0;
+            const uatLine = days.map(day => {
+                if (day > todayIso2) return null;
+                cumUAT += (uatByDay[day] || 0);
+                return Math.round(cumUAT);
+            });
+
             jiraChartRefs['sv-burndown'] = new Chart(ctxB, {
                 type: 'line',
                 data: { labels: days.map(d => d.substring(5)), datasets: [
-                    { label: 'Ideal',  data: ideal,  borderColor: '#94a3b8', borderDash: [4,4], borderWidth: 1.5, pointRadius: 0, fill: false },
-                    { label: 'Actual', data: actual, borderColor: '#5e6ad2', borderWidth: 2, tension: 0.3, pointRadius: 3, fill: false }
+                    { label: 'Ideal',        data: ideal,   borderColor: '#94a3b8', borderDash: [4,4], borderWidth: 1.5, pointRadius: 0, fill: false },
+                    { label: 'Remaining',    data: actual,  borderColor: '#5e6ad2', borderWidth: 2, tension: 0.3, pointRadius: 3, fill: false },
+                    { label: 'In UAT Queue', data: uatLine, borderColor: '#14b8a6', borderWidth: 1.5, tension: 0.3, pointRadius: 2, fill: false, borderDash: [2,2] }
                 ]},
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: tc, boxWidth: 10, font: { size: 10 } } }, datalabels: { display: false }, tooltip: { mode: 'index', intersect: false } }, scales: { x: { grid: { display: false }, ticks: { color: tc, maxRotation: 0 } }, y: { grid: { color: gc }, ticks: { color: tc }, min: 0 } } }
             });
@@ -1831,19 +1939,35 @@
             });
         }
 
-        // ── Risk Labels distribution ────────────────────────────────────────────
+        // ── Risk Labels distribution — from jiraSummary sheet ─────────────────
         if (jiraChartRefs['sv-labels']) jiraChartRefs['sv-labels'].destroy();
         const ctxL = document.getElementById('sv-chart-labels')?.getContext('2d');
         if (ctxL) {
             const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
             const tc = isDark ? '#94a3b8' : '#64748b';
             const labelCounts = {};
-            issues.forEach(i => (i.labels || []).forEach(l => { labelCounts[l] = (labelCounts[l]||0)+1; }));
-            const labelKeys = Object.keys(labelCounts).sort((a,b)=>labelCounts[b]-labelCounts[a]).slice(0,8);
+            // Aggregate from jiraSummary rows - look for 'label' or 'labels' columns
+            const summaryRows = globalData.jiraSummary || [];
+            if (summaryRows.length > 0) {
+                const keys = Object.keys(summaryRows[0]);
+                const labelKeys = keys.filter(k => /label/i.test(k));
+                summaryRows.forEach(row => {
+                    labelKeys.forEach(k => {
+                        const val = row[k];
+                        if (!val) return;
+                        String(val).split(/[,;|]+/).map(s => s.trim()).filter(Boolean).forEach(l => { labelCounts[l] = (labelCounts[l]||0)+1; });
+                    });
+                });
+            }
+            // Fallback: use current sprint issues labels if summary has none
+            if (Object.keys(labelCounts).length === 0) {
+                issues.forEach(i => (i.labels || []).forEach(l => { labelCounts[l] = (labelCounts[l]||0)+1; }));
+            }
+            const topLabels = Object.keys(labelCounts).sort((a,b) => labelCounts[b]-labelCounts[a]).slice(0,8);
             const palette = ['#5e6ad2','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#14b8a6','#3b82f6'];
             jiraChartRefs['sv-labels'] = new Chart(ctxL, {
                 type: 'doughnut',
-                data: { labels: labelKeys.length ? labelKeys : ['No labels'], datasets: [{ data: labelKeys.length ? labelKeys.map(l=>labelCounts[l]) : [1], backgroundColor: palette.slice(0, Math.max(labelKeys.length,1)), borderWidth: 0 }] },
+                data: { labels: topLabels.length ? topLabels : ['No labels'], datasets: [{ data: topLabels.length ? topLabels.map(l=>labelCounts[l]) : [1], backgroundColor: palette.slice(0, Math.max(topLabels.length,1)), borderWidth: 0 }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: tc, boxWidth: 10, font: { size: 10 } } }, datalabels: { display: false } } }
             });
         }
@@ -1893,7 +2017,7 @@
             const breaches = [];
             issues.forEach(i => {
                 const cat = jStatusCategory(i.status);
-                if (!['development','uat'].includes(cat)) return;
+                if (!['development','readyreview','codereview','readyqa','uat'].includes(cat)) return;
                 const pts = Math.round(parseFloat(i.story_points) || 0);
                 const slaThresh = (CONFIG.DEV_SLA[pts] || CONFIG.DEV_SLA.default).over;
                 const scc = i.status_category_changed || '';
@@ -1910,6 +2034,58 @@
                     .join('')
                 : '<tr><td colspan="6" style="text-align:center;color:var(--color-text-tertiary);padding:12px;">No SLA breaches ✓</td></tr>';
             if (slaBadge) { slaBadge.textContent = breaches.length; slaBadge.style.display = breaches.length ? 'inline-block' : 'none'; }
+        }
+
+        // ── Resources Sprint Spend ───────────────────────────────────────────
+        const resAgg = {};
+        if (sprintStart && sprintEnd) {
+            const startStr = sprintStart.substring(0, 10);
+            const endStr   = sprintEnd.substring(0, 10);
+
+            // Plan within sprint dates
+            (globalData.plan || []).forEach(p => {
+                const pd = parseDateSafe(p.dateStr);
+                if (pd && pd >= startStr && pd <= endStr) {
+                    if (!resAgg[p.person]) resAgg[p.person] = { plan: 0, act: 0, bill: 0, nb: 0, spend: 0 };
+                    resAgg[p.person].plan += (p.planH || 0);
+                }
+            });
+
+            // Actuals within sprint dates
+            (globalData.actuals || []).forEach(r => {
+                const rd = parseDateSafe(r.Date);
+                if (rd && rd >= startStr && rd <= endStr) {
+                    const person = (r.Person || '').trim();
+                    if (!person) return;
+                    if (!resAgg[person]) resAgg[person] = { plan: 0, act: 0, bill: 0, nb: 0, spend: 0 };
+                    const h = parseFloat(r['Time in Hours']) || 0;
+                    const s = parseFloat(r.Subtotal) || 0;
+                    const rate = parseFloat(r.Rate) || 0;
+                    resAgg[person].act += h;
+                    resAgg[person].spend += s;
+                    if (rate > 0) resAgg[person].bill += h;
+                    else resAgg[person].nb += h;
+                }
+            });
+        }
+
+        const resBody = document.getElementById('sv-resources-body');
+        if (resBody) {
+            const sortedNames = Object.keys(resAgg).sort();
+            resBody.innerHTML = sortedNames.length 
+                ? sortedNames.map(name => {
+                    const d = resAgg[name];
+                    const actStyle = d.act > d.plan * 1.1 ? 'color:var(--color-text-danger)' : (d.act > 0 && d.act < d.plan * 0.8 ? 'color:var(--color-text-warning)' : '');
+                    return `<tr>
+                        <td><strong>${esc(name)}</strong></td>
+                        <td style="text-align:right;" class="mono">${d.plan.toFixed(1)}</td>
+                        <td class="mono" style="text-align:right; ${actStyle}">${d.act.toFixed(1)}</td>
+                        <td style="text-align:right;" class="mono">${d.bill.toFixed(1)}</td>
+                        <td style="text-align:right;" class="mono">${d.nb.toFixed(1)}</td>
+                        <td style="text-align:right;" class="mono">€${fmt(d.spend)}</td>
+                    </tr>`;
+                }).join('')
+                : '<tr><td colspan="6" style="text-align:center;color:var(--color-text-tertiary);padding:16px;">No time entries or plan for this sprint range</td></tr>';
         }
 
         // ── Issue detail table ─────────────────────────────────────────────────
