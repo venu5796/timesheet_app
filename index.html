@@ -13,57 +13,40 @@
         /* ── Modern Executive Tokens (Control Tower Redesign) ────── */
         :root {
             --color-background-primary:   #ffffff;
-            --color-background-secondary: #f8fafc;
-            --color-background-tertiary:  #f1f5f9;
+            --color-background-secondary: #f5f0e8; /* Linen Sidebar Light */
+            --color-background-tertiary:  #faf8f4; /* Main Canvas Light */
             
-            --color-text-primary:         #111827;
-            --color-text-secondary:       #4b5563;
-            --color-text-tertiary:        #9ca3af;
+            --color-text-primary:         #1a1a1a;
+            --color-text-secondary:       #4a3f32;
+            --color-text-tertiary:        #a8957a;
             
-            --color-border-primary:       #e2e8f0;
-            --color-border-secondary:     #cbd5e1;
-            --color-border-tertiary:      rgba(0, 0, 0, 0.06);
+            --color-border-primary:       #e8e0d4;
+            --color-border-secondary:     #ede8df;
+            --color-border-tertiary:      rgba(0,0,0,0.08);
 
-            --color-accent:               #5e6ad2;
-            --color-accent-soft:          rgba(94, 106, 210, 0.08);
+            --color-accent:               #ea580c; /* Dark Tangerine Light */
+            --color-accent-soft:          #fff8f2;
             
-            --color-background-success:   #d1fae5;
-            --color-text-success:         #065f46;
-            --color-background-warning:   #fef3c7;
-            --color-text-warning:         #92400e;
-            --color-background-danger:    #fee2e2;
-            --color-text-danger:          #991b1b;
-            --color-background-info:      #e0f2fe;
-            --color-text-info:            #0369a1;
+            --color-background-success:   #eaf3de;
+            --color-text-success:         #3b6d11;
+            --color-background-warning:   #faeeda;
+            --color-text-warning:         #854f0b;
+            --color-background-danger:    #fcebeb;
+            --color-text-danger:          #a32d2d;
+            --color-background-info:      #f0f9ff;
+            --color-text-info:            #0284c7;
 
             --border-radius-sm:           6px;
-            --border-radius-md:           8px;
+            --border-radius-md:           10px;
             --border-radius-lg:           12px;
             
             --font-sans: 'DM Sans', -apple-system, system-ui, sans-serif;
             --font-mono: 'DM Mono', monospace;
             
-            --transition: all 0.15s ease;
-        }
+            --shadow-card:                0 1px 3px rgba(0,0,0,0.05);
+            --transition:                 all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
-        [data-theme="dark"] {
-            --color-background-primary:   #0f172a;
-            --color-background-secondary: #1e293b;
-            --color-background-tertiary:  #020617;
-            
-            --color-text-primary:         #f1f5f9;
-            --color-text-secondary:       #94a3b8;
-            --color-text-tertiary:        #64748b;
-            
-            --color-border-primary:       rgba(255, 255, 255, 0.1);
-            --color-border-secondary:     rgba(255, 255, 255, 0.08);
-            --color-border-tertiary:      rgba(255, 255, 255, 0.04);
-
-            --color-accent-soft:          rgba(94, 106, 210, 0.15);
-        }
-
-        /* ── Legacy Variable Mapping (to maintain JS compatibility) ── */
-        :root {
+            /* Legacy & Functional mappings */
             --primary:       var(--color-accent);
             --accent:        var(--color-accent);
             --bg:            var(--color-background-tertiary);
@@ -72,15 +55,43 @@
             --muted:         var(--color-text-secondary);
             --border:        var(--color-border-tertiary);
             --radius:        var(--border-radius-lg);
-            --success:       #10b981;
-            --danger:        #ef4444;
-            --warning:       #f59e0b;
+            --success:       var(--color-text-success);
+            --danger:        var(--color-text-danger);
+            --warning:       var(--color-text-warning);
+            --border-subtle: rgba(0, 0, 0, 0.08);
+            --accent-soft:   var(--color-accent-soft);
+        }
+
+        [data-theme="dark"] {
+            --color-background-primary:   rgba(255,255,255,0.05); /* Glass Surface */
+            --color-background-secondary: #1a1a1a; /* Charcoal Sidebar Dark */
+            --color-background-tertiary:  #000000; /* Pure Black Main Canvas */
+            
+            --color-text-primary:         #f8fafc;
+            --color-text-secondary:       rgba(255,255,255,0.65);
+            --color-text-tertiary:        rgba(255,255,255,0.35);
+            
+            --color-border-primary:       rgba(255,255,255,0.12);
+            --color-border-secondary:     rgba(255,255,255,0.15);
+            --color-border-tertiary:      rgba(255,255,255,0.1);
+
+            --color-accent:               #f97316; /* Orange Accent Dark */
+            --color-accent-soft:          rgba(249,115,22,0.07);
+            
+            --shadow-card:                0 8px 32px 0 rgba(0,0,0,0.8);
+
+            --bg:            var(--color-background-tertiary);
+            --surface:       var(--color-background-primary);
+            --text:          var(--color-text-primary);
+            --muted:         var(--color-text-secondary);
+            --border:        var(--color-border-tertiary);
+            --border-subtle: rgba(255, 255, 255, 0.06);
         }
 
         /* ── Reset & Base ──────────────────────────────────── */
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
-            font-family: 'DM Sans', -apple-system, system-ui, sans-serif; 
+            font-family: var(--font-sans); 
             background: var(--bg); 
             color: var(--text); 
             font-size: 13px; 
@@ -89,304 +100,382 @@
             overflow: hidden;
             height: 100vh;
         }
-        
+
         /* ── Layout ── */
-        .app-shell { display: flex; flex-direction: column; height: 100vh; width: 100%; }
-        
-        .topbar { 
-            display: flex; 
-            align-items: center; 
-            justify-content: space-between; 
-            padding: 0 20px; 
-            height: 48px; 
-            background: var(--color-background-primary); 
-            border-bottom: 0.5px solid var(--color-border-tertiary); 
-            z-index: 100;
+        .app-shell { 
+            display: grid; 
+            grid-template-columns: 180px 1fr; 
+            height: 100vh; 
+            width: 100%; 
         }
-
-        .topbar-left { display: flex; align-items: center; gap: 16px; }
-        .topbar-logo { display: flex; align-items: center; gap: 8px; font-weight: 500; font-size: 14px; }
-        .logo-mark { width: 20px; height: 20px; background: var(--color-accent); border-radius: 5px; display: flex; align-items: center; justify-content: center; }
-        .logo-mark::before { content: ""; width: 12px; height: 12px; background: white; mask: url('data:image/svg+xml;utf8,<svg viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" width="4" height="4" rx="1"/><rect x="7" y="1" width="4" height="4" rx="1"/><rect x="1" y="7" width="4" height="4" rx="1"/><rect x="7" y="7" width="4" height="4" rx="1"/></svg>') center/contain no-repeat; -webkit-mask: url('data:image/svg+xml;utf8,<svg viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" width="4" height="4" rx="1"/><rect x="7" y="1" width="4" height="4" rx="1"/><rect x="1" y="7" width="4" height="4" rx="1"/><rect x="7" y="7" width="4" height="4" rx="1"/></svg>') center/contain no-repeat; }
-
-        .main-body { display: flex; flex: 1; overflow: hidden; }
         
         .sidebar { 
-            width: 220px; 
+            width: 180px; 
             flex-shrink: 0; 
-            border-right: 0.5px solid var(--color-border-tertiary); 
-            background: var(--color-background-primary); 
+            background: var(--color-background-secondary); 
             padding: 16px; 
             display: flex; 
             flex-direction: column; 
-            gap: 16px; 
+            gap: 12px; 
             overflow-y: auto;
+            border-right: 0.5px solid var(--color-border-tertiary);
+        }
+
+        .main-body {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: var(--color-background-tertiary);
         }
 
         .content-area { 
             flex: 1; 
-            padding: 20px; 
+            padding: 16px; 
             overflow-y: auto; 
-            background: var(--color-background-tertiary);
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 10px;
         }
 
-        /* ── Navigation ── */
-        .nav-tabs { display: flex; gap: 2px; }
-        .nav-tab { 
-            padding: 6px 14px; 
-            border-radius: var(--border-radius-md); 
-            font-size: 12px; 
-            font-weight: 500; 
-            color: var(--color-text-secondary); 
-            cursor: pointer; 
-            border: none; 
-            background: transparent; 
-            transition: background .15s;
-        }
-        .nav-tab:hover { background: var(--color-background-secondary); color: var(--color-text-primary); }
-        .nav-tab.active { background: var(--color-background-secondary); color: var(--color-text-primary); }
-
-        /* ── Sidebar Components ── */
-        .sb-section { display: flex; flex-direction: column; gap: 6px; }
-        .sb-label { font-size: 10px; font-weight: 500; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 2px; }
-        
-        .kpi-mini { 
-            padding: 10px; 
-            border-radius: var(--border-radius-md); 
-            background: var(--color-background-secondary); 
-            border: none; 
-        }
-        .kpi-mini-val { font-size: 18px; font-weight: 500; font-family: var(--font-mono); letter-spacing: -0.02em; }
-        .kpi-mini-lbl { font-size: 11px; color: var(--color-text-secondary); margin-top: 2px; }
-
-        /* ── Cards ── */
-        .card { 
-            background: var(--color-background-primary); 
-            border: 0.5px solid var(--color-border-tertiary); 
-            border-radius: var(--border-radius-lg); 
-            padding: 16px; 
-            box-shadow: none;
-            margin-bottom: 0;
-        }
-        .card-title { 
-            font-size: 12px; 
-            font-weight: 500; 
-            color: var(--color-text-secondary); 
-            margin-bottom: 14px; 
+        .topbar { 
             display: flex; 
             align-items: center; 
-            justify-content: space-between;
-        }
-        .card-title-main {
-            color: var(--color-text-primary);
-            font-size: 13px;
-            font-weight: 500;
-        }
-
-        /* ── Responsive Bento Grid ── */
-        .kpi-strip { 
-            display: grid; 
-            grid-template-columns: repeat(4, minmax(0, 1fr)); 
-            gap: 12px; 
-            margin-bottom: 0;
-        }
-        .kpi-card { 
+            justify-content: space-between; 
+            padding: 8px 14px; 
             background: var(--color-background-primary); 
-            border: 0.5px solid var(--color-border-tertiary); 
-            border-radius: var(--border-radius-lg); 
-            padding: 14px; 
-            box-shadow: none;
+            border: 0.5px solid var(--color-border-primary); 
+            border-radius: 10px;
+            margin: 16px 16px 0 16px;
+            z-index: 100;
         }
-        .kpi-card h4 { font-size: 11px; color: var(--color-text-secondary); text-transform: none; font-weight: 500; margin-bottom: 8px; }
-        .kpi-card .val { font-size: 22px; font-weight: 500; font-family: var(--font-mono); letter-spacing: -0.02em; color: var(--color-text-primary); }
 
-        .two-col { display: grid; grid-template-columns: 1.6fr 1fr; gap: 20px; margin-bottom: 20px; }
-        .equal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        /* ── Components ── */
+        .card {
+            background: var(--color-background-primary);
+            border: 0.5px solid var(--color-border-primary);
+            border-radius: var(--border-radius-md);
+            padding: 13px;
+            box-shadow: var(--shadow-card);
+            transition: var(--transition);
+        }
+        [data-theme="dark"] .card { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        .card:hover { border-color: var(--color-border-secondary); }
 
-        /* ── Tables ── */
-        .table-responsive { width: 100%; overflow-x: auto; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); }
-        table { width: 100%; border-collapse: collapse; font-size: 11px; }
-        th { background: var(--color-background-secondary); text-align: left; padding: 6px 10px; font-size: 10px; color: var(--color-text-tertiary); text-transform: uppercase; border-bottom: 0.5px solid var(--color-border-tertiary); font-weight: 500; letter-spacing: .05em; }
-        td { padding: 8px 10px; border-bottom: 0.5px solid var(--color-border-tertiary); font-size: 12px; color: var(--color-text-secondary); }
-        tr:last-child td { border-bottom: none; }
-        .mono { font-family: var(--font-mono); font-weight: 500; }
+        .card-title {
+            font-size: 10px;
+            font-weight: 500;
+            color: var(--color-text-tertiary);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+        }
 
-        /* Heatmap Specific */
-        .heatmap-table td { width: auto; height: auto; text-align: center; border: 0.5px solid var(--color-border-tertiary); padding: 4px 6px; border-radius: 4px; }
-        .h-over { background: var(--color-background-danger); color: var(--color-text-danger); }
-        .h-good { background: var(--color-background-success); color: var(--color-text-success); }
-        .h-bench { background: var(--color-background-warning); color: var(--color-text-warning); }
-        .heatmap-table th { text-align: center; }
-        .heatmap-table td:first-child { text-align: left; font-weight: 500; color: var(--color-text-primary); white-space: nowrap; padding-right: 12px; }
+        .kpi-card {
+            background: var(--color-background-primary);
+            border: 0.5px solid var(--color-border-primary);
+            border-radius: var(--border-radius-md);
+            padding: 13px 15px;
+            box-shadow: var(--shadow-card);
+            transition: var(--transition);
+        }
+        .kpi-card:hover { border-color: var(--color-accent); }
+        .kpi-card.lead { 
+            border-left: 3px solid var(--color-accent); 
+            border-radius: 0 10px 10px 0; 
+            background: var(--color-accent-soft); 
+        }
+        .kpi-card h4 { 
+            font-size: 10px; 
+            color: var(--color-text-tertiary); 
+            font-weight: 500; 
+            margin-bottom: 5px; 
+            text-transform: uppercase; 
+        }
+        .kpi-card .val { 
+            font-size: 24px; 
+            font-weight: 500; 
+            font-family: var(--font-mono); 
+            letter-spacing: -0.02em; 
+            color: var(--color-text-primary); 
+        }
+        .kpi-card .val.big { font-size: 30px; }
+        [data-theme="light"] .kpi-card .val.big { color: #c2410c; }
 
-        /* ── UI Helpers ── */
-        .rag-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-        .rag-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; border-radius: var(--border-radius-md); background: var(--color-background-secondary); }
-        .rag-row span { font-size: 12px; color: var(--color-text-secondary); }
-        .rag-green { background: #10b981; }
-        .rag-amber { background: #f59e0b; }
-        .rag-red { background: #ef4444; }
-
-        .kpi-row { padding: 10px; border-radius: var(--border-radius-md); background: var(--color-background-secondary); display: flex; flex-direction: column; gap: 2px; }
-        .kpi-val { font-size: 18px; font-weight: 500; font-family: var(--font-mono); letter-spacing: -0.02em; color: var(--color-text-primary); }
-        .kpi-lbl { font-size: 11px; color: var(--color-text-secondary); }
-        .kpi-sub { font-size: 10px; color: var(--color-text-tertiary); }
-
-        .risk-badge { padding: 8px 10px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); text-align: center; }
-        .risk-label { font-size: 10px; color: var(--color-text-secondary); margin-bottom: 4px; }
-        .risk-val { font-size: 14px; font-weight: 500; }
+        /* ── Sidebar Components ── */
+        .sb-logo { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+        .sb-logomark { width: 22px; height: 22px; background: #f97316; border-radius: 6px; flex-shrink: 0; }
+        .sb-logotext { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
 
         .divider { height: 0.5px; background: var(--color-border-tertiary); margin: 4px 0; }
-        .no-print { }
-        @media print { .no-print { display: none !important; } body { overflow: visible; height: auto; } .app-shell { height: auto; } .main-body { display: block; } .sidebar { display: none; } }
-
-        @media (max-width: 1024px) {
-            .two-col, .equal-grid, .kpi-strip { grid-template-columns: 1fr; }
-            .sidebar { display: none; }
+        
+        .sb-section { display: flex; flex-direction: column; gap: 5px; }
+        .sb-label { 
+            font-size: 9px; 
+            font-weight: 500; 
+            color: var(--color-text-tertiary); 
+            text-transform: uppercase; 
+            letter-spacing: .08em; 
         }
+        
+        .kpi-mini { 
+            padding: 9px; 
+            border-radius: 7px; 
+            background: var(--color-background-primary); 
+            border: 0.5px solid var(--color-border-tertiary); 
+        }
+        .kpi-mini-val { 
+            font-size: 17px; 
+            font-weight: 500; 
+            color: var(--color-text-primary); 
+            font-family: var(--font-mono); 
+            letter-spacing: -0.02em; 
+        }
+        .kpi-mini-lbl { font-size: 10px; color: var(--color-text-tertiary); margin-top: 2px; }
 
+        .rag-row { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            padding: 7px 9px; 
+            border-radius: 7px; 
+            background: var(--color-background-primary); 
+            border: 0.5px solid var(--color-border-tertiary); 
+        }
+        .rag-row span { font-size: 11px; color: var(--color-text-secondary); }
+        .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+        .dot-g { background: #1d9e75; }
+        .dot-a { background: #ef9f27; }
+        .dot-r { background: #e24b4a; }
+
+        .risk-badge { 
+            padding: 8px 10px; 
+            border-left: 3px solid #e24b4a; 
+            border-radius: 0 7px 7px 0; 
+            background: rgba(228,75,74,0.12); 
+        }
+        [data-theme="light"] .risk-badge { background: rgba(228,75,74,0.08); }
+        .risk-label { font-size: 9px; color: var(--color-text-tertiary); margin-bottom: 2px; }
+        .risk-val { font-size: 14px; font-weight: 500; color: #a32d2d; }
+        [data-theme="dark"] .risk-val { color: #f09595; }
+
+        /* ── Navigation ── */
+        .nav-tabs { display: flex; gap: 4px; }
+        .nav-tab { 
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            color: var(--color-text-tertiary);
+            cursor: pointer; 
+            border: 0.5px solid transparent; 
+            background: transparent; 
+            transition: var(--transition);
+        }
+        .nav-tab:hover { color: var(--color-text-primary); }
+        .nav-tab.active { 
+            background: var(--color-background-secondary); 
+            color: var(--color-text-primary); 
+            font-weight: 500; 
+            border-color: var(--color-border-primary); 
+        }
+        [data-theme="dark"] .nav-tab.active {
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(255,255,255,0.15);
+        }
         .tab-panel { display: none; }
-        .tab-panel.active { display: block; animation: fadeIn 0.2s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        .tab-panel.active { display: block; }
 
-        /* --- Additional Classes for exception and trend visuals --- */
-        .kpi-trend { font-size: 10px; font-weight: 500; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
+        /* ── Insight banner ── */
+        .insight-banner { 
+            display: flex; 
+            align-items: flex-start; 
+            gap: 10px; 
+            padding: 11px 13px; 
+            border-radius: 0 10px 10px 0; 
+            background: var(--color-accent-soft); 
+            border-left: 3px solid var(--color-accent); 
+        }
+        [data-theme="light"] .insight-banner { 
+            border-top: 0.5px solid var(--color-border-primary); 
+            border-right: 0.5px solid var(--color-border-primary); 
+            border-bottom: 0.5px solid var(--color-border-primary); 
+        }
+        .insight-text { font-size: 11px; color: var(--color-text-secondary); line-height: 1.5; }
+        .btn { 
+            font-size: 11px; 
+            padding: 4px 12px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            transition: var(--transition); 
+            border: 0.5px solid var(--color-border-primary); 
+            background: var(--color-background-primary); 
+            color: var(--color-text-primary);
+            font-weight: 500;
+        }
+        .btn:hover { background: var(--color-background-secondary); }
+        .btn-primary { 
+            background: var(--color-accent); 
+            color: white; 
+            border: none; 
+        }
+        .btn-primary:hover { opacity: 0.9; }
+
+        /* ── Grid ── */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 20px;
+        }
+        .span-12 { grid-column: span 12; }
+        .span-8  { grid-column: span 8; }
+        .span-6  { grid-column: span 6; }
+        .span-4  { grid-column: span 4; }
+        .span-3  { grid-column: span 3; }
+
+        .kpi-strip { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 10px; }
+
+        /* ── Helpers ── */
+        .mono { font-family: var(--font-mono); }
+        .spinner { width: 24px; height: 24px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes bgPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        
+        .badge { font-size: 9px; font-weight: 500; padding: 2px 7px; border-radius: 4px; display: inline-block; }
+        .badge-success { background: var(--color-background-success); color: var(--color-text-success); }
+        .badge-warning { background: var(--color-background-warning); color: var(--color-text-warning); }
+        .badge-danger { background: var(--color-background-danger); color: var(--color-text-danger); }
+        .badge-neutral { background: var(--color-background-secondary); color: var(--color-text-tertiary); }
+
+        .kpi-trend { display: inline-block; font-size: 9px; font-weight: 500; padding: 2px 7px; border-radius: 4px; margin-top: 5px; }
         .trend-ok { background: var(--color-background-success); color: var(--color-text-success); }
         .trend-warn { background: var(--color-background-warning); color: var(--color-text-warning); }
         .trend-bad { background: var(--color-background-danger); color: var(--color-text-danger); }
 
-        .feed-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
-        .feed-item:last-child { border-bottom: none; }
-        .feed-label { font-weight: 500; font-size: 12px; color: var(--color-text-primary); }
-        .feed-meta { font-size: 11px; color: var(--color-text-secondary); }
+        /* Table styles */
+        table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        th { text-align: left; padding: 8px; color: var(--color-text-tertiary); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 0.5px solid var(--color-border-tertiary); }
+        td { padding: 8px; border-bottom: 0.5px solid var(--color-border-tertiary); color: var(--color-text-secondary); }
+        tr:last-child td { border-bottom: none; }
 
-        .badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; text-transform: uppercase; }
-        .badge-danger { background: var(--color-background-danger); color: var(--color-text-danger); }
-        .badge-warning { background: var(--color-background-warning); color: var(--color-text-warning); }
-        .badge-success { background: var(--color-background-success); color: var(--color-text-success); }
-        .badge-neutral { background: var(--color-background-secondary); color: var(--color-text-tertiary); }
-
-        .jira-sprint-bar .jsb-stat { display: flex; flex-direction: column; gap: 4px; }
-        .jira-avatar { width: 20px; height: 20px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: #fff; font-size: 9px; font-weight: 700; }
-        .jira-key { font-family: 'DM Mono', monospace; font-weight: 700; color: var(--accent); }
-
-        /* ── Insight banner ── */
-        .insight-banner { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border-radius: var(--border-radius-lg); border: 0.5px solid var(--color-border-secondary); background: var(--color-background-secondary); }
-        .insight-icon { width: 32px; height: 32px; border-radius: var(--border-radius-md); background: var(--color-background-info); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .insight-icon::before { content: ""; width: 16px; height: 16px; background: var(--color-text-info); mask: url('data:image/svg+xml;utf8,<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M8 1a5 5 0 0 1 3.5 8.5L10 11H6l-1.5-1.5A5 5 0 0 1 8 1zm0 12v1m-1-1h2"/></svg>') center/contain no-repeat; -webkit-mask: url('data:image/svg+xml;utf8,<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M8 1a5 5 0 0 1 3.5 8.5L10 11H6l-1.5-1.5A5 5 0 0 1 8 1zm0 12v1m-1-1h2"/></svg>') center/contain no-repeat; }
-        .insight-text { font-size: 13px; color: var(--color-text-primary); line-height: 1.5; }
-        .insight-text strong { font-weight: 500; }
-        .insight-tag { display: inline-block; margin-bottom: 4px; font-size: 11px; font-weight: 500; color: var(--color-text-warning); background: var(--color-background-warning); padding: 2px 8px; border-radius: var(--border-radius-md); }
-
-        /* Fix #9: Added missing .topbar-right layout class */
-        .topbar-right { display: flex; align-items: center; gap: 8px; }
-
-        /* Fix #10: Added missing --border-subtle variable (used in phase EAC progress bars) */
-        /* Fix #11: Added missing legacy --st-* status variables used in Jira badge elements */
-        :root {
-            --border-subtle:    rgba(0, 0, 0, 0.08);
-            --st-ok-bg:         var(--color-background-success);
-            --st-ok-text:       var(--color-text-success);
-            --st-warn-bg:       var(--color-background-warning);
-            --st-warn-text:     var(--color-text-warning);
-            --st-bad-bg:        var(--color-background-danger);
-            --st-bad-text:      var(--color-text-danger);
-            --accent-soft:      var(--color-accent-soft);
+        .heatmap-table td { padding: 4px 2px; text-align: center; border: 1px solid var(--color-background-tertiary); border-radius: 4px; }
+        .h-over { background: var(--color-background-danger); color: var(--color-text-danger); }
+        .h-good { background: var(--color-background-success); color: var(--color-text-success); }
+        .h-bench { background: var(--color-background-warning); color: var(--color-text-warning); }
+        
+        /* ── Responsive Rules ── */
+        @media (max-width: 1024px) {
+            .app-shell { grid-template-columns: 1fr; }
+            .sidebar { display: none; }
+            .topbar { margin: 10px; }
+            .bento-grid { grid-template-columns: 1fr; gap: 10px; }
+            .span-12, .span-8, .span-6, .span-4, .span-3 { grid-column: span 1; }
+            .kpi-strip { grid-template-columns: 1fr; }
+            .content-area { padding: 10px; }
         }
-        .spinner { width: 24px; height: 24px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes bgPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+        @media (max-width: 640px) {
+            .topbar { flex-direction: column; height: auto; gap: 10px; padding: 12px; }
+            .topbar-right { width: 100%; justify-content: space-between; }
+            .nav-tabs { overflow-x: auto; width: 100%; padding-bottom: 4px; }
+            .nav-tab { white-space: nowrap; }
+            
+            /* Table & Slider adjustments */
+            table { font-size: 10px; }
+            th, td { padding: 6px 4px; }
+            input[type="range"] { width: 60px !important; }
+        }
+
+        @media print { .no-print { display: none !important; } }
     </style>
 </head>
 <body>
 
 <div class="app-shell" id="master-report">
-    <!-- TOPBAR -->
-    <header class="topbar no-print">
-        <div class="topbar-left">
-            <div class="topbar-logo">
-                <div class="logo-mark"></div>
-                Control Tower
-            </div>
-            <nav class="nav-tabs">
-                <button class="nav-tab active" onclick="switchTab('program')">Program</button>
-                <button class="nav-tab" onclick="switchTab('jira-high')">Jira — High Level</button>
-                <button class="nav-tab" onclick="switchTab('jira-sprint')">Jira — Sprint View</button>
-                <button class="nav-tab" id="nav-capacity" onclick="switchTab('capacity')">Capacity</button>
-            </nav>
+    <!-- SIDEBAR -->
+    <aside class="sidebar no-print">
+        <div class="sb-logo">
+            <div class="sb-logomark"></div>
+            <span class="sb-logotext">Control Tower</span>
         </div>
-        <div class="topbar-right">
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <div id="last-synced" style="display:none; align-items:center; gap:6px; padding:4px 10px; border-radius:var(--border-radius-md); border:0.5px solid var(--color-border-tertiary); font-size:11px; color:var(--color-text-secondary);">
-                    <div id="bg-fetch-dot" style="display:none;width:6px;height:6px;border-radius:50%;background:#10b981;animation:bgPulse 1s infinite;"></div>
-                    Synced <span id="sync-time">—</span>
-                </div>
 
-                <div class="budget-field" style="display:flex; align-items:center; gap:6px; padding:4px 10px; border-radius:var(--border-radius-md); border:0.5px solid var(--color-border-secondary); background:var(--color-background-secondary);">
-                    <label style="font-size:11px; color:var(--color-text-secondary); text-transform:none; font-weight:400;">Budget</label>
-                    <div style="display:flex; align-items:center; gap:2px;">
-                        <span style="font-family:var(--font-mono); font-weight:500; color:var(--color-text-tertiary); font-size:12px;">€</span>
-                        <input type="number" id="budgetLimit" value="251392" onblur="processData()" oninput="debouncedProcess()" style="width:72px; border:none; background:transparent; font-family:var(--font-mono); font-weight:500; font-size:12px; color:var(--color-text-primary); outline:none; padding:0;">
-                    </div>
-                </div>
+        <div class="divider"></div>
 
-                <button id="btn-darkmode" onclick="toggleDarkMode()" class="nav-tab" style="padding:5px 8px; font-size:12px;" title="Toggle Dark Mode">Dark mode</button>
-                <button id="btn-export" class="nav-tab" onclick="exportPDF()">Export PDF</button>
-                <button id="btn-sync" class="nav-tab active" onclick="fetchData()" style="background:var(--color-accent); color:white;">Sync</button>
+        <div class="sb-section">
+            <div class="sb-label">Health</div>
+            <div id="rag-sidebar" style="display:flex; flex-direction:column; gap:5px;"></div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="sb-section">
+            <div class="sb-label">Financials</div>
+            <div class="kpi-mini">
+                <div class="kpi-mini-val" id="side-kpi-burn">€0</div>
+                <div class="kpi-mini-lbl">Total burn</div>
+            </div>
+            <div class="kpi-mini">
+                <div class="kpi-mini-val" id="side-kpi-eac">€0</div>
+                <div class="kpi-mini-lbl">Forecast (EAC)</div>
+            </div>
+            <div class="kpi-mini">
+                <div class="kpi-mini-val" id="side-kpi-remain">€0</div>
+                <div class="kpi-mini-lbl">Remaining</div>
             </div>
         </div>
-    </header>
+
+        <div class="divider"></div>
+
+        <div class="sb-section">
+            <div class="sb-label">Projection</div>
+            <div class="kpi-mini">
+                <div class="kpi-mini-val" id="side-kpi-runway">0 wks</div>
+                <div class="kpi-mini-lbl">Budget runway</div>
+            </div>
+            <div class="kpi-mini">
+                <div class="kpi-mini-val" id="side-kpi-finish">—</div>
+                <div class="kpi-mini-lbl">Projected finish</div>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="risk-badge" id="pm-risk-badge"></div>
+    </aside>
 
     <div class="main-body">
-        <!-- SIDEBAR -->
-        <aside class="sidebar no-print">
-            <div class="sb-section">
-                <div class="sb-label">Health</div>
-                <div id="rag-sidebar" style="display:flex; flex-direction:column; gap:6px;"></div>
+        <!-- TOPBAR -->
+        <header class="topbar no-print">
+            <div class="topbar-left">
+                <nav class="nav-tabs">
+                    <button class="nav-tab active" id="nav-capacity" onclick="switchTab('capacity')">Capacity</button>
+                    <button class="nav-tab" onclick="switchTab('program')">Program</button>
+                    <button class="nav-tab" onclick="switchTab('jira-high')">Jira — High Level</button>
+                    <button class="nav-tab" onclick="switchTab('jira-sprint')">Jira — Sprint View</button>
+                </nav>
             </div>
+            <div class="topbar-right">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div id="last-synced" style="display:none; align-items:center; gap:6px; padding:4px 10px; border-radius:var(--border-radius-md); border:0.5px solid var(--color-border-tertiary); font-size:11px; color:var(--color-text-secondary); font-family:var(--font-mono);">
+                        <div id="bg-fetch-dot" style="display:none;width:6px;height:6px;border-radius:50%;background:#10b981;animation:bgPulse 1s infinite;"></div>
+                        Synced <span id="sync-time">—</span>
+                    </div>
 
-            <div class="divider"></div>
+                    <div class="budget-field" style="display:flex; align-items:center; gap:6px; padding:4px 10px; border-radius:var(--border-radius-md); border:0.5px solid var(--color-border-secondary); background:var(--color-background-secondary);">
+                        <label style="font-size:11px; color:var(--color-text-secondary); text-transform:none; font-weight:400;">Budget</label>
+                        <div style="display:flex; align-items:center; gap:2px;">
+                            <span style="font-family:var(--font-mono); font-weight:500; color:var(--color-text-tertiary); font-size:12px;">€</span>
+                            <input type="number" id="budgetLimit" value="251392" onblur="processData()" oninput="debouncedProcess()" style="width:72px; border:none; background:transparent; font-family:var(--font-mono); font-weight:500; font-size:12px; color:var(--color-text-primary); outline:none; padding:0;">
+                        </div>
+                    </div>
 
-            <div class="sb-section">
-                <div class="sb-label">Financials</div>
-                <div class="kpi-row">
-                    <div class="kpi-val" id="side-kpi-burn">€0</div>
-                    <div class="kpi-lbl">Total burn</div>
-                    <div class="kpi-sub">Actual spend to date</div>
-                </div>
-                <div class="kpi-row">
-                    <div class="kpi-val" id="side-kpi-eac">€0</div>
-                    <div class="kpi-lbl">Forecast (EAC)</div>
-                    <div class="kpi-sub" id="eac-over-cap"></div>
-                </div>
-                <div class="kpi-row">
-                    <div class="kpi-val" id="side-kpi-remain">€0</div>
-                    <div class="kpi-lbl">Remaining</div>
-                    <div class="kpi-sub">Actual vs budget cap</div>
-                </div>
-            </div>
-
-            <div class="divider"></div>
-
-            <div class="sb-section">
-                <div class="sb-label">Projection</div>
-                <div class="kpi-row">
-                    <div class="kpi-val" id="side-kpi-runway">0 wks</div>
-                    <div class="kpi-lbl">Budget runway</div>
-                </div>
-                <div class="kpi-row">
-                    <div class="kpi-val" id="side-kpi-finish">—</div>
-                    <div class="kpi-lbl">Projected finish</div>
+                    <button id="btn-darkmode" onclick="toggleDarkMode()" class="btn" title="Toggle Dark Mode">Dark mode</button>
+                    <button id="btn-export" class="btn" onclick="exportPDF()">Export PDF</button>
+                    <button id="btn-sync" class="btn btn-primary" onclick="fetchData()">Sync</button>
                 </div>
             </div>
-
-            <div class="divider"></div>
-
-            <div class="risk-badge" id="pm-risk-badge"></div>
-        </aside>
+        </header>
 
         <!-- MAIN CONTENT -->
         <main class="content-area">
@@ -400,116 +489,112 @@
             <div id="dashboard" style="display:none;">
 
                 <!-- ══ PROGRAM TAB ══════════════════════════════════ -->
-                <div id="tab-program" class="tab-panel active">
-                    
-                    <!-- Insight & Stats Row -->
-                    <div class="insight-banner" id="smart-insight-card">
-                        <div class="insight-icon"></div>
-                        <div>
-                            <div class="insight-tag" id="insight-type-tag">Program insight</div>
-                            <div class="insight-text" id="smart-insight-text">Generating proactive insights...</div>
+                <div id="tab-program" class="tab-panel">
+                    <div class="bento-grid">
+                        
+                        <!-- Insight & Stats Row -->
+                        <div class="insight-banner span-12" id="smart-insight-card">
+                            <div class="insight-icon"></div>
+                            <div>
+                                <div class="insight-tag" id="insight-type-tag">Program insight</div>
+                                <div class="insight-text" id="smart-insight-text">Generating proactive insights...</div>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="kpi-strip">
-                        <div class="kpi-card">
-                            <h4>Velocity (Alloc vs Spend)</h4>
-                            <div class="val" id="kpi-velo">0h/wk</div>
-                            <div id="kpi-velo-trend" style="margin-top:4px;"></div>
-                            <canvas id="spark-velo" style="display:block; margin-top:6px; width:100%; height:28px;"></canvas>
+                        <div class="kpi-strip span-12">
+                            <div class="kpi-card lead">
+                                <h4>Velocity (Alloc vs Spend)</h4>
+                                <div class="val big" id="kpi-velo">0h/wk</div>
+                                <div id="kpi-velo-trend"></div>
+                                <canvas id="spark-velo" style="display:block; margin-top:8px; width:100%; height:32px;"></canvas>
+                            </div>
+                            <div class="kpi-card">
+                                <h4>Non-Billable</h4>
+                                <div class="val" id="kpi-bench">0%</div>
+                                <div id="kpi-bench-trend"></div>
+                            </div>
+                            <div class="kpi-card">
+                                <h4>Budget Burn Rate</h4>
+                                <div class="val" id="kpi-eff">—</div>
+                                <div id="kpi-eff-trend"></div>
+                            </div>
+                            <div class="kpi-card">
+                                <h4>EAC Confidence</h4>
+                                <div class="val" id="kpi-conf">—</div>
+                                <div id="kpi-conf-trend"></div>
+                            </div>
                         </div>
-                        <div class="kpi-card">
-                            <h4>Non-Billable</h4>
-                            <div class="val" id="kpi-bench">0%</div>
-                            <div id="kpi-bench-trend" style="margin-top:4px;"></div>
-                        </div>
-                        <div class="kpi-card">
-                            <h4>Budget Burn Rate</h4>
-                            <div class="val" id="kpi-eff">—</div>
-                            <div id="kpi-eff-trend" style="margin-top:4px;"></div>
-                        </div>
-                        <div class="kpi-card">
-                            <h4>EAC Confidence</h4>
-                            <div class="val" id="kpi-conf">—</div>
-                            <div id="kpi-conf-trend" style="margin-top:4px;"></div>
-                        </div>
-                    </div>
 
-                    <!-- Main Charts -->
-                    <div class="two-col">
-                        <div class="card">
-                            <div class="card-title">📉 Cumulative Burn vs. Budget</div>
+                        <!-- Main Charts -->
+                        <div class="card span-8">
+                            <div class="card-title">📈 Cumulative Burn vs. Budget</div>
                             <div style="height:300px; width:100%;"><canvas id="chart-burn"></canvas></div>
                         </div>
-                        <div class="card">
+                        <div class="card span-4">
                             <div class="card-title">📅 Predictive Roll-off</div>
                             <div id="rolloff-container" style="max-height:300px; overflow-y:auto;">
                                 <div id="rolloff-list"></div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="card">
-                        <div class="card-title">📉 Phase Performance & Cost Breakdown</div>
-                        <div class="table-responsive">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Phase</th>
-                                        <th style="text-align:right;">Actual (€)</th>
-                                        <th style="text-align:right;">Planned (€)</th>
-                                        <th style="text-align:right;">Delta (€)</th>
-                                        <th style="text-align:right;">% of Planned</th>
-                                        <th style="text-align:right;">Phase EAC (€)</th>
-                                        <th style="text-align:right;">Completion</th>
-                                        <th style="text-align:right;">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="phase-merged-body"></tbody>
-                            </table>
+                        <div class="card span-12">
+                            <div class="card-title">📉 Phase Performance & Cost Breakdown</div>
+                            <div class="table-responsive">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Phase</th>
+                                            <th style="text-align:right;">Actual (€)</th>
+                                            <th style="text-align:right;">Planned (€)</th>
+                                            <th style="text-align:right;">Delta (€)</th>
+                                            <th style="text-align:right;">% of Planned</th>
+                                            <th style="text-align:right;">Phase EAC (€)</th>
+                                            <th style="text-align:right;">Completion</th>
+                                            <th style="text-align:right;">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="phase-merged-body"></tbody>
+                                </table>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="equal-grid">
-                        <div class="card">
+                        <div class="card span-6">
                             <div class="card-title">⚖️ Non-Billable vs. Billable Time</div>
                             <div style="height:260px;width:100%;"><canvas id="chart-bench"></canvas></div>
                         </div>
-                        <div class="card">
+                        <div class="card span-6">
                             <div class="card-title">📐 Planned vs. Actual Hours (S-Curve)</div>
                             <div style="height:260px;width:100%;"><canvas id="chart-scurve"></canvas></div>
                         </div>
-                    </div>
 
-                    <div class="card">
-                        <div class="card-title">🚨 Variance Flags</div>
-                        <div id="red-flags"></div>
-                    </div>
+                        <div class="card span-4">
+                            <div class="card-title">🚨 Variance Flags</div>
+                            <div id="red-flags"></div>
+                        </div>
 
-                    <div class="card">
-                        <div class="card-title">📊 Timesheet Compliance Trend</div>
-                        <div style="height:200px;width:100%;"><canvas id="chart-compliance"></canvas></div>
-                    </div>
+                        <div class="card span-8">
+                            <div class="card-title">📊 Timesheet Compliance Trend</div>
+                            <div style="height:200px;width:100%;"><canvas id="chart-compliance"></canvas></div>
+                        </div>
 
-                    <div class="card">
-                        <div class="card-title">👤 Resource Load by Name (h/wk)</div>
-                        <div style="height:260px;width:100%;"><canvas id="chart-resource-load"></canvas></div>
-                    </div>
+                        <div class="card span-12">
+                            <div class="card-title">👤 Resource Load by Name (h/wk)</div>
+                            <div style="height:260px;width:100%;"><canvas id="chart-resource-load"></canvas></div>
+                        </div>
 
-                    <div class="card">
-                        <div class="card-title">🗂️ Spend by Phase — Actual vs Planned (€)</div>
-                        <div style="height:320px;width:100%;"><canvas id="chart-phase"></canvas></div>
-                    </div>
+                        <div class="card span-12">
+                            <div class="card-title">🗂️ Spend by Phase — Actual vs Planned (€)</div>
+                            <div style="height:320px;width:100%;"><canvas id="chart-phase"></canvas></div>
+                        </div>
 
-                    <div class="equal-grid">
-                        <div class="card">
+                        <div class="card span-6">
                             <div class="card-title">
                                 💸 Top 5 Spenders
                                 <select id="spenderWeekSelect" class="nav-tab no-print" style="font-size:10px; padding:2px 6px;" onchange="renderTopSpenders(this.value)"></select>
                             </div>
                             <div id="top-spenders"></div>
                         </div>
-                        <div class="card">
+                        <div class="card span-6">
                             <div class="card-title">🏁 Milestone Tracker</div>
                             <div id="ms-summary" style="font-size:11px; color:var(--muted); margin-bottom:12px;"></div>
                             <div class="table-responsive">
@@ -519,194 +604,188 @@
                                 </table>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="card" id="card-data-integrity" style="display:none;">
-                        <div class="card-title">🔍 Data Integrity & Mapping Alerts</div>
-                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
-                            <div>
-                                <div class="sb-label" style="margin-bottom:8px;">Unmapped Tasks (TimeEntries)</div>
-                                <div id="unmapped-tasks-list" style="max-height:150px; overflow-y:auto; font-size:11px; color:var(--muted);"></div>
-                            </div>
-                            <div>
-                                <div class="sb-label" style="margin-bottom:8px;">Jira Hygiene</div>
-                                <div id="jira-hygiene-alerts" style="font-size:11px; color:var(--muted);"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-title">
-                            🔥 Resource Heatmap
-                            <div style="display:flex; align-items:center; gap:16px; font-weight:400;">
-                                <input type="text" id="heatmap-search" placeholder="Search resource…" oninput="if(globalData._people && globalData._weeks) renderHeatmap(globalData._people, Object.keys(globalData._weeks).sort())" style="padding:4px 10px; border-radius:6px; border:1px solid var(--border); font-size:11px;">
-                                <div style="display:flex; gap:8px; font-size:10px; color:var(--muted);">
-                                    <span><span class="rag-dot" style="background:var(--danger)"></span> Spend > Alloc</span>
-                                    <span><span class="rag-dot" style="background:var(--success)"></span> Match (±10%)</span>
-                                    <span><span class="rag-dot" style="background:var(--warning)"></span> Under Alloc</span>
+                        <div class="card span-12" id="card-data-integrity" style="display:none;">
+                            <div class="card-title">🔍 Data Integrity & Mapping Alerts</div>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+                                <div>
+                                    <div class="sb-label" style="margin-bottom:8px;">Unmapped Tasks (TimeEntries)</div>
+                                    <div id="unmapped-tasks-list" style="max-height:150px; overflow-y:auto; font-size:11px; color:var(--muted);"></div>
+                                </div>
+                                <div>
+                                    <div class="sb-label" style="margin-bottom:8px;">Jira Hygiene</div>
+                                    <div id="jira-hygiene-alerts" style="font-size:11px; color:var(--muted);"></div>
                                 </div>
                             </div>
                         </div>
-                        <div class="table-responsive">
-                            <table id="heatmap-body" class="heatmap-table"></table>
+
+                        <div class="card span-12">
+                            <div class="card-title">
+                                🔥 Resource Heatmap
+                                <div style="display:flex; align-items:center; gap:16px; font-weight:400;">
+                                    <input type="text" id="heatmap-search" placeholder="Search resource…" oninput="if(globalData._people && globalData._weeks) renderHeatmap(globalData._people, Object.keys(globalData._weeks).sort())" style="padding:4px 10px; border-radius:6px; border:1px solid var(--border); font-size:11px;">
+                                    <div style="display:flex; gap:8px; font-size:10px; color:var(--muted);">
+                                        <span><span class="rag-dot" style="background:var(--danger)"></span> Spend > Alloc</span>
+                                        <span><span class="rag-dot" style="background:var(--success)"></span> Match (±10%)</span>
+                                        <span><span class="rag-dot" style="background:var(--warning)"></span> Under Alloc</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table id="heatmap-body" class="heatmap-table"></table>
+                            </div>
                         </div>
                     </div>
                 </div> <!-- End Program Tab -->
 
                 <!-- ══ JIRA HIGH LEVEL TAB ══════════════════════════ -->
                 <div id="tab-jira-high" class="tab-panel">
-                    <div class="kpi-strip" id="hl-phase-cards"></div>
-                    
-                    <div class="card">
-                        <div class="card-title">Pipeline Flow</div>
-                        <div class="jira-sprint-bar" id="hl-status-bar" style="display:flex; gap:24px; padding:16px; border:1px solid var(--border); border-radius:12px;">
-                            <div class="jsb-stat"><div class="jsb-val" id="hl-stat-qual" style="font-size:18px; font-weight:700;">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--muted); text-transform:uppercase;">Qual</div></div>
-                            <div class="jsb-stat"><div class="jsb-val" id="hl-stat-dev" style="font-size:18px; font-weight:700;">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--muted); text-transform:uppercase;">Dev</div></div>
-                            <div class="jsb-stat"><div class="jsb-val" id="hl-stat-uat" style="font-size:18px; font-weight:700;">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--muted); text-transform:uppercase;">UAT</div></div>
-                            <div class="jsb-stat"><div class="jsb-val" id="hl-stat-done" style="font-size:18px; font-weight:700;">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--muted); text-transform:uppercase;">Done</div></div>
-                        </div>
-                    </div>
+                    <div class="bento-grid">
+                        <div class="kpi-strip span-12" id="hl-phase-cards"></div>
 
-                    <div class="equal-grid">
-                        <div class="card">
+                        <div class="card span-12">
+                            <div class="card-title">Pipeline Flow</div>
+                            <div class="jira-sprint-bar" id="hl-status-bar" style="display:flex; gap:24px; padding:16px; border:1px solid var(--border); border-radius:12px;">
+                                <div class="jsb-stat"><div class="jsb-val" id="hl-stat-qual" style="font-size:18px; font-weight:700;">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--muted); text-transform:uppercase;">Qual</div></div>
+                                <div class="jsb-stat"><div class="jsb-val" id="hl-stat-dev" style="font-size:18px; font-weight:700;">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--muted); text-transform:uppercase;">Dev</div></div>
+                                <div class="jsb-stat"><div class="jsb-val" id="hl-stat-uat" style="font-size:18px; font-weight:700;">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--muted); text-transform:uppercase;">UAT</div></div>
+                                <div class="jsb-stat"><div class="jsb-val" id="hl-stat-done" style="font-size:18px; font-weight:700;">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--muted); text-transform:uppercase;">Done</div></div>
+                            </div>
+                        </div>
+
+                        <div class="card span-8">
                             <div class="card-title">Velocity Trends (Points per Month)</div>
                             <div style="height:300px; width:100%;"><canvas id="hl-chart-velocity"></canvas></div>
                         </div>
-                        <div class="card">
+                        <div class="card span-4">
                             <div class="card-title">Category Distribution</div>
                             <div style="height:300px; width:100%;"><canvas id="hl-chart-categories"></canvas></div>
                         </div>
-                    </div>
 
-                    <div class="card">
-                        <div class="card-title">Jira Spend Analysis (Actual Hours vs Story Points)</div>
-                        <div style="height:350px; width:100%;"><canvas id="hl-chart-spend"></canvas></div>
+                        <div class="card span-12">
+                            <div class="card-title">Jira Spend Analysis (Actual Hours vs Story Points)</div>
+                            <div style="height:350px; width:100%;"><canvas id="hl-chart-spend"></canvas></div>
+                        </div>
                     </div>
                 </div>
-
                 <!-- ══ JIRA SPRINT VIEW TAB ══════════════════════════ -->
                 <div id="tab-jira-sprint" class="tab-panel">
-                    <div class="card" style="display:flex; align-items:center; justify-content:space-between; padding:12px 20px;">
-                        <div style="display:flex; align-items:center; gap:16px;">
-                            <select id="sprint-selector" onchange="jRenderSprintView()" class="nav-tab active" style="font-size:13px; padding:6px 12px;"></select>
-                            <span id="sv-sprint-dates" style="font-family:'DM Mono',monospace; font-size:12px; color:var(--muted);"></span>
+                    <div class="bento-grid">
+                        <div class="card span-12" style="display:flex; align-items:center; justify-content:space-between; padding:12px 20px;">
+                            <div style="display:flex; align-items:center; gap:16px;">
+                                <select id="sprint-selector" onchange="jRenderSprintView()" class="nav-tab active" style="font-size:13px; padding:6px 12px;"></select>
+                                <span id="sv-sprint-dates" class="mono" style="font-size:12px; color:var(--color-text-tertiary);"></span>
+                            </div>
+                            <div id="sv-sprint-points"></div>
                         </div>
-                        <div id="sv-sprint-points" style="font-weight:700;"></div>
-                    </div>
 
-                    <div class="card">
-                        <div class="jira-sprint-bar" style="display:flex; gap:24px; padding:16px; border:1px solid var(--border); border-radius:12px; flex-wrap:wrap;">
-                            <div class="jsb-stat"><div class="jsb-val" id="jsb-total" style="font-size:18px; font-weight:700;">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--muted); text-transform:uppercase;">Total</div></div>
-                            <div class="jsb-stat"><div class="jsb-val" id="jsb-done" style="font-size:18px; font-weight:700;">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--muted); text-transform:uppercase;">Done</div></div>
-                            <div class="jsb-stat"><div class="jsb-val" id="jsb-readydev" style="font-size:18px; font-weight:700;">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--muted); text-transform:uppercase;">Ready for Dev</div></div>
-                            <div class="jsb-stat"><div class="jsb-val" id="jsb-dev" style="font-size:18px; font-weight:700;">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--muted); text-transform:uppercase;">In Progress</div></div>
-                            <div class="jsb-stat"><div class="jsb-val" id="jsb-readyreview" style="font-size:18px; font-weight:700;">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--muted); text-transform:uppercase;">Ready for Review</div></div>
-                            <div class="jsb-stat"><div class="jsb-val" id="jsb-codereview" style="font-size:18px; font-weight:700;">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--muted); text-transform:uppercase;">Code Review</div></div>
-                            <div class="jsb-stat"><div class="jsb-val" id="jsb-readyqa" style="font-size:18px; font-weight:700;">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--muted); text-transform:uppercase;">Ready for QA</div></div>
-                            <div class="jsb-stat"><div class="jsb-val" id="jsb-uat" style="font-size:18px; font-weight:700;">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--muted); text-transform:uppercase;">QA</div></div>
-                            <div class="jsb-stat"><div class="jsb-val" id="jsb-reopened" style="font-size:18px; font-weight:700; color:var(--warning);">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--muted); text-transform:uppercase;">Re-opened</div></div>
-                            <div style="width:1px; background:var(--border); height:30px;"></div>
-                            <div class="jsb-stat"><div class="jsb-val" id="jsb-creep" style="font-size:18px; font-weight:700; color:var(--danger);">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--muted); text-transform:uppercase;">Creep</div></div>
-                            <div class="jsb-stat"><div class="jsb-val" id="jsb-blocked" style="font-size:18px; font-weight:700; color:var(--danger);">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--muted); text-transform:uppercase;">Blocked</div></div>
+                        <div class="card span-6">
+                            <div class="card-title">Sprint Progress</div>
+                            <div class="jira-sprint-bar" style="display:flex; gap:20px; flex-wrap:wrap;">
+                                <div class="jsb-stat"><div class="jsb-val" id="jsb-total" style="font-size:18px; font-weight:700;">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--color-text-tertiary); text-transform:uppercase;">Total</div></div>
+                                <div class="jsb-stat"><div class="jsb-val" id="jsb-done" style="font-size:18px; font-weight:700;">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--color-text-tertiary); text-transform:uppercase;">Done</div></div>
+                                <div class="jsb-stat"><div class="jsb-val" id="jsb-readydev" style="font-size:18px; font-weight:700;">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--color-text-tertiary); text-transform:uppercase;">To Do</div></div>
+                                <div class="jsb-stat"><div class="jsb-val" id="jsb-dev" style="font-size:18px; font-weight:700;">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--color-text-tertiary); text-transform:uppercase;">Active</div></div>
+                                <div class="jsb-stat"><div class="jsb-val" id="jsb-readyreview" style="font-size:18px; font-weight:700;">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--color-text-tertiary); text-transform:uppercase;">Review</div></div>
+                                <div class="jsb-stat"><div class="jsb-val" id="jsb-readyqa" style="font-size:18px; font-weight:700;">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--color-text-tertiary); text-transform:uppercase;">QA/UAT</div></div>
+                            </div>
                         </div>
-                    </div>
+                        <div class="card span-6" style="border-left:4px solid var(--color-text-danger);">
+                            <div class="card-title">Risk Signals</div>
+                            <div class="jira-sprint-bar" style="display:flex; gap:20px; flex-wrap:wrap;">
+                                <div class="jsb-stat"><div class="jsb-val" id="jsb-blocked" style="font-size:18px; font-weight:700; color:var(--color-text-danger);">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--color-text-tertiary); text-transform:uppercase;">Blocked</div></div>
+                                <div class="jsb-stat"><div class="jsb-val" id="jsb-reopened" style="font-size:18px; font-weight:700; color:var(--color-text-warning);">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--color-text-tertiary); text-transform:uppercase;">Re-opened</div></div>
+                                <div class="jsb-stat"><div class="jsb-val" id="jsb-creep" style="font-size:18px; font-weight:700; color:var(--color-text-danger);">—</div><div class="jsb-lbl" style="font-size:10px; color:var(--color-text-tertiary); text-transform:uppercase;">Creep</div></div>
+                            </div>
+                        </div>
 
-                    <div class="equal-grid">
-                        <div class="card">
+                        <div class="card span-8">
                             <div class="card-title">Sprint Burndown (Points)</div>
                             <div style="height:280px; width:100%;"><canvas id="sv-chart-burndown"></canvas></div>
                         </div>
-                        <div class="card">
+                        <div class="card span-4">
                             <div class="card-title">Risk Labels Distribution</div>
                             <div style="height:280px; width:100%;"><canvas id="sv-chart-labels"></canvas></div>
                         </div>
-                    </div>
 
-                    <div class="card">
-                        <div class="card-title">
-                            ⏱️ Ready for Review aging
-                            <span id="sv-ready-review-count" style="display:none;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--accent-soft);color:var(--accent);"></span>
+                        <div class="card span-12">
+                            <div class="card-title">
+                                ⚠️ At-Risk Queue
+                                <span id="at-risk-count" style="display:none;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--st-bad-bg);color:var(--st-bad-text);"></span>
+                            </div>
+                            <div class="table-responsive">
+                                <table>
+                                    <thead><tr><th>Key</th><th>Summary</th><th>Assignee</th><th>Status/Type</th><th>Aging/SLA</th></tr></thead>
+                                    <tbody id="at-risk-body"></tbody>
+                                </table>
+                            </div>
                         </div>
-                        <div class="table-responsive">
-                            <table>
-                                <thead><tr><th>Key</th><th>Summary</th><th>Assignee</th><th>Hours in Status</th></tr></thead>
-                                <tbody id="sv-ready-review-body"></tbody>
-                            </table>
-                        </div>
-                    </div>
 
-                    <div class="card">
-                        <div class="card-title">
-                            🔍 Code Review aging
-                            <span id="sv-code-review-count" style="display:none;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--st-warn-bg);color:var(--st-warn-text);"></span>
-                        </div>
-                        <div class="table-responsive">
-                            <table>
-                                <thead><tr><th>Key</th><th>Summary</th><th>Assignee</th><th>Hours in Status</th></tr></thead>
-                                <tbody id="sv-code-review-body"></tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-title">
-                            ⚠️ Dev SLA breaches
-                            <span id="sla-breach-count" style="display:none;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--st-bad-bg);color:var(--st-bad-text);"></span>
-                        </div>
-                        <div class="table-responsive">
-                            <table>
-                                <thead><tr><th>Key</th><th>Summary</th><th>Status</th><th>Assignee</th><th>Spent (h)</th><th>SLA (h)</th></tr></thead>
-                                <tbody id="sla-breach-body"></tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-title">Sprint Issue Detail</div>
-                        <div class="table-responsive">
-                            <table>
-                                <thead><tr><th>Key</th><th>Status</th><th>Summary</th><th>Assignee</th><th>Points</th></tr></thead>
-                                <tbody id="sv-issues-body"></tbody>
-                            </table>
+                        <div class="card span-12">
+                            <div class="card-title">Sprint Issue Detail</div>
+                            <div class="table-responsive">
+                                <table>
+                                    <thead><tr><th>Key</th><th>Status</th><th>Summary</th><th>Assignee</th><th>Points</th></tr></thead>
+                                    <tbody id="sv-issues-body"></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- ══ CAPACITY & PLANNING TAB ══════════════════════ -->
-                <div id="tab-capacity" class="tab-panel">
-                    <div class="card">
-                        <div class="card-title">What-If? Velocity Simulator</div>
-                        <div style="display:flex; align-items:center; gap:24px; margin-bottom:24px;">
-                            <div style="flex:1;">
-                                <input type="range" id="sim-velo-slider" min="10" max="100" step="5" style="width:100%;" oninput="runVelocitySimulation(this.value)">
-                                <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--muted); margin-top:8px;">
-                                    <span>10h/wk</span>
-                                    <span>Target Velocity: <strong id="sim-velo-val" style="color:var(--accent); font-size:14px;">40</strong>h/wk</span>
-                                    <span>100h/wk</span>
+                <div id="tab-capacity" class="tab-panel active">
+                    <div class="bento-grid">
+                        <div class="card span-12">
+                            <div class="card-title">Sprint Capacity Planner</div>
+                            <div style="display:flex; align-items:flex-end; gap:24px; margin-bottom:24px;">
+                                <div style="flex:1;">
+                                    <label style="display:block; font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px;">Planning Sprint</label>
+                                    <select id="cap-sprint-selector" class="nav-tab active" style="width:100%; font-size:13px; padding:6px 12px;" onchange="renderCapacity()"></select>
                                 </div>
-                            </div>
-                            <div style="display:flex; gap:16px;">
-                                <div class="kpi-mini" style="min-width:140px;">
-                                    <div class="kpi-mini-val" id="sim-eac-val">€0</div>
-                                    <div class="kpi-mini-lbl">Simulated EAC</div>
+                                <div style="flex:2;">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                        <label style="font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em;">Productivity Quotient</label>
+                                        <span style="font-size:14px; font-weight:700; color:var(--accent);"><span id="cap-quotient-val">90</span>%</span>
+                                    </div>
+                                    <input type="range" id="cap-quotient-slider" min="10" max="100" step="5" value="90" style="width:100%;" oninput="document.getElementById('cap-quotient-val').textContent = this.value; renderCapacity()">
                                 </div>
-                                <div class="kpi-mini" style="min-width:140px;">
-                                    <div class="kpi-mini-val" id="sim-buffer-val">€0</div>
-                                    <div class="kpi-mini-lbl">Simulated Buffer</div>
+                                <div style="display:flex; gap:12px;">
+                                    <div class="kpi-mini" style="min-width:140px;">
+                                        <div class="kpi-mini-val" id="cap-fe-total">0h</div>
+                                        <div class="kpi-mini-lbl">Frontend Net</div>
+                                    </div>
+                                    <div class="kpi-mini" style="min-width:140px;">
+                                        <div class="kpi-mini-val" id="cap-be-total">0h</div>
+                                        <div class="kpi-mini-lbl">Backend Net</div>
+                                    </div>
+                                    <div class="kpi-mini" style="min-width:140px;">
+                                        <div class="kpi-mini-val" id="cap-net-total">0h</div>
+                                        <div class="kpi-mini-lbl">Total Net Capacity</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div id="sim-impact-msg" style="text-align:center; font-weight:800; font-size:14px; letter-spacing:0.05em;"></div>
-                    </div>
 
-                    <div class="card">
-                        <div class="card-title">Sprint Capacity Overview</div>
-                        <div id="capacity-summary"></div>
-                        <div class="table-responsive" style="margin-top:20px;">
-                            <table id="capacity-table">
-                                <thead><tr><th>Resource</th><th>Role</th><th>Available h</th><th>Planned h</th><th>Load %</th></tr></thead>
-                                <tbody id="capacity-body"></tbody>
-                            </table>
+                        <div class="card span-12">
+                            <div class="card-title">Select Resources & Assign Roles <span style="cursor:pointer; color:var(--accent);" onclick="toggleAllCapacityResources(true)">All</span> / <span style="cursor:pointer; color:var(--muted);" onclick="toggleAllCapacityResources(false)">None</span></div>
+                            <div class="table-responsive">
+                                <table id="capacity-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="width:40px;"><input type="checkbox" id="cap-check-all" onchange="toggleAllCapacityResources(this.checked)"></th>
+                                            <th>Resource</th>
+                                            <th>Original Role</th>
+                                            <th>Type (Override)</th>
+                                            <th style="text-align:right;">Raw Capacity (h)</th>
+                                            <th style="text-align:right;">Quotient (%)</th>
+                                            <th style="text-align:right;">Net Available (h)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="capacity-body"></tbody>
+                                </table>
+                            </div>
+                            <div id="capacity-summary" style="margin-top:16px; font-size:11px; color:var(--muted);"></div>
                         </div>
                     </div>
                 </div>
@@ -720,6 +799,19 @@
     Chart.register(ChartDataLabels);
     ChartDataLabels.defaults.display = false;
 
+    // ── Global Chart.js Styles (Dribbble-inspired) ──────────────────
+    Chart.defaults.elements.line.tension = 0.4;
+    Chart.defaults.elements.line.borderWidth = 3;
+    Chart.defaults.elements.line.fill = true;
+    Chart.defaults.elements.point.radius = 0;
+    Chart.defaults.elements.point.hoverRadius = 6;
+    Chart.defaults.font.family = "'DM Sans', sans-serif";
+    Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(15, 23, 42, 0.9)';
+    Chart.defaults.plugins.tooltip.padding = 12;
+    Chart.defaults.plugins.tooltip.cornerRadius = 8;
+    Chart.defaults.plugins.tooltip.titleFont = { size: 12, weight: '700' };
+    Chart.defaults.plugins.tooltip.bodyFont = { size: 12 };
+
     // ── CONFIG — single source of truth for all constants ────────────────────
     const CONFIG = {
         API_URL:        "https://script.google.com/macros/s/AKfycbx4OQ81fkE5LHkAG-yqAo2h37NC_9OoZrcIQ_MEAKx0uMjoeG6Ws8-E3VmEnc75Bo0l/exec",
@@ -729,7 +821,7 @@
         VARIANCE_FACTOR:1.2,
         VARIANCE_UNDER: 0.8,
         ACTIVE_DAYS:    14,
-        CHART_COLORS:   ['#004a99','#3b82f6','#10b981','#f59e0b','#8b5cf6','#ec4899','#14b8a6'],
+        CHART_COLORS:   ['#f97316', '#ea580c', '#fb923c', '#fdba74', '#1d9e75', '#e24b4a', '#ef9f27'],
         SYNC_INTERVAL_MS: 15 * 60 * 1000,
         // Fix #2: Added missing constant used by aging table badge threshold
         AGING_THRESHOLD_WORK_HRS: 16,
@@ -745,7 +837,7 @@
         },
         // ── Working hours configuration ───────────────────────────────────────
         WORK_HOURS: {
-            startHour: 9,
+            startHour: 10,
             endHour:   18,
             holidays: new Set([
                 '2026-01-01',  // New Year's Day
@@ -1425,8 +1517,8 @@
 
         const labels = {Budget: budgetRAG, Schedule: schedRAG, Resources: resRAG, Delivery: delivRAG};
         const ragHtml = Object.entries(labels).map(([lbl, rag]) => {
-            const cls = `rag-${rag}`;
-            return `<div class="rag-row"><span>${lbl}</span><div class="rag-dot ${cls}"></div></div>`;
+            const dotCls = rag === 'green' ? 'dot-g' : (rag === 'amber' ? 'dot-a' : 'dot-r');
+            return `<div class="rag-row"><span>${lbl}</span><div class="dot ${dotCls}"></div></div>`;
         }).join('');
         safeHTML('rag-sidebar', ragHtml);
 
@@ -1686,7 +1778,7 @@
 
     function switchTab(name) {
         document.querySelectorAll('.tab-panel').forEach(p => { p.classList.toggle('active', p.id === 'tab-' + name); });
-        document.querySelectorAll('.nav-tab').forEach(b => { b.classList.toggle('active', b.getAttribute('onclick')?.includes(`'${name}'`)); });
+        document.querySelectorAll('.nav-tabs .nav-tab').forEach(b => { b.classList.toggle('active', b.getAttribute('onclick')?.includes(`'${name}'`)); });
         // Fix #6: only re-render charts on tab switch, not full processData() re-aggregation
         if (name === 'program' && globalData._weeks) {
             const budget = parseFloat(document.getElementById('budgetLimit').value) || 0;
@@ -1713,7 +1805,17 @@
     }
     function jStatusColor(s) {
         const cat = jStatusCategory(s);
-        const map = { done:'#10b981', development:'#3b82f6', readyreview:'#8b5cf6', codereview:'#6366f1', readyqa:'#14b8a6', uat:'#0ea5e9', readydev:'#f59e0b', reopened:'#ef4444' };
+        // Orange-based palette for active development items
+        const map = { 
+            done: '#1d9e75', 
+            development: '#f97316', 
+            readyreview: '#ea580c', 
+            codereview: '#f59e0b', 
+            readyqa: '#14b8a6', 
+            uat: '#0ea5e9', 
+            readydev: '#a8957a', 
+            reopened: '#e24b4a' 
+        };
         return map[cat] || '#94a3b8';
     }
     function jAvatarColor(name) { return "#5e6ad2"; }
@@ -1726,9 +1828,15 @@
 
     function jPopulateSprintSelector() {
         const sel = document.getElementById("sprint-selector");
-        const seen = new Set(); (globalData.jiraIssues || []).forEach(i => { if (i.sprint) seen.add(i.sprint.trim()); });
+        const capSel = document.getElementById("cap-sprint-selector");
+        const seen = new Set(); 
+        (globalData.jiraIssues || []).forEach(i => { if (i.sprint) seen.add(i.sprint.trim()); });
         const sprints = [...seen].sort();
-        sel.innerHTML = sprints.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
+        
+        const optionsHtml = sprints.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join("");
+        if (sel) sel.innerHTML = optionsHtml;
+        if (capSel) capSel.innerHTML = optionsHtml;
+
         // Default to current sprint (sprint whose dates contain today), else last alphabetically
         const todayIso = toLocalISO(new Date());
         const cfg = globalData.jiraConfig || {};
@@ -1741,7 +1849,16 @@
             }
         }
         if (!currentSprint && sprints.length) currentSprint = sprints[sprints.length - 1];
-        if (currentSprint) sel.value = currentSprint;
+        
+        if (currentSprint) {
+            if (sel) sel.value = currentSprint;
+            if (capSel) capSel.value = currentSprint;
+        }
+
+        // Trigger capacity render if tab is visible
+        if (document.getElementById('tab-capacity')?.classList.contains('active')) {
+            renderCapacity();
+        }
     }
 
     function jRenderHighLevel() {
@@ -1972,68 +2089,46 @@
             });
         }
 
-        // ── Aging: Ready for Review ────────────────────────────────────────────
-        const rrIssues = issues.filter(i => (i.status||'').trim().toUpperCase() === 'READY FOR REVIEW');
-        const rrBody = document.getElementById('sv-ready-review-body');
-        const rrCount = document.getElementById('sv-ready-review-count');
-        if (rrBody) {
-            const aged = rrIssues.map(i => {
-                const scc = i.status_category_changed || '';
-                const hrs = scc ? workingHoursElapsed_(new Date(scc), new Date(), i.assignee) : null;
-                return { i, hrs };
-            }).filter(x => x.hrs !== null).sort((a,b) => b.hrs - a.hrs);
-            rrBody.innerHTML = aged.length
-                ? aged.map(({i, hrs}) => {
-                    const flag = hrs >= CONFIG.AGING_THRESHOLD_WORK_HRS ? 'badge-danger' : 'badge-warning';
-                    return `<tr><td><span class="jira-key">${esc(i.key)}</span></td><td>${esc(i.summary)}</td><td>${esc(i.assignee)}</td><td><span class="badge ${flag}">${hrs.toFixed(1)}h</span></td></tr>`;
-                }).join('')
-                : '<tr><td colspan="4" style="text-align:center;color:var(--color-text-tertiary);padding:12px;">No issues in Ready for Review</td></tr>';
-            if (rrCount) { rrCount.textContent = aged.length; rrCount.style.display = aged.length ? 'inline-block' : 'none'; }
-        }
-
-        // ── Aging: Code Review ─────────────────────────────────────────────────
-        const crIssues = issues.filter(i => (i.status||'').trim().toUpperCase() === 'CODE REVIEW' || (i.status||'').trim().toUpperCase() === 'IN REVIEW');
-        const crBody = document.getElementById('sv-code-review-body');
-        const crCount = document.getElementById('sv-code-review-count');
-        if (crBody) {
-            const aged = crIssues.map(i => {
-                const scc = i.status_category_changed || '';
-                const hrs = scc ? workingHoursElapsed_(new Date(scc), new Date(), i.assignee) : null;
-                return { i, hrs };
-            }).filter(x => x.hrs !== null).sort((a,b) => b.hrs - a.hrs);
-            crBody.innerHTML = aged.length
-                ? aged.map(({i, hrs}) => {
-                    const flag = hrs >= CONFIG.AGING_THRESHOLD_WORK_HRS ? 'badge-danger' : 'badge-warning';
-                    return `<tr><td><span class="jira-key">${esc(i.key)}</span></td><td>${esc(i.summary)}</td><td>${esc(i.assignee)}</td><td><span class="badge ${flag}">${hrs.toFixed(1)}h</span></td></tr>`;
-                }).join('')
-                : '<tr><td colspan="4" style="text-align:center;color:var(--color-text-tertiary);padding:12px;">No issues in Code Review</td></tr>';
-            if (crCount) { crCount.textContent = aged.length; crCount.style.display = aged.length ? 'inline-block' : 'none'; }
-        }
-
-        // ── Dev SLA Breaches ───────────────────────────────────────────────────
-        const slaBody  = document.getElementById('sla-breach-body');
-        const slaBadge = document.getElementById('sla-breach-count');
-        if (slaBody) {
-            const breaches = [];
+        // ── At-Risk Queue (Aging + SLA) ───────────────────────────────────────
+        const atRiskBody = document.getElementById('at-risk-body');
+        const atRiskBadge = document.getElementById('at-risk-count');
+        if (atRiskBody) {
+            const risks = [];
             issues.forEach(i => {
                 const cat = jStatusCategory(i.status);
-                if (!['development','readyreview','codereview','readyqa','uat'].includes(cat)) return;
-                const pts = Math.round(parseFloat(i.story_points) || 0);
-                const slaThresh = (CONFIG.DEV_SLA[pts] || CONFIG.DEV_SLA.default).over;
                 const scc = i.status_category_changed || '';
                 if (!scc) return;
                 const hrs = workingHoursElapsed_(new Date(scc), new Date(), i.assignee);
-                if (hrs > slaThresh + CONFIG.SLA_GRACE_HOURS) {
-                    breaches.push({ i, hrs, slaThresh });
+
+                // 1. SLA Check (In Progress only)
+                if (cat === 'development') {
+                    const ptsRaw = parseFloat(i.story_points);
+                    if (ptsRaw > 0) {
+                        const pts = Math.round(ptsRaw);
+                        const slaThresh = (CONFIG.DEV_SLA[pts] || CONFIG.DEV_SLA.default).over;
+                        if (hrs > slaThresh + CONFIG.SLA_GRACE_HOURS) {
+                            risks.push({ i, hrs, type: 'SLA Breach', label: `SLA ${slaThresh}h`, severity: 'danger' });
+                        }
+                    }
+                }
+                // 2. Ready Review Aging
+                if (cat === 'readyreview' && hrs >= CONFIG.AGING_THRESHOLD_WORK_HRS) {
+                    risks.push({ i, hrs, type: 'Ready Review', label: 'Aging', severity: 'warning' });
+                }
+                // 3. Code Review Aging
+                if (cat === 'codereview' && hrs >= CONFIG.AGING_THRESHOLD_WORK_HRS) {
+                    risks.push({ i, hrs, type: 'Code Review', label: 'Aging', severity: 'warning' });
                 }
             });
-            breaches.sort((a,b) => b.hrs - a.hrs);
-            slaBody.innerHTML = breaches.length
-                ? breaches.map(({i, hrs, slaThresh}) =>
-                    `<tr><td><span class="jira-key">${esc(i.key)}</span></td><td>${esc(i.summary)}</td><td><span class="badge" style="background:${jStatusColor(i.status)}22;color:${jStatusColor(i.status)};">${esc(i.status)}</span></td><td>${esc(i.assignee)}</td><td class="mono" style="color:var(--color-text-danger);">${hrs.toFixed(1)}</td><td class="mono">${slaThresh}</td></tr>`)
-                    .join('')
-                : '<tr><td colspan="6" style="text-align:center;color:var(--color-text-tertiary);padding:12px;">No SLA breaches ✓</td></tr>';
-            if (slaBadge) { slaBadge.textContent = breaches.length; slaBadge.style.display = breaches.length ? 'inline-block' : 'none'; }
+
+            risks.sort((a,b) => b.hrs - a.hrs);
+            atRiskBody.innerHTML = risks.length
+                ? risks.map(({i, hrs, type, label, severity}) => {
+                    const badgeClass = severity === 'danger' ? 'badge-danger' : 'badge-warning';
+                    return `<tr><td><span class="jira-key">${esc(i.key)}</span></td><td>${esc(i.summary)}</td><td>${esc(i.assignee)}</td><td>${type}</td><td><span class="badge ${badgeClass}">${hrs.toFixed(1)}h / ${label}</span></td></tr>`;
+                }).join('')
+                : '<tr><td colspan="5" style="text-align:center;color:var(--color-text-tertiary);padding:12px;">No risk items found ✓</td></tr>';
+            if (atRiskBadge) { atRiskBadge.textContent = risks.length; atRiskBadge.style.display = risks.length ? 'inline-block' : 'none'; }
         }
 
         // ── Resources Sprint Spend ───────────────────────────────────────────
@@ -2099,51 +2194,149 @@
         </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--color-text-tertiary);padding:16px;">No issues in this sprint</td></tr>';
     }
 
-    // Fix #7: Added missing renderCapacity() function — was never defined, tab was permanently hidden
+    // State for Capacity overrides and selections
+    let capacityState = {
+        selected: {}, // { "Person Name": true/false }
+        roleOverrides: {}, // { "Person Name": "FE" | "BE" | "Other" }
+        productivityQuotients: {} // { "Person Name": 0-100 }
+    };
+
+    function toggleAllCapacityResources(checked) {
+        const resSet = new Set();
+        (globalData.plan || []).forEach(p => p.person && resSet.add(p.person));
+        (globalData.actuals || []).forEach(r => r.Person && resSet.add(r.Person));
+        resSet.forEach(name => capacityState.selected[name] = checked);
+        renderCapacity();
+    }
+
+    function updateCapacityState(name, key, value) {
+        if (!capacityState[key]) capacityState[key] = {};
+        capacityState[key][name] = value;
+        renderCapacity();
+    }
+
+    // Fix #7: Refactored Capacity Planner with Productivity Quotient and Role Summaries
     function renderCapacity() {
-        const people  = globalData._people  || {};
-        const plan    = globalData.plan     || [];
-        const today   = toLocalISO(new Date());
-        const body    = document.getElementById('capacity-body');
-        const summary = document.getElementById('capacity-summary');
-        if (!body) return;
+        const sel = document.getElementById("cap-sprint-selector");
+        const sprintName = sel ? sel.value : "";
+        if (!sprintName) {
+            const body = document.getElementById("capacity-body");
+            if (body) body.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px; color:var(--color-text-tertiary);">Select a sprint to see capacity</td></tr>';
+            return;
+        }
 
-        // Gather next sprint / upcoming week planned hours per person
-        const upcoming = {};
-        plan.forEach(p => {
-            const d = parseDateSafe(p.dateStr);
-            if (!d || d < today) return;
-            if (!upcoming[p.person]) upcoming[p.person] = { role: p.role, planned: 0 };
-            upcoming[p.person].planned += (p.planH || 0);
-        });
+        const globalQSlider = document.getElementById("cap-quotient-slider");
+        const globalQuotient = (globalQSlider ? parseFloat(globalQSlider.value) : 90);
 
-        const rows = Object.keys(upcoming).sort().map(name => {
-            const available = 40; // standard weekly capacity
-            const planned   = upcoming[name].planned;
-            const loadPct   = available > 0 ? Math.round((planned / available) * 100) : 0;
-            const cls       = loadPct > 100 ? 'color:var(--color-text-danger)' : loadPct >= 80 ? 'color:var(--color-text-warning)' : 'color:var(--color-text-success)';
+        const cfg = globalData.jiraConfig || {};
+        const sprintDates = (cfg.sprint_dates || {})[sprintName] || {};
+        let sprintStart = sprintDates.start ? new Date(sprintDates.start) : null;
+        let sprintEnd = sprintDates.end ? new Date(sprintDates.end) : null;
+
+        // Force sprint range: Monday Week 1 (10:00) to Friday Week 2 (18:00) = 80h Base
+        if (sprintStart) {
+            const day = sprintStart.getDay();
+            if (day === 0) sprintStart.setDate(sprintStart.getDate() + 1);
+            else if (day === 6) sprintStart.setDate(sprintStart.getDate() + 2);
+            sprintStart.setHours(10, 0, 0, 0);
+        }
+        if (sprintEnd) {
+            sprintEnd.setHours(18, 0, 0, 0);
+        }
+
+        const body = document.getElementById("capacity-body");
+        if (!body || !sprintStart || !sprintEnd) return;
+
+        const resources = {};
+        (globalData.plan || []).forEach(p => { if (p.person && !resources[p.person]) resources[p.person] = p.role || "Unassigned"; });
+        (globalData.actuals || []).forEach(r => { if (r.Person && !resources[r.Person]) resources[r.Person] = r.Role || "Unassigned"; });
+
+        let totalFE = 0, totalBE = 0, totalNet = 0;
+        const rows = Object.keys(resources).sort().map(name => {
+            const originalRole = resources[name];
+            const isSelected = capacityState.selected[name] !== false;
+            
+            if (!capacityState.roleOverrides[name]) {
+                capacityState.roleOverrides[name] = /frontend|fe/i.test(originalRole) ? "FE" : (/backend|be/i.test(originalRole) ? "BE" : "Other");
+            }
+            const roleOverride = capacityState.roleOverrides[name];
+            
+            // Individual Productivity Quotient
+            const individualQ = capacityState.productivityQuotients[name] ?? globalQuotient;
+            const quotientDecimal = individualQ / 100;
+
+            const weekdayH = (() => {
+                let h=0, d=new Date(sprintStart);
+                while(d <= sprintEnd) { if(d.getDay()!==0 && d.getDay()!==6) h+=8; d.setDate(d.getDate()+1); }
+                return h;
+            })();
+
+            const personalH = workingHoursElapsed_(sprintStart, sprintEnd, name);
+            const holidayH = weekdayH - workingHoursElapsed_(sprintStart, sprintEnd, null);
+            const ptoH = weekdayH - holidayH - personalH;
+
+            const planForPerson = (globalData.plan || []).filter(p => p.person === name);
+            const sprintWeeks = [];
+            let currMon = getMonday(toLocalISO(sprintStart));
+            const endMon = getMonday(toLocalISO(sprintEnd));
+            while(currMon <= endMon) { sprintWeeks.push(currMon); currMon = getMonday(new Date(new Date(currMon).getTime() + 604800000)); }
+            const totalPlannedH = planForPerson.filter(p => sprintWeeks.includes(getMonday(p.dateStr))).reduce((sum, p) => sum + (p.planH || 0), 0);
+            const avgPlannedH = sprintWeeks.length ? (totalPlannedH / sprintWeeks.length) : 0;
+            const allocationFactor = avgPlannedH > 0 ? (avgPlannedH / 40) : 1.0; 
+
+            const rawH = personalH * allocationFactor;
+            const netH = rawH * quotientDecimal;
+
+            if (isSelected) {
+                if (roleOverride === "FE") totalFE += netH;
+                if (roleOverride === "BE") totalBE += netH;
+                totalNet += netH;
+            }
+
+            const explanation = `<div style="font-size:9px; color:var(--color-text-tertiary); line-height:1.2; margin-top:2px;">
+                ${weekdayH}h base - ${holidayH}h holiday - ${ptoH}h PTO<br>
+                × ${(allocationFactor * 100).toFixed(0)}% allocation
+            </div>`;
+
             return `<tr>
+                <td><input type="checkbox" ${isSelected ? 'checked' : ''} onchange="updateCapacityState('${esc(name)}', 'selected', this.checked)"></td>
                 <td><strong>${esc(name)}</strong></td>
-                <td>${esc(upcoming[name].role)}</td>
-                <td class="mono">${available}h</td>
-                <td class="mono">${planned.toFixed(1)}h</td>
-                <td class="mono" style="${cls}">${loadPct}%</td>
+                <td>${esc(originalRole)}</td>
+                <td>
+                    <select onchange="updateCapacityState('${esc(name)}', 'roleOverrides', this.value)" style="font-size:11px; padding:2px 4px; border-radius:4px; border:1px solid var(--color-border); background:transparent; color:inherit;">
+                        <option value="FE" ${roleOverride==='FE'?'selected':''}>FE</option>
+                        <option value="BE" ${roleOverride==='BE'?'selected':''}>BE</option>
+                        <option value="Other" ${roleOverride==='Other'?'selected':''}>Other</option>
+                    </select>
+                </td>
+                <td style="text-align:right;" class="mono">
+                    <strong>${rawH.toFixed(1)}h</strong>
+                    ${explanation}
+                </td>
+                <td style="text-align:right; width:160px;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <input type="range" min="10" max="100" step="5" value="${individualQ}" 
+                               oninput="this.nextElementSibling.textContent = this.value + '%'"
+                               onchange="updateCapacityState('${esc(name)}', 'productivityQuotients', parseInt(this.value))" 
+                               style="width:100px;">
+                        <span class="mono" style="font-size:11px; width:30px;">${individualQ}%</span>
+                    </div>
+                </td>
+                <td style="text-align:right;" class="mono" style="font-weight:600; color:${isSelected?'var(--color-accent)':'var(--color-text-tertiary)'};">${netH.toFixed(1)}h</td>
             </tr>`;
         });
 
-        body.innerHTML = rows.length
-            ? rows.join('')
-            : '<tr><td colspan="5" style="text-align:center;color:var(--color-text-tertiary);padding:16px;">No upcoming planned hours found</td></tr>';
+        body.innerHTML = rows.length ? rows.join("") : '<tr><td colspan="7" style="text-align:center; padding:20px;">No resources found</td></tr>';
+        
+        safeText("cap-fe-total", `${totalFE.toFixed(0)}h`);
+        safeText("cap-be-total", `${totalBE.toFixed(0)}h`);
+        safeText("cap-net-total", `${totalNet.toFixed(0)}h`);
 
+        const summary = document.getElementById("capacity-summary");
         if (summary) {
-            const over = Object.values(upcoming).filter(p => p.planned > 40).length;
-            summary.innerHTML = `<span style="font-size:11px;color:var(--color-text-secondary);">${Object.keys(upcoming).length} resources with upcoming plan · <span style="color:var(--color-text-danger);">${over} over 40h</span></span>`;
+            summary.innerHTML = `<span style="font-size:11px; color:var(--color-text-secondary);">Sprint range: <strong>${formatDateForUI(toLocalISO(sprintStart))}</strong> to <strong>${formatDateForUI(toLocalISO(sprintEnd))}</strong> · 
+                Calculated for ${Object.keys(resources).length} resources. PTO/Holidays automatically subtracted.</span>`;
         }
-
-        // update what-if slider default
-        const weeks = globalData._weeks || {};
-        const totals = globalData._totals || { hours: 0 };
-        initVelocitySimulation(weeks, totals, globalData._eacRem || 0);
     }
 
     window.onload = fetchData;
