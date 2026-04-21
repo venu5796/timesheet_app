@@ -1,0 +1,353 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font-sans,system-ui,sans-serif);}
+.shell{display:grid;grid-template-columns:180px 1fr;border-radius:12px;overflow:hidden;}
+
+.sb-dark{background:#1a1a1a;padding:16px;display:flex;flex-direction:column;gap:12px;}
+.sb-light{background:#f5f0e8;padding:16px;display:flex;flex-direction:column;gap:12px;}
+
+.sb-logo{display:flex;align-items:center;gap:8px;}
+.sb-logomark{width:22px;height:22px;background:#f97316;border-radius:6px;flex-shrink:0;}
+.sb-logotext-dark{font-size:13px;font-weight:500;color:#f8fafc;}
+.sb-logotext-light{font-size:13px;font-weight:500;color:#1a1a1a;}
+
+.div-dark{height:0.5px;background:rgba(255,255,255,0.1);}
+.div-light{height:0.5px;background:rgba(0,0,0,0.1);}
+
+.sbl-dark{font-size:9px;font-weight:500;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:.08em;}
+.sbl-light{font-size:9px;font-weight:500;color:#a8957a;text-transform:uppercase;letter-spacing:.08em;}
+
+.rag-dark{display:flex;align-items:center;justify-content:space-between;padding:7px 9px;border-radius:7px;background:rgba(255,255,255,0.05);border:0.5px solid rgba(255,255,255,0.1);}
+.rag-light{display:flex;align-items:center;justify-content:space-between;padding:7px 9px;border-radius:7px;background:rgba(0,0,0,0.04);border:0.5px solid rgba(0,0,0,0.08);}
+.rag-lbl-dark{font-size:11px;color:rgba(255,255,255,0.65);}
+.rag-lbl-light{font-size:11px;color:#4a3f32;}
+.dot{width:7px;height:7px;border-radius:50%;}
+.dot-g{background:#1d9e75;}.dot-a{background:#ef9f27;}.dot-r{background:#e24b4a;}
+
+.fin-dark{padding:9px;border-radius:7px;background:rgba(255,255,255,0.05);border:0.5px solid rgba(255,255,255,0.12);}
+.fin-light{padding:9px;border-radius:7px;background:rgba(0,0,0,0.04);border:0.5px solid rgba(0,0,0,0.07);}
+.fin-val-dark{font-size:17px;font-weight:500;color:#f8fafc;font-family:var(--font-mono,monospace);letter-spacing:-0.02em;}
+.fin-val-light{font-size:17px;font-weight:500;color:#1a1a1a;font-family:var(--font-mono,monospace);letter-spacing:-0.02em;}
+.fin-lbl-dark{font-size:10px;color:rgba(255,255,255,0.35);margin-top:2px;}
+.fin-lbl-light{font-size:10px;color:#a8957a;margin-top:2px;}
+
+.risk-dark{padding:8px 10px;border-left:3px solid #e24b4a;border-radius:0 7px 7px 0;background:rgba(228,75,74,0.12);}
+.risk-light{padding:8px 10px;border-left:3px solid #e24b4a;border-radius:0 7px 7px 0;background:rgba(228,75,74,0.08);}
+.risk-lbl-dark{font-size:9px;color:rgba(255,255,255,0.35);}
+.risk-lbl-light{font-size:9px;color:#a8957a;}
+.risk-val-dark{font-size:14px;font-weight:500;color:#f09595;}
+.risk-val-light{font-size:14px;font-weight:500;color:#a32d2d;}
+
+.main-dark{padding:16px;display:flex;flex-direction:column;gap:10px;background:#0d1117;}
+.main-light{padding:16px;display:flex;flex-direction:column;gap:10px;background:#faf8f4;}
+
+.topbar-dark{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.04);border:0.5px solid rgba(255,255,255,0.12);border-radius:10px;padding:8px 14px;}
+.topbar-light{display:flex;align-items:center;justify-content:space-between;background:#fff;border:0.5px solid #e8e0d4;border-radius:10px;padding:8px 14px;}
+
+.tab-dark{font-size:11px;padding:4px 10px;border-radius:6px;color:rgba(255,255,255,0.35);}
+.tab-dark.on{background:rgba(255,255,255,0.08);color:#f8fafc;font-weight:500;border:0.5px solid rgba(255,255,255,0.15);}
+.tab-light{font-size:11px;padding:4px 10px;border-radius:6px;color:#78716c;}
+.tab-light.on{background:#f0ebe2;color:#1a1a1a;font-weight:500;}
+
+.sync-btn{font-size:11px;padding:4px 12px;border-radius:6px;background:#f97316;color:#fff;border:none;font-weight:500;}
+
+.insight-dark{display:flex;gap:10px;align-items:flex-start;padding:11px 13px;border-radius:0 10px 10px 0;background:rgba(249,115,22,0.07);border-left:3px solid #f97316;}
+.insight-light{display:flex;gap:10px;align-items:flex-start;padding:11px 13px;border-radius:0 10px 10px 0;background:#fff8f2;border-left:3px solid #ea580c;border-top:0.5px solid #e8e0d4;border-right:0.5px solid #e8e0d4;border-bottom:0.5px solid #e8e0d4;}
+.itag-dark{font-size:9px;font-weight:500;color:#fdba74;background:rgba(249,115,22,0.18);padding:1px 7px;border-radius:4px;display:inline-block;margin-bottom:4px;}
+.itag-light{font-size:9px;font-weight:500;color:#9a3412;background:#ffedd5;padding:1px 7px;border-radius:4px;display:inline-block;margin-bottom:4px;}
+.itext-dark{font-size:11px;color:rgba(255,255,255,0.65);line-height:1.5;}
+.itext-light{font-size:11px;color:#44403c;line-height:1.5;}
+
+.kpi-strip{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:10px;}
+.kpi-dark{background:rgba(255,255,255,0.04);border:0.5px solid rgba(255,255,255,0.14);border-radius:10px;padding:13px 15px;}
+.kpi-dark.lead{border-left:3px solid #f97316;border-radius:0 10px 10px 0;background:rgba(249,115,22,0.07);}
+.kpi-light{background:#fff;border:0.5px solid #e8e0d4;border-radius:10px;padding:13px 15px;}
+.kpi-light.lead{border-left:3px solid #ea580c;border-radius:0 10px 10px 0;background:#fff8f2;}
+.klbl-dark{font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:5px;font-weight:500;}
+.klbl-light{font-size:10px;color:#a8957a;margin-bottom:5px;font-weight:500;}
+.kval-dark{font-size:24px;font-weight:500;color:#f8fafc;font-family:var(--font-mono,monospace);letter-spacing:-0.02em;}
+.kval-dark.big{font-size:30px;}
+.kval-light{font-size:24px;font-weight:500;color:#1a1a1a;font-family:var(--font-mono,monospace);letter-spacing:-0.02em;}
+.kval-light.big{font-size:30px;color:#c2410c;}
+
+.b-ok{display:inline-block;font-size:9px;font-weight:500;padding:2px 7px;border-radius:4px;margin-top:5px;background:#eaf3de;color:#3b6d11;}
+.b-warn{display:inline-block;font-size:9px;font-weight:500;padding:2px 7px;border-radius:4px;margin-top:5px;background:#faeeda;color:#854f0b;}
+.b-bad{display:inline-block;font-size:9px;font-weight:500;padding:2px 7px;border-radius:4px;margin-top:5px;background:#fcebeb;color:#a32d2d;}
+
+.two-col{display:grid;grid-template-columns:1.6fr 1fr;gap:10px;}
+.card-dark{background:rgba(255,255,255,0.04);border:0.5px solid rgba(255,255,255,0.14);border-radius:10px;padding:13px;}
+.card-light{background:#fff;border:0.5px solid #e8e0d4;border-radius:10px;padding:13px;}
+.clbl-dark{font-size:10px;font-weight:500;color:rgba(255,255,255,0.4);margin-bottom:10px;display:flex;justify-content:space-between;}
+.clbl-light{font-size:10px;font-weight:500;color:#a8957a;margin-bottom:10px;display:flex;justify-content:space-between;}
+
+.chart-dark{background:rgba(255,255,255,0.03);border-radius:6px;height:100px;display:flex;align-items:flex-end;gap:4px;padding:8px;}
+.chart-light{background:#faf8f4;border-radius:6px;height:100px;display:flex;align-items:flex-end;gap:4px;padding:8px;}
+.bar{border-radius:3px 3px 0 0;flex:1;}
+
+.pr-dark{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:0.5px solid rgba(255,255,255,0.06);font-size:10px;}
+.pr-light{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:0.5px solid #ede8df;font-size:10px;}
+.pr-dark:last-child,.pr-light:last-child{border-bottom:none;}
+.pn-dark{flex:1;color:rgba(255,255,255,0.8);font-weight:500;}
+.pn-light{flex:1;color:#2c2418;font-weight:500;}
+.pa-dark{color:rgba(255,255,255,0.35);font-family:var(--font-mono,monospace);font-size:9px;width:64px;text-align:right;}
+.pa-light{color:#a8957a;font-family:var(--font-mono,monospace);font-size:9px;width:64px;text-align:right;}
+.prog{height:3px;border-radius:2px;overflow:hidden;width:44px;}
+.prog-bg-dark{background:rgba(255,255,255,0.08);}
+.prog-bg-light{background:#ede8df;}
+.prog-fill{height:100%;border-radius:2px;}
+
+.heat-cell{font-size:9px;flex:1;text-align:center;padding:4px 2px;border-radius:5px;font-family:var(--font-mono,monospace);}
+.h-r{background:#fcebeb;color:#a32d2d;}
+.h-g{background:#eaf3de;color:#3b6d11;}
+.h-a{background:#faeeda;color:#854f0b;}
+.h-0d{background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.2);}
+.h-0l{background:#f5f0e8;color:#c4b49a;}
+.heat-row{display:flex;gap:5px;align-items:center;margin-bottom:4px;}
+.hn-dark{font-size:10px;color:rgba(255,255,255,0.6);font-weight:500;width:72px;}
+.hn-light{font-size:10px;color:#44403c;font-weight:500;width:72px;}
+.wk-dark{flex:1;text-align:center;font-size:9px;color:rgba(255,255,255,0.22);}
+.wk-light{flex:1;text-align:center;font-size:9px;color:#c4b49a;}
+
+.mode-label{font-size:11px;font-weight:500;color:var(--color-text-tertiary);padding:6px 0 4px;letter-spacing:0.03em;}
+</style>
+
+<div style="padding:1rem 0;display:flex;flex-direction:column;gap:20px;">
+
+<div class="mode-label">Dark mode — charcoal sidebar, orange accent, white borders</div>
+<div class="shell" style="border:0.5px solid rgba(255,255,255,0.12);">
+  <div class="sb-dark">
+    <div class="sb-logo">
+      <div class="sb-logomark"></div>
+      <span class="sb-logotext-dark">Control Tower</span>
+    </div>
+    <div class="div-dark"></div>
+    <div style="display:flex;flex-direction:column;gap:5px;">
+      <div class="sbl-dark">Health</div>
+      <div class="rag-dark"><span class="rag-lbl-dark">Budget</span><div class="dot dot-a"></div></div>
+      <div class="rag-dark"><span class="rag-lbl-dark">Schedule</span><div class="dot dot-g"></div></div>
+      <div class="rag-dark"><span class="rag-lbl-dark">Resources</span><div class="dot dot-a"></div></div>
+      <div class="rag-dark"><span class="rag-lbl-dark">Delivery</span><div class="dot dot-r"></div></div>
+    </div>
+    <div class="div-dark"></div>
+    <div style="display:flex;flex-direction:column;gap:5px;">
+      <div class="sbl-dark">Financials</div>
+      <div class="fin-dark"><div class="fin-val-dark">€189k</div><div class="fin-lbl-dark">Total burn</div></div>
+      <div class="fin-dark"><div class="fin-val-dark">€263k</div><div class="fin-lbl-dark">Forecast (EAC)</div></div>
+      <div class="fin-dark"><div class="fin-val-dark">€62k</div><div class="fin-lbl-dark">Remaining</div></div>
+    </div>
+    <div class="div-dark"></div>
+    <div style="display:flex;flex-direction:column;gap:5px;">
+      <div class="sbl-dark">Projection</div>
+      <div class="fin-dark"><div class="fin-val-dark">6.8 wks</div><div class="fin-lbl-dark">Budget runway</div></div>
+      <div class="fin-dark"><div class="fin-val-dark">14 Jun</div><div class="fin-lbl-dark">Projected finish</div></div>
+    </div>
+    <div class="div-dark"></div>
+    <div class="risk-dark">
+      <div class="risk-lbl-dark">Overall risk</div>
+      <div class="risk-val-dark">Critical</div>
+    </div>
+  </div>
+
+  <div class="main-dark">
+    <div class="topbar-dark">
+      <div style="display:flex;gap:4px;">
+        <div class="tab-dark on">Program</div>
+        <div class="tab-dark">Jira — High Level</div>
+        <div class="tab-dark">Jira — Sprint</div>
+        <div class="tab-dark">Capacity</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:10px;color:rgba(255,255,255,0.25);font-family:var(--font-mono,monospace);">Synced 14:32</span>
+        <button class="sync-btn">Sync</button>
+      </div>
+    </div>
+
+    <div class="insight-dark">
+      <div>
+        <div class="itag-dark">Runway alert</div>
+        <div class="itext-dark">EAC exceeds cap by <strong style="color:#fdba74;">€12,400</strong>. At €9.1k/wk burn, budget exhausts in <strong style="color:#fdba74;">4.2 weeks</strong>.</div>
+      </div>
+    </div>
+
+    <div class="kpi-strip">
+      <div class="kpi-dark lead">
+        <div class="klbl-dark">Velocity — alloc vs spend</div>
+        <div class="kval-dark big">47.2h</div>
+        <div class="b-ok">Optimum</div>
+      </div>
+      <div class="kpi-dark">
+        <div class="klbl-dark">Non-billable</div>
+        <div class="kval-dark">18%</div>
+        <div class="b-warn">Moderate</div>
+      </div>
+      <div class="kpi-dark">
+        <div class="klbl-dark">Burn rate</div>
+        <div class="kval-dark">€9.1k</div>
+        <div class="b-warn">On Budget</div>
+      </div>
+      <div class="kpi-dark">
+        <div class="klbl-dark">EAC confidence</div>
+        <div class="kval-dark">Med</div>
+        <div class="b-warn">6 wks planned</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="card-dark">
+        <div class="clbl-dark">Cumulative burn <span style="color:rgba(255,255,255,0.18);">vs budget cap</span></div>
+        <div class="chart-dark">
+          <div class="bar" style="height:28%;background:rgba(249,115,22,0.15);"></div>
+          <div class="bar" style="height:40%;background:rgba(249,115,22,0.25);"></div>
+          <div class="bar" style="height:54%;background:rgba(249,115,22,0.38);"></div>
+          <div class="bar" style="height:63%;background:rgba(249,115,22,0.52);"></div>
+          <div class="bar" style="height:72%;background:rgba(249,115,22,0.68);"></div>
+          <div class="bar" style="height:80%;background:#f97316;"></div>
+          <div class="bar" style="height:90%;background:#ea580c;border:0.5px solid rgba(255,255,255,0.2);"></div>
+          <div style="width:0.5px;background:#e24b4a;align-self:stretch;margin:0 2px;"></div>
+          <div class="bar" style="height:96%;background:rgba(249,115,22,0.08);border:1px dashed rgba(249,115,22,0.25);"></div>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:6px;">
+          <span style="font-size:9px;color:rgba(255,255,255,0.3);display:flex;align-items:center;gap:4px;"><span style="width:10px;height:3px;background:#f97316;border-radius:2px;display:inline-block;"></span>Actual</span>
+          <span style="font-size:9px;color:rgba(255,255,255,0.3);display:flex;align-items:center;gap:4px;"><span style="width:10px;height:1px;background:#e24b4a;display:inline-block;"></span>Budget cap</span>
+        </div>
+      </div>
+      <div class="card-dark">
+        <div class="clbl-dark">Phase performance</div>
+        <div class="pr-dark"><span class="pn-dark">Discovery</span><span class="pa-dark">€42k/€40k</span><div class="prog prog-bg-dark"><div class="prog-fill" style="width:100%;background:#e24b4a;"></div></div><span class="b-bad">Overrun</span></div>
+        <div class="pr-dark"><span class="pn-dark">Build</span><span class="pa-dark">€88k/€100k</span><div class="prog prog-bg-dark"><div class="prog-fill" style="width:88%;background:#f97316;"></div></div><span class="b-ok">On track</span></div>
+        <div class="pr-dark"><span class="pn-dark">UAT</span><span class="pa-dark">€12k/€30k</span><div class="prog prog-bg-dark"><div class="prog-fill" style="width:40%;background:#ef9f27;"></div></div><span class="b-warn">Near cap</span></div>
+      </div>
+    </div>
+
+    <div class="card-dark">
+      <div class="clbl-dark">Resource heatmap <span style="color:rgba(255,255,255,0.18);">spend / alloc · last 4 weeks</span></div>
+      <div style="display:flex;gap:5px;padding-left:77px;margin-bottom:5px;">
+        <div class="wk-dark">Mar 31</div><div class="wk-dark">Apr 7</div><div class="wk-dark">Apr 14</div><div class="wk-dark">Apr 21</div>
+      </div>
+      <div class="heat-row"><span class="hn-dark">Alice M.</span><div class="heat-cell h-g">30/32</div><div class="heat-cell h-r">38/32</div><div class="heat-cell h-g">31/32</div><div class="heat-cell h-g">32/32</div></div>
+      <div class="heat-row"><span class="hn-dark">Ben T.</span><div class="heat-cell h-g">22/24</div><div class="heat-cell h-g">24/24</div><div class="heat-cell h-a">16/24</div><div class="heat-cell h-0d">–</div></div>
+      <div class="heat-row"><span class="hn-dark">Priya R.</span><div class="heat-cell h-r">46/40</div><div class="heat-cell h-g">39/40</div><div class="heat-cell h-g">40/40</div><div class="heat-cell h-g">38/40</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="mode-label">Light mode — linen sidebar, dark tangerine accent (#ea580c)</div>
+<div class="shell" style="border:0.5px solid #ddd5c8;">
+  <div class="sb-light">
+    <div class="sb-logo">
+      <div class="sb-logomark"></div>
+      <span class="sb-logotext-light">Control Tower</span>
+    </div>
+    <div class="div-light"></div>
+    <div style="display:flex;flex-direction:column;gap:5px;">
+      <div class="sbl-light">Health</div>
+      <div class="rag-light"><span class="rag-lbl-light">Budget</span><div class="dot dot-a"></div></div>
+      <div class="rag-light"><span class="rag-lbl-light">Schedule</span><div class="dot dot-g"></div></div>
+      <div class="rag-light"><span class="rag-lbl-light">Resources</span><div class="dot dot-a"></div></div>
+      <div class="rag-light"><span class="rag-lbl-light">Delivery</span><div class="dot dot-r"></div></div>
+    </div>
+    <div class="div-light"></div>
+    <div style="display:flex;flex-direction:column;gap:5px;">
+      <div class="sbl-light">Financials</div>
+      <div class="fin-light"><div class="fin-val-light">€189k</div><div class="fin-lbl-light">Total burn</div></div>
+      <div class="fin-light"><div class="fin-val-light">€263k</div><div class="fin-lbl-light">Forecast (EAC)</div></div>
+      <div class="fin-light"><div class="fin-val-light">€62k</div><div class="fin-lbl-light">Remaining</div></div>
+    </div>
+    <div class="div-light"></div>
+    <div style="display:flex;flex-direction:column;gap:5px;">
+      <div class="sbl-light">Projection</div>
+      <div class="fin-light"><div class="fin-val-light">6.8 wks</div><div class="fin-lbl-light">Budget runway</div></div>
+      <div class="fin-light"><div class="fin-val-light">14 Jun</div><div class="fin-lbl-light">Projected finish</div></div>
+    </div>
+    <div class="div-light"></div>
+    <div class="risk-light">
+      <div class="risk-lbl-light">Overall risk</div>
+      <div class="risk-val-light">Critical</div>
+    </div>
+  </div>
+
+  <div class="main-light">
+    <div class="topbar-light">
+      <div style="display:flex;gap:4px;">
+        <div class="tab-light on">Program</div>
+        <div class="tab-light">Jira — High Level</div>
+        <div class="tab-light">Jira — Sprint</div>
+        <div class="tab-light">Capacity</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:10px;color:#c4b49a;font-family:var(--font-mono,monospace);">Synced 14:32</span>
+        <button class="sync-btn">Sync</button>
+      </div>
+    </div>
+
+    <div class="insight-light">
+      <div>
+        <div class="itag-light">Runway alert</div>
+        <div class="itext-light">EAC exceeds cap by <strong>€12,400</strong>. At €9.1k/wk burn, budget exhausts in <strong>4.2 weeks</strong>.</div>
+      </div>
+    </div>
+
+    <div class="kpi-strip">
+      <div class="kpi-light lead">
+        <div class="klbl-light">Velocity — alloc vs spend</div>
+        <div class="kval-light big">47.2h</div>
+        <div class="b-ok">Optimum</div>
+      </div>
+      <div class="kpi-light">
+        <div class="klbl-light">Non-billable</div>
+        <div class="kval-light">18%</div>
+        <div class="b-warn">Moderate</div>
+      </div>
+      <div class="kpi-light">
+        <div class="klbl-light">Burn rate</div>
+        <div class="kval-light">€9.1k</div>
+        <div class="b-warn">On Budget</div>
+      </div>
+      <div class="kpi-light">
+        <div class="klbl-light">EAC confidence</div>
+        <div class="kval-light">Med</div>
+        <div class="b-warn">6 wks planned</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="card-light">
+        <div class="clbl-light">Cumulative burn <span style="color:#c4b49a;font-weight:400;">vs budget cap</span></div>
+        <div class="chart-light">
+          <div class="bar" style="height:28%;background:#ffedd5;"></div>
+          <div class="bar" style="height:40%;background:#fed7aa;"></div>
+          <div class="bar" style="height:54%;background:#fb923c;"></div>
+          <div class="bar" style="height:63%;background:#f97316;"></div>
+          <div class="bar" style="height:72%;background:#ea580c;"></div>
+          <div class="bar" style="height:80%;background:#c2410c;"></div>
+          <div class="bar" style="height:90%;background:#9a3412;border:0.5px solid #e8e0d4;"></div>
+          <div style="width:0.5px;background:#e24b4a;align-self:stretch;margin:0 2px;"></div>
+          <div class="bar" style="height:96%;background:#fff7ed;border:1px dashed #fed7aa;"></div>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:6px;">
+          <span style="font-size:9px;color:#a8957a;display:flex;align-items:center;gap:4px;"><span style="width:10px;height:3px;background:#ea580c;border-radius:2px;display:inline-block;"></span>Actual</span>
+          <span style="font-size:9px;color:#a8957a;display:flex;align-items:center;gap:4px;"><span style="width:10px;height:1px;background:#e24b4a;display:inline-block;"></span>Budget cap</span>
+        </div>
+      </div>
+      <div class="card-light">
+        <div class="clbl-light">Phase performance</div>
+        <div class="pr-light"><span class="pn-light">Discovery</span><span class="pa-light">€42k/€40k</span><div class="prog prog-bg-light"><div class="prog-fill" style="width:100%;background:#e24b4a;"></div></div><span class="b-bad">Overrun</span></div>
+        <div class="pr-light"><span class="pn-light">Build</span><span class="pa-light">€88k/€100k</span><div class="prog prog-bg-light"><div class="prog-fill" style="width:88%;background:#ea580c;"></div></div><span class="b-ok">On track</span></div>
+        <div class="pr-light"><span class="pn-light">UAT</span><span class="pa-light">€12k/€30k</span><div class="prog prog-bg-light"><div class="prog-fill" style="width:40%;background:#ef9f27;"></div></div><span class="b-warn">Near cap</span></div>
+      </div>
+    </div>
+
+    <div class="card-light">
+      <div class="clbl-light">Resource heatmap <span style="color:#c4b49a;font-weight:400;">spend / alloc · last 4 weeks</span></div>
+      <div style="display:flex;gap:5px;padding-left:77px;margin-bottom:5px;">
+        <div class="wk-light">Mar 31</div><div class="wk-light">Apr 7</div><div class="wk-light">Apr 14</div><div class="wk-light">Apr 21</div>
+      </div>
+      <div class="heat-row"><span class="hn-light">Alice M.</span><div class="heat-cell h-g">30/32</div><div class="heat-cell h-r">38/32</div><div class="heat-cell h-g">31/32</div><div class="heat-cell h-g">32/32</div></div>
+      <div class="heat-row"><span class="hn-light">Ben T.</span><div class="heat-cell h-g">22/24</div><div class="heat-cell h-g">24/24</div><div class="heat-cell h-a">16/24</div><div class="heat-cell h-0l">–</div></div>
+      <div class="heat-row"><span class="hn-light">Priya R.</span><div class="heat-cell h-r">46/40</div><div class="heat-cell h-g">39/40</div><div class="heat-cell h-g">40/40</div><div class="heat-cell h-g">38/40</div></div>
+    </div>
+  </div>
+</div>
+
+</div>

@@ -1,105 +1,127 @@
 # Acquia Program Control Tower — Technical Documentation
 
-> Version: 3.1 | Source: `index.html` | Format: Single-page HTML application
+> Version: 4.5 | Source: `index.html` | Format: Single-page HTML application
 
 ---
 
 ## 1. Overview
 
-The **Acquia Program Control Tower** is a high-fidelity, interactive single-page dashboard designed for senior project managers and stakeholders. It provides real-time visibility into project finances, resource utilisation, and Jira-based development velocity across four dedicated tabs. Version 3.1 introduces a more robust tab-switching engine and enhanced sprint-aware data normalization.
+The **Acquia Program Control Tower** is a premium, executive-grade dashboard designed for high-fidelity project management. v4.5 refines the **Capacity Analysis Engine** to exclusively target development roles while calculating targeted PTO deductions, and includes **Dual-Threshold SLA Warnings** for development work items, enabling early visibility into at-risk tickets before hard SLA breaches. The application combines real-time financial tracking, Jira development velocity analytics, sophisticated resource modelling, and proactive risk flagging to provide a "single source of truth" for program stakeholders.
 
 ---
 
-## 2. Key Features & Layout
+## 2. Interface Architecture
 
-### 2.1 Persistent Sidebar (Global Overview)
-The sidebar remains visible across all tabs, providing a constant "cockpit" view of the most critical health metrics:
-- **Logo & Brand Area:** Program identity.
-- **Critical Health (RAG):** Dynamic status dots for Budget, Schedule, Resources, and Delivery.
-- **Overall Risk Badge:** Automated assessment (Low/Moderate/Critical) based on budget burn, EAC forecast, and planning depth.
-- **Core Financials:** Real-time Burned (€), Remaining, and Forecast (EAC) values.
-- **Budget Runway:** Dynamic calculation of remaining weeks based on recent 4-week average burn rate.
-- **Projected Finish:** Date estimate based on the furthest scheduled task in the `plan` dataset.
-- **Budget Cap Control:** Inline editable input to adjust the project's financial ceiling.
+### 2.1 Fixed Executive Sidebar (Desktop)
+A permanent 180px left-hand sidebar providing high-level program vitals:
+- **Health Indicators:** Compact RAG cards (Budget, Schedule, Resources, Delivery) using high-fidelity status dots (Green, Amber, Red).
+- **Financial Pulse:** Quick-view mini-cards for **Total Burn**, **Forecast (EAC)**, and **Remaining Budget**.
+- **Projections:** Real-time calculation of **Budget Runway** (weeks) and **Projected Finish** date based on plan data.
+- **Risk Assessment:** A high-contrast "Overall Risk" badge (Low, Moderate, Critical) that updates dynamically.
 
-### 2.2 Program Dashboard (Main Tab)
-- **Smart Insight Card:** AI-style human-readable summary of project health (e.g., "Budget Warning: EAC exceeds cap by €12k").
-- **Efficiency KPIs:** Velocity (h/wk), Non-Billable %, and Billable Efficiency with 6-week trend sparklines.
-- **EAC Confidence:** Gauge of data reliability based on the volume of future-planned weeks.
-- **Variance & Delinquency:** 
-    - **Split-Bar Variance:** Visual comparison of Prorated Plan (Ghost bar) vs. Actual (Solid bar).
-    - **Delinquency:** List of resources with 0 hours, showing "Days since last entry."
-- **Charts:** Cumulative Burn vs. Cap, Stacked Billability, S-Curve (Plan vs Actual), and Phase Spend.
-- **Resource Heatmap:** 
-    - **Search Filter:** Real-time resource lookup.
-    - **Pinned Headers:** Sticky top row and first column for large datasets.
-    - **Color-Coded Tiers:** Over >40h (Red), Optimal 30-40h (Green), Low 1-29h (Amber).
-
-### 2.3 Jira High Level & Sprint View
-- **Multi-Sprint Awareness:** Automatically detects and displays dates for the selected sprint, ensuring burndown and scope-creep metrics are accurate across historical and current sprints.
-- **Scope Creep Indicator:** Tracks tickets added to the sprint after its start date.
-- **SLA Hour-Budget Breaches:** Flags tickets exceeding their story-point working-hour allocation.
-- **Aging Issues:** Highlights tickets stuck in Development or Review for >16 working hours.
-- **Pipeline Flow:** Distribution of tickets across Qualification, Development, UAT, and Done.
-
-### 2.4 Capacity & Planning
-- **Velocity Simulation (What-If?):** Interactive slider allowing PMs to model how team velocity changes impact the final project EAC and buffer.
-- **Hours-to-Points Ratio:** Configurable conversion factor for story point estimation.
-- **Sprint Planner:** Visual interface to move tickets between Backlog and Planned Sprint buckets.
+### 2.2 Functional Topbar & Responsive Design
+The command center for global project controls:
+- **Responsive Layout:** Automatically collapses the sidebar and stacks grid components on tablets and mobile devices.
+- **Integrated Navigation:** Seamless switching between Program, Jira High Level, Sprint View, and Capacity tabs.
+- **Live Sync Engine:** Status indicator showing last-synced timestamp and a pulsing background fetch dot.
+- **Scenario Modeller:** A topbar-integrated **Budget Cap** input that triggers pro-rata adjustments across all financial charts.
 
 ---
 
-## 3. Technical Architecture
+## 3. Core Analytics & Planning
 
-### 3.1 Tab Engine & Navigation
-- **Asynchronous Rendering:** Tabs can render independently even if specific datasets (e.g., timesheet actuals) are still loading or unavailable.
-- **CSS-Driven Visibility:** Optimized `.tab-panel` transitions with CSS animations for a smoother user experience.
-- **Persistent States:** Dark mode and selected filters are preserved across tab switches.
+### 3.1 Capacity Analysis Engine (Planning Tab)
+The Planning tab allows for granular resource modeling for specific sprints:
+- **Developer-Only Filtering:** Automatically filters out non-development roles (e.g., PM, QA, Design) so the capacity model exclusively loads resources mapped as Developers (Frontend, Backend, Dev).
+- **Individual Productivity Quotients:** Every resource has a dedicated range slider (10% to 100%) to model individual efficiency levels.
+- **FE/BE Categorization:** Stakeholders can manually override roles to tag resources as **Frontend (FE)** or **Backend (BE)**. These tags instantly aggregate into team-specific KPI cards.
+- **Dynamic Resource Selection:** Checkboxes allow for inclusion/exclusion of individuals to see the impact on total team throughput.
+- **Advanced Calculation Logic:**
+    - **Ideal Sprint Base:** Normalised to 10 working days (Monday Week 1 to Friday Week 2).
+    - **Targeted PTO Deduction:** PTO and holidays are calculated and subtracted *only* if they fall within the specific weeks a resource is actively allocated to the sprint.
+    - **Raw Capacity Formula:** `Total Planned Hours (within sprint weeks) - PTO (within allocated weeks)`.
+    - **Net Available Formula:** `Raw Capacity × Individual Productivity Quotient`.
+- **Explanation Sub-text:** The "Raw Capacity" column provides a transparent mathematical breakdown beneath the value: `Planned: Xh - PTO (allocated weeks): Yh`.
+- **Team KPI Cards:** Real-time totals for **Frontend Net**, **Backend Net**, and **Total Net Capacity**.
 
-### 3.2 Design System (SaaS Aesthetic)
-- **Glassmorphism:** Blur-filtered headers and persistent UI elements for depth.
-- **Modern Indigo Palette:** High-contrast indigo and slate scheme optimized for data density.
-- **Night Mode (Dark Mode):** 
-    - Fully semantic variable mapping (`--surface`, `--surface-2`, `--st-ok-bg`, etc.).
-    - Automatic Chart.js re-rendering to update gridlines and axis labels on theme toggle.
-    - Persisted via `localStorage` and respects system preferences.
+### 3.2 Program Performance (Dashboard Tab)
+- **Insight Banner:** A Glassmorphism-styled card providing proactive summaries (e.g., "EAC exceeds cap by €12k").
+- **Analytical KPI Strip:**
+    - **Velocity (Alloc vs Spend):** Lead card showing actual hours/week with an integrated sparkline trend.
+    - **Non-Billable Share:** Executive gauge of non-revenue time.
+    - **Budget Burn Rate:** Average weekly spend vs. pro-rata target.
+- **Advanced Charts:**
+    - **Cumulative S-Curve:** Tracks cumulative Actual vs. Planned hours over time.
+    - **Utilization Heatmap:** A per-resource, per-week grid with **Search/Filter** and color-coded allocation matching.
 
-### 3.3 Data Normalization & Processing
-- **Sprint Date Resolution:** The app maps Jira issues to specific sprint windows stored in the `jiraConfig.sprint_dates` map, resolving the "Latest Sprint" bug from Version 3.0.
-- **Monday-Snapping:** The `getMonday()` helper ensures all weekly aggregations are consistent, regardless of the date format provided by the API.
-- **Robust Date Parsing:** `parseDateSafe()` handles ISO, DD-Mon-YY, DD-Mon-YYYY, and Mon-DD formats with India-timezone safety.
-- **Prorata Basis:** Current week metrics (Variance, etc.) are scaled based on the number of elapsed working days (Mon-Fri) to ensure "Actuals" are compared fairly against incomplete "Plan" targets.
+### 3.3 Jira Pipeline & Sprint Health
+- **Cross-Sprint Pipeline:** Visual summary of the "Dev to UAT" queue status with story point totals and completion percentage.
+- **Burndown Analytics:** High-fidelity chart tracking Ideal trajectory, Remaining points, and the "UAT Queue" pressure.
+- **Risk Signals:** Dedicated tracking for **Scope Creep**, **Re-opened Tickets**, and **Blocker Pressure**.
 
-### 3.4 Working Hours Engine
-Calculates elapsed time excluding:
-- Weekends (Saturday/Sunday).
-- Non-working hours (outside 09:00 - 18:00).
-- **Public Holidays:** Hardcoded in `CONFIG.WORK_HOURS.holidays` (India 2026).
+#### 3.3.1 At-Risk Queue (Sprint View)
+A real-time risk alerting system that flags development items at intermediate and critical SLA thresholds:
+- **Dual-Threshold SLA Warnings:** Development items trigger two levels of alerts based on elapsed working hours since status change:
+  - **SLA Warning** (Orange Badge): Item has exceeded the `warn` threshold but is still within the `over` threshold. Provides early visibility to allow corrective action.
+  - **SLA Breach** (Red Badge): Item has exceeded the `over` threshold + grace period. Indicates hard SLA violation requiring immediate escalation.
+- **Aging Flags:** Items in "Ready for Review" or "Code Review" statuses longer than 16 working hours are flagged as aging (Orange Badge) to prevent review bottlenecks.
+- **Story Point Bands:** SLA thresholds vary by story point complexity:
+  - **1 point:** warn=2h, over=2h
+  - **2 points:** warn=4h, over=4h
+  - **3 points:** warn=8h, over=12h
+  - **5 points:** warn=16h, over=24h
+  - **8 points:** warn=24h, over=24h
+  - **Default (>8 points):** warn=16h, over=24h
+- **Working Hours Basis:** All time calculations respect business hours (10:00–18:00), exclude weekends/holidays, and account for person-specific PTO.
+- **Sorted Display:** At-Risk items sorted by hours elapsed (descending) to prioritize most critical issues.
 
 ---
 
-## 4. Configuration & Thresholds (`CONFIG`)
+## 4. Technical Engine
 
-| Constant | Default | Purpose |
+### 4.1 UI/UX & Theming
+- **Executive Palette:** Pure Black/Orange for Dark mode; Linen/Dark Tangerine for Light mode.
+- **Adaptive UI:** Media queries ensure all charts, sliders, and tables are fully functional on screens down to 320px wide.
+
+### 4.2 Working Hours Engine (`workingHoursElapsed_`)
+- **Standard Schedule:** Hardcoded to **10:00 – 18:00** (8 hours/day base).
+- **India-Specific Holidays:** Integrated 2026-2027 holiday set.
+- **Fuzzy PTO Matching:** Case-insensitive resource matching between `Teamleaves` and `ResourcePlan`.
+
+---
+
+## 5. Thresholds & Configuration (`CONFIG`)
+
+### 5.1 Performance Guards & SLA Configuration
+| Parameter | Value | Purpose |
 |---|---|---|
-| `THRESH_OVER` | `40` h | Heatmap: Over-utilisation trigger |
-| `THRESH_GOOD` | `30` h | Heatmap: Lower bound of optimal range |
-| `RATE_FALLBACK` | `100` | €/h used for simulations when no rate is found |
-| `VARIANCE_FACTOR` | `1.2` | "Red Flag" trigger (20% over plan) |
-| `VARIANCE_UNDER` | `0.8` | "Green Flag" trigger (20% under plan) |
-| `ACTIVE_DAYS` | `14` | Window for considering a resource "Active" |
-| `SYNC_INTERVAL_MS` | `15 min` | Background data refresh cadence |
+| **Variance Factor** | 1.2 | Flags resources billing 20% over plan |
+| **Aging Threshold** | 16 Working Hours | Flags items stalled in review/QA |
+| **SLA Grace Period** | 1 Hour | Grace period after `over` threshold before flagging breach |
+| **Work Hours Start** | 10:00 | Business day start time |
+| **Work Hours End** | 18:00 | Business day end time |
+
+### 5.2 Development SLA Thresholds by Story Point
+| Story Points | Warn Threshold | Over Threshold | Risk Level |
+|---|---|---|---|
+| 1 | 2h | 2h | Single-threshold (no intermediate warning) |
+| 2 | 4h | 4h | Single-threshold (no intermediate warning) |
+| 3 | 8h | 12h | Dual-threshold (4h warning window) |
+| 5 | 16h | 24h | Dual-threshold (8h warning window) |
+| 8 | 24h | 24h | Single-threshold (no intermediate warning) |
+| Default (>8) | 16h | 24h | Dual-threshold (8h warning window) |
+
+**SLA Logic:** When an item enters "In Progress" status, elapsed working hours are measured from `status_category_changed`. If hours exceed `warn` + grace period, a SLA Warning is triggered (orange badge). If hours exceed `over` + grace period, a SLA Breach is triggered (red badge).
 
 ---
 
-## 5. Sync & Error Handling
-- **Data Monitor:** A hidden debug panel appears if the API returns 0 rows, assisting in troubleshooting.
-- **Sync Status:** The header displays the last successful sync time and a countdown.
-- **Error Resilience:** Individual chart failures or missing fields do not crash the entire dashboard; fallback logic provides "—" or "0" values.
+## 6. Data Sources
 
----
-
-## 6. PDF Export
-- **A3 Landscape:** Optimized layout for executive status reports.
-- **Print Mode:** Automatically hides the sidebar, navigation, and interactive controls to maximize data visibility.
-- **Canvas Snapshots:** Converts interactive Chart.js canvases to static images during export to ensure cross-browser compatibility.
+- **`actuals`**: `TimeEntries` sheet (Hours, Rates, Tasks).
+- **`plan`**: `ResourcePlan` sheet (Phase allocation, planned hours).
+- **`jiraIssues`**: `Jira_CT` sheet (Live ticket status, Points, Sprints).
+- **`leaves`**: `Teamleaves` sheet (Individual holiday dates).
+- **`jiraSummary`**: Live Jira board metadata and labels.
+- **`milestones`**: Key project deliverables and due dates.
+- **`spendAnalysis`**: Aggregated actual hours vs story points mapping.
+- **`rawPhases`**: Raw Phase breakdown configurations.
