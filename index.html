@@ -2100,14 +2100,21 @@
                 if (!scc) return;
                 const hrs = workingHoursElapsed_(new Date(scc), new Date(), i.assignee);
 
-                // 1. SLA Check (In Progress only)
+                // 1. SLA Check (In Progress only) — Dual threshold: warn & over
                 if (cat === 'development') {
                     const ptsRaw = parseFloat(i.story_points);
                     if (ptsRaw > 0) {
                         const pts = Math.round(ptsRaw);
-                        const slaThresh = (CONFIG.DEV_SLA[pts] || CONFIG.DEV_SLA.default).over;
-                        if (hrs > slaThresh + CONFIG.SLA_GRACE_HOURS) {
-                            risks.push({ i, hrs, type: 'SLA Breach', label: `SLA ${slaThresh}h`, severity: 'danger' });
+                        const slaCfg = CONFIG.DEV_SLA[pts] || CONFIG.DEV_SLA.default;
+                        const warnThresh = slaCfg.warn;
+                        const overThresh = slaCfg.over;
+                        // Check for SLA Breach (over threshold + grace period)
+                        if (hrs > overThresh + CONFIG.SLA_GRACE_HOURS) {
+                            risks.push({ i, hrs, type: 'SLA Breach', label: `SLA ${overThresh}h`, severity: 'danger' });
+                        }
+                        // Check for SLA Warning (between warn and over thresholds)
+                        else if (hrs > warnThresh + CONFIG.SLA_GRACE_HOURS) {
+                            risks.push({ i, hrs, type: 'SLA Warning', label: `SLA ${warnThresh}h`, severity: 'warning' });
                         }
                     }
                 }
@@ -2252,7 +2259,14 @@
         (globalData.actuals || []).forEach(r => { if (r.Person && !resources[r.Person]) resources[r.Person] = r.Role || "Unassigned"; });
 
         let totalFE = 0, totalBE = 0, totalNet = 0;
-        const rows = Object.keys(resources).sort().map(name => {
+        
+        // Filter resources to only include those with Developer, FE, or BE roles
+        const developerNames = Object.keys(resources).filter(name => {
+            const role = resources[name] || "";
+            return /frontend|fe|backend|be|developer|dev/i.test(role);
+        }).sort();
+
+        const rows = developerNames.map(name => {
             const originalRole = resources[name];
             const isSelected = capacityState.selected[name] !== false;
             
@@ -2284,7 +2298,21 @@
             const avgPlannedH = sprintWeeks.length ? (totalPlannedH / sprintWeeks.length) : 0;
             const allocationFactor = avgPlannedH > 0 ? (avgPlannedH / 40) : 1.0; 
 
-            const rawH = personalH * allocationFactor;
+            // Calculate PTO only within allocated weeks
+            let ptoInAllocatedH = 0;
+            const leavesForPerson = globalData._processedLeaves?.get(name);
+            if (leavesForPerson && totalPlannedH > 0) {
+                sprintWeeks.forEach(weekMon => {
+                    const weekPlan = planForPerson.find(p => getMonday(p.dateStr) === weekMon);
+                    if (!weekPlan || !weekPlan.planH) return; // Skip unallocated weeks
+                    const weekEnd = new Date(new Date(weekMon).getTime() + 5 * 86400000);
+                    leavesForPerson.forEach(leaveDate => {
+                        if (leaveDate >= weekMon && leaveDate < toLocalISO(weekEnd)) ptoInAllocatedH += 8;
+                    });
+                });
+            }
+
+            const rawH = totalPlannedH - ptoInAllocatedH;
             const netH = rawH * quotientDecimal;
 
             if (isSelected) {
@@ -2294,8 +2322,7 @@
             }
 
             const explanation = `<div style="font-size:9px; color:var(--color-text-tertiary); line-height:1.2; margin-top:2px;">
-                ${weekdayH}h base - ${holidayH}h holiday - ${ptoH}h PTO<br>
-                × ${(allocationFactor * 100).toFixed(0)}% allocation
+                Planned: ${totalPlannedH.toFixed(0)}h - PTO (allocated weeks): ${ptoInAllocatedH.toFixed(0)}h
             </div>`;
 
             return `<tr>
